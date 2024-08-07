@@ -11,7 +11,17 @@ export const LoginAPI = async (reqBody: any) => {
     return await commonAPI("POST", `${SERVER_URL}/login`, reqBody);
 }
 
-// Verify OTP API
-export const VerifyOTPAPI = async (otp: string) => {
-    return await commonAPI("POST", `${SERVER_URL}/verifyOtp`, { otp });
-}
+
+
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: `${SERVER_URL}/api/users`, // Your backend URL
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const verifyOtp = async (data: any) => {
+    return api.post('/verifyOtp', data);
+  };

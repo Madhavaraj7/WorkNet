@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
 import { createUser, findUserByEmail, updateUser, findUserByEmailAndPassword } from '../infrastructure/userRepository';
 import { User } from '../domain/user';
 
@@ -35,7 +34,7 @@ export const updateUserOtp = async (email: string, otp: string) => {
 };
 
 export const loginUser = async (email: string, password: string) => {
-    const user = await findUserByEmailAndPassword(email, password);
+    const user = await findUserByEmail(email);
     if (!user) {
         throw new Error('Invalid Email/Password');
     }
@@ -43,6 +42,6 @@ export const loginUser = async (email: string, password: string) => {
     if (!isPasswordValid) {
         throw new Error('Invalid Email/Password');
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY!);
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' });
     return { user, token };
 };

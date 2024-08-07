@@ -1,39 +1,78 @@
-import React, { useState } from "react";
-import { Button, TextField, Backdrop, CircularProgress, Typography } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Button, TextField, Backdrop, CircularProgress, Typography, Grid, Box, IconButton } from "@mui/material";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { verifyOtp, resendOtp } from "../Services/api";
 import HomeIcon from "@mui/icons-material/Home";
-import { VerifyOTPAPI } from "../Services/allAPI"; // Update path as necessary
 
-const OTPVerification = () => {
+
+const VerifyOtp: React.FC = () => {
   const [otp, setOtp] = useState("");
+  const [timer, setTimer] = useState(60);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+  const { email } = (location.state as { email?: string }) || {};
 
-  const handleVerifyOTP = async () => {
-    if (!otp) {
-        toast.info("Please enter the OTP!");
-        return;
+  useEffect(() => {
+    if (timer === 0) {
+      setIsResendDisabled(false);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setTimer(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOtp(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.info("Email is not available in location state");
+      return;
     }
 
     setLoading(true);
 
     try {
-        const result = await VerifyOTPAPI( otp ); // Wrap otp in an object if the server expects it that way
-
-        if (result.error) {
-            toast.error(result.message || "Invalid OTP, please try again.");
-        } else {
-            navigate("/dashboard"); // Navigate to the desired page on success
-        }
+      await verifyOtp({ email, otp });
+      navigate("/");
     } catch (error) {
-        console.error("Error verifying OTP:", error);
-        toast.error("An error occurred. Please try again.");
+      console.error(error);
+      toast.error("Verification failed. Please try again.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
+
+  const handleResendOtp = async () => {
+    if (!email) {
+      toast.info("Email is not available in location state");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await resendOtp({ email });
+      setTimer(60);
+      setIsResendDisabled(true);
+      toast.success("OTP has been resent.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to resend OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -45,58 +84,91 @@ const OTPVerification = () => {
       </Backdrop>
       <div className="min-h-screen flex justify-center items-center bg-gray-900">
         <ToastContainer autoClose={3000} position="top-center" theme="colored" />
-        <div className="grid grid-cols-1 w-[650px] shadow-2xl bg-white rounded-lg overflow-hidden">
-          <div className="flex justify-center items-center bg-gray-900">
-          </div>
-          <div className="space-y-10 px-10 py-12">
-            <Typography variant="h4" className="text-center text-gray-900 font-bold mb-4">
-              Enter Your OTP
-            </Typography>
-            <TextField
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              type="text"
-              className="w-full"
-              label="OTP"
-              variant="standard"
-              InputLabelProps={{
-                className: "text-gray-900",
-              }}
-              InputProps={{
-                className: "text-gray-900",
-              }}
-            />
+        <Box
+          component="form"
+          className="bg-white shadow-2xl rounded-lg p-10 w-full max-w-md mx-4"
+          onSubmit={handleSubmit}
+        >
+          <Typography variant="h4" className="text-center text-gray-900 font-bold mb-6" gap={2}>
+            Enter Your OTP 
+          </Typography >
+          <br />
+          <Grid container spacing={2} justifyContent="center">
+            <Grid item xs={12} gap={2}>
+              <TextField
+                value={otp}
+                onChange={handleChange}
+                type="text"
+                className="w-full"
+                label="OTP"
+                variant="outlined"
+                InputLabelProps={{
+                  className: "text-gray-900",
+                }}
+                InputProps={{
+                  className: "text-gray-900",
+                  style: { textAlign: 'center', fontSize: '1.5rem', letterSpacing: '1rem' },
+                }}
+                placeholder="● ● ● ● ● ●"
+                sx={{
+                  "& .MuiInputBase-input": {
+                    height: '3rem', // Increase height
+                    fontSize: '1.5rem', // Increase font size
+                    textAlign: 'center',
+                    letterSpacing: '0.5rem',
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: '8px', // Rounded corners
+                  },
+                  mb: 4, // Margin bottom
+                }}
+              />
+            </Grid>
+          </Grid>
+          <Box mt={2} display="flex" flexDirection="column" gap={2}>
             <Button
-              onClick={handleVerifyOTP}
-              style={{
-                width: "100%",
-                background: "rgb(22 180 74 / var(--tw-bg-opacity))",
-                fontSize: "16px",
-                fontWeight: "bold",
-              }}
-              className="bg-green-600"
+              type="submit"
+              className="bg-green-600 text-white font-bold py-2"
               variant="contained"
+              sx={{
+                height: '3rem', // Match height with OTP input
+                fontSize: '1rem',
+                borderRadius: '8px',
+              }}
             >
               Verify OTP
             </Button>
-            <p className="text-center text-sm text-gray-900">
-              Back to
-              <Link to="/login">
-                <span className="font-bold text-sm ml-1 text-yellow-400 cursor-pointer">
-                  Login
-                </span>
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
-      <Link to="/" className="fixed top-0 left-0 m-4">
-        <Button>
+            <Button
+              onClick={handleResendOtp}
+              disabled={isResendDisabled}
+              className={`bg-gray-600 text-white font-bold py-2 ${isResendDisabled ? 'opacity-50' : ''}`}
+              variant="contained"
+              sx={{
+                height: '3rem', // Match height with OTP input
+                fontSize: '1rem',
+                borderRadius: '8px',
+              }}
+            >
+              {isResendDisabled ? `Resend OTP (${timer}s)` : "Resend OTP"}
+            </Button>
+          </Box>
+          <p className="text-center text-sm text-gray-900 mt-4">
+            Back to
+            <Link to="/login">
+              <span className="font-bold text-yellow-400 ml-1 cursor-pointer">
+                Login
+              </span>
+            </Link>
+          </p>
+        </Box>
+        <Link to="/" className="fixed top-0 left-0 m-4">
+        <IconButton>
           <HomeIcon fontSize="large" className="text-white" />
-        </Button>
+        </IconButton>
       </Link>
+      </div>
     </>
   );
 };
 
-export default OTPVerification;
+export default VerifyOtp;

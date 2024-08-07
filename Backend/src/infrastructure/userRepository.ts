@@ -31,5 +31,5 @@ export const findUserByEmailAndPassword = async (
   email: string,
   password: string
 ) => {
-  return UserModel.findOne({ email });
+  return UserModel.findOne({ email, password });
 };

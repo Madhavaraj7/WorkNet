@@ -1,13 +1,8 @@
 import { Request, Response } from "express";
-import {
-  registerUser,
-  updateUserOtp,
-  verifyAndSaveUser,
-  loginUser,
-} from "../../application/userService";
-import { generateAndSaveOTP, verifyOTP } from "../../application/otpService";
+import { registerUser, verifyAndSaveUser, loginUser, updateUserOtp } from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
+import { findUserByEmail, updateUser } from "../../infrastructure/userRepository";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -22,27 +17,53 @@ export const register = async (req: Request, res: Response) => {
       profileImage: profile,
       otp,
     });
-    await generateAndSaveOTP({ email, otp });
     await sendEmail(email, otp);
     res.status(200).json("OTP sent to email");
   } catch (error: any) {
-    res.status(400).json(error.message);
+    res.status(400).json({ error: error.message });
   }
 };
 
 export const verifyOtp = async (req: Request, res: Response) => {
   try {
     const { email, otp } = req.body;
-    const isValid = await verifyOTP(email, otp);
+    const user = await findUserByEmail(email);
 
-    if (isValid) {
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.otp === otp) {
       await verifyAndSaveUser(email, otp);
       res.status(200).json("User registered successfully");
     } else {
-      res.status(400).json("Invalid OTP");
+      res.status(400).json({ error: "Invalid OTP" });
     }
   } catch (error: any) {
-    res.status(400).json(error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const resendOtp = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  try {
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const otp = otpGenerator();
+    await updateUserOtp(email, otp);
+    await sendEmail(email, otp);
+
+    res.status(200).json({ message: 'OTP has been resent' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to resend OTP' });
   }
 };
 

@@ -55,7 +55,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       toast.info("Please fill the form completely!!!");
       return;
     }
-  
+
     const reqBody = new FormData();
     reqBody.append("username", username);
     reqBody.append("email", email);
@@ -64,21 +64,21 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
     const reqHeader = {
       "Content-Type": preview ? "multipart/form-data" : "application/json",
     };
-  
+
     try {
       const result = await SignUpAPI(reqBody, reqHeader);
-  
-      if (result?.status === 400) { 
+
+      if (result?.status === 400) {
         toast.error("This email is already registered!");
       } else if (result) {
-        navigate("/otp");
+        // Example of navigating with state
+        navigate("/otp", { state: { email: user.email } });
       }
     } catch (err) {
       console.error(err);
       toast.error("An error occurred during signup. Please try again.");
     }
   };
-  
 
   const handleLogin = async () => {
     const { email, password } = user;
@@ -87,7 +87,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
     } else {
       try {
         const result = await LoginAPI(user);
-        // console.log(result);
+        console.log(result);
 
         if (result.user._id) {
           setOpen(true);
