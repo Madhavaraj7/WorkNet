@@ -1,0 +1,68 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('/path-to-your-background-image.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
+  
+  .auth-form {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    animation: fadeIn 1s ease-out;
+  }
+  
+  .auth-title {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333;
+  }
+  
+  .auth-field {
+    margin-bottom: 1rem;
+  }
+  
+  .auth-button {
+    margin-top: 1.5rem;
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    color: white;
+  }
+  
+  .auth-button:hover {
+    background: linear-gradient(to right, #feb47b, #ff7e5f);
+  }
+  
+  .auth-switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .switch-text {
+    margin-right: 0.5rem;
+  }
+  
+  .switch-link {
+    text-decoration: none;
+    color: #007bff;
+  }
+  
+  .switch-link:hover {
+    text-decoration: underline;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  

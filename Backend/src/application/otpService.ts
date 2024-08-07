@@ -2,7 +2,7 @@ import { createOTP, findOTPByEmail, deleteOTP } from '../infrastructure/otpRepos
 import { OTP } from '../domain/otp';
 
 export const generateAndSaveOTP = async (otp: OTP) => {
-    await deleteOTP(otp.email);
+    await deleteOTP(otp.email); // Delete existing OTP for the user
     return createOTP(otp);
 };
 

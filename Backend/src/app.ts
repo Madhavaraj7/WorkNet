@@ -1,9 +1,16 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import userRoutes from './presentation/routes/userRoutes';
 import { connectToDatabase } from './config';
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors({
+    origin: 'http://localhost:5173'
+}));
+
 
 app.use(bodyParser.json());
 app.use('/api/users', userRoutes);
