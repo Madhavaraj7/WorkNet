@@ -34,7 +34,7 @@ interface User {
   profileImage?: string | File;
 }
 
-const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
+const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
   const { setIsAuthorized }: any = useContext(tokenAuthenticationContext);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -62,7 +62,11 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       }
     }
 
-    if (/\s/.test(email) || /\s/.test(password) || (username && /\s/.test(username))) {
+    if (
+      /\s/.test(email) ||
+      /\s/.test(password) ||
+      (username && /\s/.test(username))
+    ) {
       toast.info("Fields should not contain spaces!");
       return false;
     }
@@ -73,7 +77,11 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       return false;
     }
 
-    if (insideSignup && (!profileImage || (typeof profileImage === 'string' && profileImage === UserPlaceHolder))) {
+    if (
+      insideSignup &&
+      (!profileImage ||
+        (typeof profileImage === "string" && profileImage === UserPlaceHolder))
+    ) {
       toast.info("Please upload a profile picture!");
       return false;
     }
@@ -89,21 +97,26 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
     reqBody.append("username", username || "");
     reqBody.append("email", email);
     reqBody.append("password", password);
-    reqBody.append("profileImage", preview ? (profileImage as File) : UserPlaceHolder);
+    reqBody.append(
+      "profileImage",
+      preview ? (profileImage as File) : UserPlaceHolder
+    );
     const reqHeader = {
       "Content-Type": preview ? "multipart/form-data" : "application/json",
     };
 
     try {
       const result = await SignUpAPI(reqBody, reqHeader);
+      // console.log('SignUpAPI result:', result); // Debugging line
 
       if (result?.status === 400) {
         toast.error("This email is already registered!");
       } else if (result) {
+        toast.success("OTP sent, please check your mail.");
         navigate("/otp", { state: { email: user.email } });
       }
     } catch (err) {
-      console.error(err);
+      // console.error('SignUpAPI error:', err); // Debugging line
       toast.error("An error occurred during signup. Please try again.");
     }
   };
@@ -115,13 +128,14 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
     try {
       setOpen(true);
       const result = await LoginAPI(user);
+      // console.log('LoginAPI result:', result); // Debugging line
       setOpen(false);
 
       if (result && result.user && result.token) {
         localStorage.setItem("token", result.token);
         localStorage.setItem("user", JSON.stringify(result.user));
         setIsAuthorized(true);
-        setUser(result.user); // Update user in context
+        setUser(result.user);
 
         toast.success("Login Successful!");
         navigate("/");
@@ -130,7 +144,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       }
     } catch (err) {
       setOpen(false);
-      console.error(err);
+      // console.error('LoginAPI error:', err); // Debugging line
       toast.error("An error occurred during login. Please try again.");
     }
   };
@@ -149,6 +163,17 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== "image/jpeg" && file.type !== "image/png") {
+        toast.error("Please select a valid image file (.jpg, .png).");
+        return;
+      }
+      setUser({ ...user, profileImage: file });
+    }
   };
 
   return (
@@ -179,24 +204,49 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
                 </h1>
               </div>
             ) : (
-              <img src={LoginBack} alt="" />
+              <div className="flex justify-center flex-col items-center h-full">
+              <EngineeringIcon
+                fontSize="large"
+                style={{ fontSize: "80px" }}
+                className="mb-5 font-bold text-gray-900"
+              />
+              <h1 className="text-5xl font-bold w-80 text-center text-gray-900">
+                WELCOME <span className="text-yellow-400">BACK</span>
+              </h1>
+            </div>
             )}
           </div>
           <div className="space-y-10 px-10 bg-gray-900 py-12">
             {!insideSignup && (
-              <h1 className="text-center text-4xl mb-3 font-bold text-white">
-                LOGIN
-              </h1>
+              <>
+              
+              
+                <Button
+                  // onClick={handleGoogleLogin}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
+                  startIcon={
+                    <img
+                      src={Google}
+                      alt="Google logo"
+                      className="w-6 h-6 mr-2"
+                    />
+                  }
+                >
+                  <span className="text-sm font-semibold text-white">
+                    Sign in with Google
+                  </span>
+                </Button>
+              </>
             )}
+
             {insideSignup && (
               <div className="flex justify-center items-center mt-10">
                 <label className="text-center">
                   <input
-                    onChange={(e) =>
-                      setUser({ ...user, profileImage: e.target.files![0] })
-                    }
+                    onChange={handleFileChange}
                     className="hidden"
                     type="file"
+                    accept=".jpg, .png"
                   />
                   <div
                     style={{
@@ -251,12 +301,14 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
               onChange={(e) => setUser({ ...user, password: e.target.value })}
               type={showPassword ? "text" : "password"}
               id="password"
+              className="w-full"
               label="Password"
               variant="standard"
               InputLabelProps={{
                 className: "text-white",
               }}
               InputProps={{
+                className: "text-white",
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
@@ -269,55 +321,36 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
                     </IconButton>
                   </InputAdornment>
                 ),
-                className: "text-white",
               }}
             />
-            <div className="flex justify-center flex-col items-center space-y-5">
-              {insideSignup && (
-                <Button
-                  onClick={handleSignUp}
-                  className="w-full bg-yellow-400 text-gray-900"
-                  variant="contained"
+            <Button
+              onClick={insideSignup ? handleSignUp : handleLogin}
+              className="w-full text-white bg-gradient-to-r from-[#FF5733] to-[#FFC300] border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
+            >
+              {insideSignup ? "Sign Up" : "Login"}
+            </Button>
+            
+            <div className="text-center">
+              <span className="text-white">
+                {insideSignup
+                  ? "Already have an account? "
+                  : "Don't have an account? "}
+                <Link
+                  to={insideSignup ? "/login" : "/signup"}
+                  className="text-blue-500 font-bold hover:underline"
                 >
-                  Sign Up
-                </Button>
-              )}
-              {!insideSignup && (
-                <Button
-                  onClick={handleLogin}
-                  className="w-full bg-yellow-400 text-gray-900"
-                  variant="contained"
-                >
-                  Log In
-                </Button>
-              )}
-              <div className="flex justify-center items-center">
-                {insideSignup ? (
-                  <p className="text-white text-sm">
-                    Already have an account?{" "}
-                    <Link
-                      to="/login"
-                      className="text-yellow-400 font-semibold ml-1"
-                    >
-                      Log In
-                    </Link>
-                  </p>
-                ) : (
-                  <p className="text-white text-sm">
-                    Don't have an account?{" "}
-                    <Link
-                      to="/signup"
-                      className="text-yellow-400 font-semibold ml-1"
-                    >
-                      Sign Up
-                    </Link>
-                  </p>
-                )}
-              </div>
+                  {insideSignup ? "Login" : "Sign Up"}
+                </Link>
+              </span>
             </div>
           </div>
         </div>
       </div>
+      <Link to="/" className="fixed top-0 left-0 m-4">
+        <IconButton>
+          <HomeIcon fontSize="large" className="text-white" />
+        </IconButton>
+      </Link>
     </>
   );
 };
