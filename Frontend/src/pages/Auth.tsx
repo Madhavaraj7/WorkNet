@@ -2,7 +2,6 @@ import {
   Button,
   FormControl,
   IconButton,
-  Input,
   InputAdornment,
   InputLabel,
   TextField,
@@ -29,38 +28,68 @@ interface AuthProps {
 }
 
 interface User {
-  username: string;
+  username?: string;
   email: string;
   password: string;
-  profileImage: string | File;
+  profileImage?: string | File;
 }
 
 const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
-  const { setIsAuthorized }: any = useContext(
-    tokenAuthenticationContext
-  );
+  const { setIsAuthorized }: any = useContext(tokenAuthenticationContext);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState<User>({
-    username: "",
     email: "",
     password: "",
-    profileImage: "",
   });
   const [preview, setPreview] = useState<string>("");
 
-  const handleSignUp = async () => {
-    const { username, email, password, profileImage } = user;
-    if (!username || !email || !password) {
-      toast.info("Please fill the form completely!!!");
-      return;
+  const validateForm = (
+    email: string,
+    password: string,
+    username?: string,
+    profileImage?: string | File
+  ) => {
+    if (insideSignup) {
+      if (!username || !email || !password) {
+        toast.info("Please fill the form completely!");
+        return false;
+      }
+    } else {
+      if (!email || !password) {
+        toast.info("Please fill the form completely!");
+        return false;
+      }
     }
 
+    if (/\s/.test(email) || /\s/.test(password) || (username && /\s/.test(username))) {
+      toast.info("Fields should not contain spaces!");
+      return false;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      toast.info("Please enter a valid email address!");
+      return false;
+    }
+
+    if (insideSignup && (!profileImage || (typeof profileImage === 'string' && profileImage === UserPlaceHolder))) {
+      toast.info("Please upload a profile picture!");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    const { username, email, password, profileImage } = user;
+    if (!validateForm(email, password, username, profileImage)) return;
+
     const reqBody = new FormData();
-    reqBody.append("username", username);
+    reqBody.append("username", username || "");
     reqBody.append("email", email);
     reqBody.append("password", password);
-    reqBody.append("profileImage", preview ? profileImage : UserPlaceHolder);
+    reqBody.append("profileImage", preview ? (profileImage as File) : UserPlaceHolder);
     const reqHeader = {
       "Content-Type": preview ? "multipart/form-data" : "application/json",
     };
@@ -78,12 +107,10 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       toast.error("An error occurred during signup. Please try again.");
     }
   };
+
   const handleLogin = async () => {
     const { email, password } = user;
-    if (!email || !password) {
-      toast.info("Please fill the form Completely!!!");
-      return;
-    }
+    if (!validateForm(email, password)) return;
 
     try {
       setOpen(true);
@@ -107,6 +134,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       toast.error("An error occurred during login. Please try again.");
     }
   };
+
   useEffect(() => {
     if (user.profileImage instanceof File) {
       setPreview(URL.createObjectURL(user.profileImage));
@@ -188,11 +216,11 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
             )}
             {insideSignup && (
               <TextField
-                value={user.username}
+                value={user.username || ""}
                 onChange={(e) => setUser({ ...user, username: e.target.value })}
                 type="text"
                 className="w-full"
-                id="standard-basic"
+                id="username"
                 label="Username"
                 variant="standard"
                 InputLabelProps={{
@@ -208,7 +236,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
               onChange={(e) => setUser({ ...user, email: e.target.value })}
               type="email"
               className="w-full"
-              id="standard-basic"
+              id="email"
               label="Email"
               variant="standard"
               InputLabelProps={{
@@ -218,106 +246,78 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
                 className: "text-white",
               }}
             />
-            <FormControl sx={{ width: "100%" }} variant="standard">
-              <InputLabel
-                htmlFor="standard-adornment-password"
-                className="text-white"
-              >
-                Password
-              </InputLabel>
-              <Input
-                onChange={(e) => setUser({ ...user, password: e.target.value })}
-                value={user.password}
-                id="standard-adornment-password"
-                type={showPassword ? "text" : "password"}
-                endAdornment={
+            <TextField
+              value={user.password}
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
+              type={showPassword ? "text" : "password"}
+              id="password"
+              label="Password"
+              variant="standard"
+              InputLabelProps={{
+                className: "text-white",
+              }}
+              InputProps={{
+                endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
                       aria-label="toggle password visibility"
                       onClick={handleClickShowPassword}
                       onMouseDown={handleMouseDownPassword}
-                      className="text-white"
+                      edge="end"
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                }
-                className="text-white"
-              />
-            </FormControl>
-            {insideSignup ? (
-              <Button
-                onClick={handleSignUp}
-                style={{
-                  width: "100%",
-                  background: "rgb(22 180 74 / var(--tw-bg-opacity))",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                }}
-                className="bg-green-600"
-                variant="contained"
-              >
-                SignUp
-              </Button>
-            ) : (
-              <Button
-                onClick={handleLogin}
-                style={{
-                  width: "100%",
-                  background: "rgb(22 180 74 / var(--tw-bg-opacity))",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                }}
-                className="bg-green-600"
-                variant="contained"
-              >
-                LogIn
-              </Button>
-            )}
-            {!insideSignup && (
-              <div>
-                <p className="text-center font-bold text-white">OR</p>
+                ),
+                className: "text-white",
+              }}
+            />
+            <div className="flex justify-center flex-col items-center space-y-5">
+              {insideSignup && (
                 <Button
-                  variant="outlined"
-                  className="w-full"
-                  style={{
-                    color: "#1c1b1b",
-                    background: "white",
-                    textTransform: "capitalize",
-                  }}
-                  startIcon={<img className="w-5 h-5" src={Google} alt="" />}
+                  onClick={handleSignUp}
+                  className="w-full bg-yellow-400 text-gray-900"
+                  variant="contained"
                 >
-                  SignIn with Google
+                  Sign Up
                 </Button>
+              )}
+              {!insideSignup && (
+                <Button
+                  onClick={handleLogin}
+                  className="w-full bg-yellow-400 text-gray-900"
+                  variant="contained"
+                >
+                  Log In
+                </Button>
+              )}
+              <div className="flex justify-center items-center">
+                {insideSignup ? (
+                  <p className="text-white text-sm">
+                    Already have an account?{" "}
+                    <Link
+                      to="/login"
+                      className="text-yellow-400 font-semibold ml-1"
+                    >
+                      Log In
+                    </Link>
+                  </p>
+                ) : (
+                  <p className="text-white text-sm">
+                    Don't have an account?{" "}
+                    <Link
+                      to="/signup"
+                      className="text-yellow-400 font-semibold ml-1"
+                    >
+                      Sign Up
+                    </Link>
+                  </p>
+                )}
               </div>
-            )}
-            {insideSignup ? (
-              <p className="text-center text-sm text-white">
-                Already have an account?
-                <Link to="/login">
-                  <span className="font-bold text-sm ml-1 text-yellow-400 cursor-pointer">
-                    Login
-                  </span>
-                </Link>
-              </p>
-            ) : (
-              <p className="text-center text-sm text-white">
-                Don't have an account?
-                <Link to="/signup">
-                  <span className="font-bold text-sm ml-1 text-yellow-400 cursor-pointer">
-                    SignUp
-                  </span>
-                </Link>
-              </p>
-            )}
+            </div>
           </div>
         </div>
       </div>
-      <Link to="/" className="fixed top-0 left-0 m-4">
-        <IconButton>
-          <HomeIcon fontSize="large" className="text-white" />
-        </IconButton>
-      </Link>
     </>
   );
 };
