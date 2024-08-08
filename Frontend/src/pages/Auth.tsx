@@ -36,7 +36,7 @@ interface User {
 }
 
 const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
-  const { isAuthorized, setIsAuthorized }: any = useContext(
+  const { setIsAuthorized }: any = useContext(
     tokenAuthenticationContext
   );
   const [open, setOpen] = useState(false);
@@ -71,7 +71,6 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       if (result?.status === 400) {
         toast.error("This email is already registered!");
       } else if (result) {
-        // Example of navigating with state
         navigate("/otp", { state: { email: user.email } });
       }
     } catch (err) {
@@ -79,28 +78,35 @@ const Auth: React.FC<AuthProps> = ({ insideSignup, setAdminEmail }) => {
       toast.error("An error occurred during signup. Please try again.");
     }
   };
-
   const handleLogin = async () => {
     const { email, password } = user;
     if (!email || !password) {
       toast.info("Please fill the form Completely!!!");
-    } else {
-      try {
-        const result = await LoginAPI(user);
-        console.log(result);
+      return;
+    }
 
-        if (result.user._id) {
-          setOpen(true);
-          localStorage.setItem("token", result.token);
-          localStorage.setItem("user", JSON.stringify(result.user));
-          navigate("/");
-        }
-      } catch (err) {
-        console.error(err);
+    try {
+      setOpen(true);
+      const result = await LoginAPI(user);
+      setOpen(false);
+
+      if (result && result.user && result.token) {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        setIsAuthorized(true);
+        setUser(result.user); // Update user in context
+
+        toast.success("Login Successful!");
+        navigate("/");
+      } else {
+        toast.error("Invalid login credentials. Please try again.");
       }
+    } catch (err) {
+      setOpen(false);
+      console.error(err);
+      toast.error("An error occurred during login. Please try again.");
     }
   };
-
   useEffect(() => {
     if (user.profileImage instanceof File) {
       setPreview(URL.createObjectURL(user.profileImage));

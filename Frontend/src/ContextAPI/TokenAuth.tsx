@@ -1,12 +1,16 @@
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
 
-// Define the shape of the context value
-interface TokenAuthContextType {
-  isAuthorized: boolean;
-  setIsAuthorized: React.Dispatch<React.SetStateAction<boolean>>;
+interface User {
+  profileImage?: string;
 }
 
-// Create the context with an initial value
+interface TokenAuthContextType {
+  isAuthorized: boolean;
+  user?: User;
+  setIsAuthorized: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+}
+
 export const tokenAuthenticationContext = createContext<TokenAuthContextType | undefined>(undefined);
 
 interface TokenAuthProps {
@@ -15,17 +19,21 @@ interface TokenAuthProps {
 
 const TokenAuth: React.FC<TokenAuthProps> = ({ children }) => {
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [user, setUser] = useState<User | undefined>(undefined);
 
   useEffect(() => {
-    if (sessionStorage.getItem("token")) {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
       setIsAuthorized(true);
+      setUser(JSON.parse(storedUser));
     } else {
       setIsAuthorized(false);
+      setUser(undefined);
     }
   }, []);
 
   return (
-    <tokenAuthenticationContext.Provider value={{ isAuthorized, setIsAuthorized }}>
+    <tokenAuthenticationContext.Provider value={{ isAuthorized, user, setIsAuthorized, setUser }}>
       {children}
     </tokenAuthenticationContext.Provider>
   );

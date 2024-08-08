@@ -44,7 +44,7 @@ const VerifyOtp: React.FC = () => {
 
     try {
       await verifyOtp({ email, otp });
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error(error);
       toast.error("Verification failed. Please try again.");
