@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createUser, findUserByEmail, updateUser, findUserByEmailAndPassword } from '../infrastructure/userRepository';
+import { createUser, findUserByEmail, updateUser } from '../infrastructure/userRepository';
 import { User } from '../domain/user';
 
 export const registerUser = async (user: User) => {
@@ -18,6 +18,39 @@ export const registerUser = async (user: User) => {
 
     return createUser(user);
 };
+
+// Function to handle Google login
+export const googleLogin = async ({
+    email,
+    profileImagePath, // New parameter to accept the path of the stored image
+    username,
+  }: {
+    email: string;
+    profileImagePath?: string;
+    username: string;
+  }) => {
+    const existingUser = await findUserByEmail(email);
+  
+    if (existingUser) {
+      const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' });
+      return { user: existingUser, token };
+    } else {
+      const newUser: User = {
+        username,
+        email,
+        password: 'defaultPassword',
+        profileImage: profileImagePath || '',
+      };
+  
+      const hashedPassword = await bcrypt.hash(newUser.password, 10);
+      newUser.password = hashedPassword;
+  
+      const createdUser = await createUser(newUser);
+      const token = jwt.sign({ userId: createdUser._id }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' });
+      return { user: createdUser, token };
+    }
+  };
+  
 
 export const verifyAndSaveUser = async (email: string, otp: string) => {
     const user = await findUserByEmail(email);

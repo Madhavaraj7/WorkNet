@@ -15,7 +15,9 @@ import UserPlaceHolder from "../assets/Images/UserPlaceHolder.jpg";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { LoginAPI, SignUpAPI } from "../Services/allAPI";
+import { LoginAPI, SignUpAPI,GoogleLoginAPI } from "../Services/allAPI";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -43,6 +45,12 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
     password: "",
   });
   const [preview, setPreview] = useState<string>("");
+  const [googleLogin,setGoogleLogin]=useState({
+    username: "",
+    email: "",
+    password: "",
+    profileImage: "",
+  })
 
   const validateForm = (
     email: string,
@@ -148,12 +156,56 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       toast.error("An error occurred during login. Please try again.");
     }
   };
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      setGoogleLogin({
+        email: result.user.email!,
+        username: result.user.displayName!,
+        profileImage: result.user.photoURL!,
+        password: "",
+      });
+    } catch (error) {
+      toast.error("Google login failed. Please try again.");
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    if (googleLogin.email) {
+      try {
+        const googleLoginResult = await GoogleLoginAPI(googleLogin);
+        console.log(googleLoginResult);
+        
+        if (googleLoginResult && googleLoginResult.user && googleLoginResult.token) {
+          localStorage.setItem("token", googleLoginResult.token);
+          localStorage.setItem("user", JSON.stringify(googleLoginResult.user));
+          navigate("/");
+          setIsAuthorized(true);
+        } else {
+          toast.error("Google authentication failed. Please try again.");
+        }
+      } catch (err) {
+        toast.error("An error occurred during Google authentication. Please try again.");
+      }
+    }
+  };
+
 
   useEffect(() => {
     if (user.profileImage instanceof File) {
       setPreview(URL.createObjectURL(user.profileImage));
     }
   }, [user.profileImage]);
+
+  useEffect(() => {
+    if (googleLogin.email) {
+      handleGoogleSignUp();
+    }
+  }, [googleLogin]);
+
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -222,8 +274,8 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
               
               
                 <Button
-                  // onClick={handleGoogleLogin}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
+                onClick={handleGoogleLogin}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
                   startIcon={
                     <img
                       src={Google}

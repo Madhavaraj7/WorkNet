@@ -1,78 +1,128 @@
 import { Request, Response } from "express";
-import { registerUser, verifyAndSaveUser, loginUser, updateUserOtp } from "../../application/userService";
+import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp } from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
-import { findUserByEmail, updateUser } from "../../infrastructure/userRepository";
+import { findUserByEmail } from "../../infrastructure/userRepository";
+import axios from 'axios';
+import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
+
+
+// Controller function to handle Google login
+export const googleLoginHandler = async (req: any, res: any) => {
+    try {
+      const { email, username, profileImage } = req.body;
+  
+      if (!profileImage) {
+        return res.status(400).json({ error: 'Profile image URL is required' });
+      }
+  
+      // Define the uploads directory
+      const uploadsDir = path.join(__dirname, '..', 'uploads');
+  
+      // Check if the uploads directory exists, if not, create it
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+  
+      // Download the profile image from the URL
+      const imageResponse = await axios({
+        url: profileImage,
+        responseType: 'arraybuffer',
+      });
+  
+      // Convert the image to JPEG and save it using sharp
+      const imageName = `${Date.now()}-${username}.jpeg`;
+      const imagePath = path.join(uploadsDir, imageName);
+  
+      await sharp(imageResponse.data)
+        .jpeg()
+        .toFile(imagePath);
+  
+      // Call googleLogin with the path to the stored image
+      const result = await googleLogin({
+        email,
+        username,
+        profileImagePath: imageName,
+      });
+  
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Failed to process Google login' });
+    }
+  };
 
 export const register = async (req: Request, res: Response) => {
-  try {
-    const { username, email, password, profileImage } = req.body;
-    const profile = req.file ? req.file.filename : profileImage;
-    const otp = otpGenerator();
+    try {
+        const { username, email, password, profileImage } = req.body;
+        const profile = req.file ? req.file.filename : profileImage;
+        const otp = otpGenerator();
 
-    await registerUser({
-      username,
-      email,
-      password,
-      profileImage: profile,
-      otp,
-    });
-    await sendEmail(email, otp);
-    res.status(200).json("OTP sent to email");
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
+        await registerUser({
+            username,
+            email,
+            password,
+            profileImage: profile,
+            otp,
+        });
+        await sendEmail(email, otp);
+        res.status(200).json("OTP sent to email");
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
 };
 
 export const verifyOtp = async (req: Request, res: Response) => {
-  try {
-    const { email, otp } = req.body;
-    const user = await findUserByEmail(email);
+    try {
+        const { email, otp } = req.body;
+        const user = await findUserByEmail(email);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
-    if (user.otp === otp) {
-      await verifyAndSaveUser(email, otp);
-      res.status(200).json("User registered successfully");
-    } else {
-      res.status(400).json({ error: "Invalid OTP" });
+        if (user.otp === otp) {
+            await verifyAndSaveUser(email, otp);
+            res.status(200).json("User registered successfully");
+        } else {
+            res.status(400).json({ error: "Invalid OTP" });
+        }
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
     }
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
 };
 
 export const resendOtp = async (req: Request, res: Response) => {
-  const { email } = req.body;
+    const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
-
-  try {
-    const user = await findUserByEmail(email);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
     }
 
-    const otp = otpGenerator();
-    await updateUserOtp(email, otp);
-    await sendEmail(email, otp);
+    try {
+        const user = await findUserByEmail(email);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
-    res.status(200).json({ message: 'OTP has been resent' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to resend OTP' });
-  }
+        const otp = otpGenerator();
+        await updateUserOtp(email, otp);
+        await sendEmail(email, otp);
+
+        res.status(200).json({ message: 'OTP has been resent' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to resend OTP' });
+    }
 };
 
 export const login = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    const { user, token } = await loginUser(email, password);
-    res.status(200).json({ user, token });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
+    try {
+        const { email, password } = req.body;
+        const { user, token } = await loginUser(email, password);
+        res.status(200).json({ user, token });
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
 };

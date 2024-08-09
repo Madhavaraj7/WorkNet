@@ -11,6 +11,10 @@ export const LoginAPI = async (reqBody: any) => {
     return await commonAPI("POST", `${SERVER_URL}/login`, reqBody);
 }
 
+export const GoogleLoginAPI=async(reqBody: any)=>{
+  return await commonAPI("POST",`${SERVER_URL}/googleLogin`,reqBody,)
+}
+
 
 
 import axios from 'axios';

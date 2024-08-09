@@ -119,7 +119,7 @@ const Header: React.FC = () => {
                   className="bg-teal-500 hover:bg-teal-600 flex items-center space-x-2"
                 >
                   <PersonAddIcon />
-                  <span>Register Worker</span>
+                  <span>Register</span>
                 </Button>
               </Link>
             </div>

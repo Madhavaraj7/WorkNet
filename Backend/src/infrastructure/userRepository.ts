@@ -1,9 +1,14 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { User } from "../domain/user";
 
-interface UserModel extends User, Document {}
+// Extending the User interface with mongoose Document
+interface UserModel extends User, Document {
+  otp?: string;
+  otpVerified?: boolean;
+}
 
-const UserSchema: Schema = new Schema({
+// Define the Mongoose schema for the User
+const UserSchema: Schema<UserModel> = new Schema({
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -12,21 +17,26 @@ const UserSchema: Schema = new Schema({
   otpVerified: { type: Boolean, default: false },
 });
 
+// Create the Mongoose model
 const UserModel = mongoose.model<UserModel>("User", UserSchema);
 
+// Function to create a new user
 export const createUser = async (user: User) => {
   const newUser = new UserModel(user);
   return newUser.save();
 };
 
+// Function to find a user by email
 export const findUserByEmail = async (email: string) => {
   return UserModel.findOne({ email });
 };
 
+// Function to update a user by email
 export const updateUser = async (email: string, update: Partial<User>) => {
   return UserModel.findOneAndUpdate({ email }, update, { new: true });
 };
 
+// Function to find a user by email and password
 export const findUserByEmailAndPassword = async (
   email: string,
   password: string

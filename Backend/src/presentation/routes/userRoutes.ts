@@ -5,6 +5,7 @@ import {
   verifyOtp,
   login,
   resendOtp,
+  googleLoginHandler,
 } from "../controllers/userController";
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post("/signUp", upload.single("profileImage"), register);
 router.post("/verifyOtp", verifyOtp);
 router.post("/resendOtp", resendOtp);
 router.post("/login", login);
+router.post("/googleLogin", googleLoginHandler);
 
 export default router;
