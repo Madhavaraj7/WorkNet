@@ -1,13 +1,15 @@
 import { Request, Response } from "express";
-import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp } from "../../application/userService";
+import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp ,updateUserProfile} from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail } from "../../infrastructure/userRepository";
 import axios from 'axios';
 import sharp from 'sharp';
-import cloudinary from '../../cloudinaryConfig'; // Import your Cloudinary config
+import cloudinary from '../../cloudinaryConfig';
 
-// Correct the type to match the properties
+
+
+// handle google login
 export const googleLoginHandler = async (req: Request, res: Response) => {
     try {
         const { email, username, profileImage } = req.body;
@@ -16,18 +18,15 @@ export const googleLoginHandler = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Profile image URL is required' });
         }
     
-        // Download the profile image from the URL
         const imageResponse = await axios({
             url: profileImage,
             responseType: 'arraybuffer',
         });
     
-        // Convert the image to JPEG using sharp
         const imageBuffer = await sharp(imageResponse.data)
             .jpeg()
             .toBuffer();
     
-        // Upload the image to Cloudinary
         cloudinary.v2.uploader.upload_stream((error, result) => {
             if (error) {
                 return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
@@ -35,11 +34,10 @@ export const googleLoginHandler = async (req: Request, res: Response) => {
     
             const profileImageUrl = result?.secure_url || '';
     
-            // Call googleLogin with the URL of the uploaded image
             googleLogin({
                 email,
                 username,
-                profileImagePath: profileImageUrl, // Use the correct property name
+                profileImagePath: profileImageUrl, 
             }).then((loginResult) => {
                 res.status(200).json(loginResult);
             }).catch(error => {
@@ -51,6 +49,9 @@ export const googleLoginHandler = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to process Google login' });
     }
 };
+
+
+// register the user
 export const register = async (req: Request, res: Response) => {
     try {
         const { username, email, password } = req.body;
@@ -143,5 +144,49 @@ export const login = async (req: Request, res: Response) => {
     res.status(200).json({ user, token });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+
+export const updateProfile = async (req: any, res: Response) => {
+  try {
+      const { userId } = req;  
+      // console.log(userId);
+      
+      
+      const { username, email } = req.body; 
+       
+      const profileImage = req.file ? req.file.buffer : null;
+      let profileImageUrl = '';
+
+      const proceedWithUpdate = async () => {
+          try {
+              const updatedUser = await updateUserProfile(userId, {
+                  username,
+                  email,
+                  profileImage: profileImageUrl || undefined,  
+              });
+              // console.log(updatedUser);
+              
+              res.status(200).json(updatedUser);
+          } catch (error: any) {
+              res.status(400).json({ error: 'Failed to update profile: ' + error.message });
+          }
+      };
+
+      if (profileImage) {
+          // Upload the image to Cloudinary
+          cloudinary.v2.uploader.upload_stream((error, result) => {
+              if (error) {
+                  return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+              }
+              profileImageUrl = result?.secure_url || '';
+              proceedWithUpdate();
+          }).end(profileImage);
+      } else {
+          proceedWithUpdate();  // No image provided, proceed with updating other fields
+      }
+  } catch (error: any) {
+      res.status(500).json({ error: 'Failed to update profile: ' + error.message });
   }
 };

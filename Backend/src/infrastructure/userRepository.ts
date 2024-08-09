@@ -43,3 +43,8 @@ export const findUserByEmailAndPassword = async (
 ) => {
   return UserModel.findOne({ email, password });
 };
+
+// Function to update the user's profile by user ID
+export const updateUserProfile = async (userId: string, update: Partial<User>) => {
+  return UserModel.findByIdAndUpdate(userId, update, { new: true });
+};
