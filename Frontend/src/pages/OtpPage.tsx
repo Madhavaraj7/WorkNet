@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button, TextField, Backdrop, CircularProgress, Typography, Grid, Box, IconButton } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
+
 import { verifyOtp, resendOtp } from "../Services/api";
 import HomeIcon from "@mui/icons-material/Home";
 
@@ -84,7 +84,6 @@ const VerifyOtp: React.FC = () => {
         <CircularProgress size={60} color="warning" />
       </Backdrop>
       <div className="min-h-screen flex justify-center items-center bg-gray-900">
-        <ToastContainer autoClose={3000} position="top-center" theme="colored" />
         <Box
           component="form"
           className="bg-white shadow-2xl rounded-lg p-10 w-full max-w-md mx-4"

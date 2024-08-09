@@ -23,6 +23,7 @@ export const addAvarageResponseContext = createContext<AddAvarageResponseContext
 export const profileUpdateResponseContext = createContext<ProfileUpdateResponseContextType | undefined>(undefined);
 export const adminReportResponseContext = createContext<AdminReportResponseContextType | undefined>(undefined);
 
+
 function AvarageRes({ children }: AvarageResProps) {
   const [addAvarageResponse, setAddAvarageResponse] = useState<string>("");
   const [profileUpdateResponse, setProfileUpdateResponse] = useState<string>("");
@@ -36,7 +37,8 @@ function AvarageRes({ children }: AvarageResProps) {
         </addAvarageResponseContext.Provider>
       </profileUpdateResponseContext.Provider>
     </adminReportResponseContext.Provider>
-  )
+  );
 }
+
 
 export default AvarageRes

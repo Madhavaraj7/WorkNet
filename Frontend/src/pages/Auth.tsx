@@ -13,8 +13,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import HomeIcon from "@mui/icons-material/Home";
 import UserPlaceHolder from "../assets/Images/UserPlaceHolder.jpg";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { LoginAPI, SignUpAPI,GoogleLoginAPI } from "../Services/allAPI";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase/firebase";
@@ -237,11 +236,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
         <CircularProgress size={60} color="warning" />
       </Backdrop>
       <div className="min-h-screen flex justify-center items-center bg-gray-900">
-        <ToastContainer
-          autoClose={3000}
-          position="top-center"
-          theme="colored"
-        />
+        
         <div className="grid grid-cols-2 max-[650px]:grid-cols-1 w-[650px] shadow-2xl bg-white rounded-lg overflow-hidden">
           <div className="flex justify-center items-center max-[850px]:h-screen bg-white">
             {insideSignup ? (

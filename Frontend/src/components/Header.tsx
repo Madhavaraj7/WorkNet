@@ -5,8 +5,8 @@ import EngineeringIcon from '@mui/icons-material/Engineering';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Logout from '@mui/icons-material/Logout';
 import { tokenAuthenticationContext } from '../ContextAPI/TokenAuth';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+
 
 
 const Header: React.FC = () => {
@@ -156,7 +156,6 @@ const Header: React.FC = () => {
           </svg>
         </button>
       </div>
-      <ToastContainer />
     </header>
   );
 };

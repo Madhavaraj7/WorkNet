@@ -29,3 +29,8 @@ export const GoogleLoginAPI=async(reqBody: any)=>{
 export const verifyOtp = async (data: any) => {
     return api.post('/verifyOtp', data);
   };
+
+// update User Profile
+export const updateUserProfileAPI=async(reqBody: any,reqHeader: { "Content-Type": string; } | undefined)=>{
+  return await commonAPI("PUT",`${SERVER_URL}/profile`,reqBody,reqHeader)
+}
