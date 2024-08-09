@@ -47,8 +47,8 @@ const VerifyOtp: React.FC = () => {
       toast.success("please login");
       navigate("/login");
     } catch (error) {
-      console.error(error);
-      toast.error("Verification failed. Please try again.");
+      // console.error(error);
+      toast.error("Invalid otp.");
     } finally {
       setLoading(false);
     }

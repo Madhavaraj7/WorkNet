@@ -8,19 +8,13 @@ import {
   googleLoginHandler,
 } from "../controllers/userController";
 
+
 const router = express.Router();
 
 // Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
 
 router.post("/signUp", upload.single("profileImage"), register);
 router.post("/verifyOtp", verifyOtp);

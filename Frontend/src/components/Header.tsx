@@ -67,7 +67,9 @@ const Header: React.FC = () => {
     navigate('/');
   };
 
-  const profileImageUrl = user?.profileImage ? `http://localhost:3000/uploads/${user.profileImage}` : undefined;
+  const profileImageUrl = user?.profileImage  
+  console.log(profileImageUrl);
+  
 
   return (
     <header className="bg-gray-900 text-white py-4 fixed top-0 left-0 w-full z-50 shadow-lg">

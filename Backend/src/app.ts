@@ -12,7 +12,8 @@ app.use(cors({
 }));
 
 // Serve static files from the 'uploads' directory
-app.use('/uploads', express.static('./uploads'));
+app.use('/uploads', express.static('uploads'));
+
 
 app.use(bodyParser.json());
 app.use('/api/users', userRoutes);

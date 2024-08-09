@@ -115,7 +115,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
 
     try {
       const result = await SignUpAPI(reqBody, reqHeader);
-      // console.log('SignUpAPI result:', result); // Debugging line
+      console.log('SignUpAPI result:', result); // Debugging line
 
       if (result?.status === 400) {
         toast.error("This email is already registered!");
