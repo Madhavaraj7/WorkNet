@@ -6,8 +6,12 @@ import {
   updateUser,
 } from "../infrastructure/userRepository";
 import { updateUserProfile as updateUserProfileRepo } from "../infrastructure/userRepository";
+import { sendEmail } from "../utils/sendEmail";
+
 
 import { User } from "../domain/user";
+import { otpGenerator } from "../utils/otpGenerator"; // Make sure this function generates OTPs
+
 
 
 // registerUser new User
@@ -133,4 +137,47 @@ export const updateUserProfile = async (userId: string, update: Partial<User>) =
         console.error("Error updating user profile:", error);
         throw new Error("Failed to update user profile");
     }
+};
+
+
+export const forgotPassword = async (email: string) => {
+  try {
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const otp = otpGenerator(); // Generate an OTP
+    await updateUser(email, { otp }); // Store the OTP in the user's record
+
+    await sendEmail(email, otp, "Your OTP for password reset is:"); // Send OTP email
+    
+    return { message: "OTP sent to your email" };
+  } catch (error) {
+    console.error("Error during password reset request:", error);
+    throw new Error("Failed to send OTP");
+  }
+};
+
+
+// Function to handle password reset
+export const resetPassword = async (email: string, otp: string, newPassword: string) => {
+  try {
+    const user = await findUserByEmail(email);
+
+    if (!user || user.otp !== otp) {
+      throw new Error("Invalid OTP or user not found");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.otp = undefined; // Clear the OTP after successful reset
+    await user.save();
+
+    return { message: "Password has been reset successfully" };
+  } catch (error) {
+    console.error("Error during password reset:", error);
+    throw new Error("Failed to reset password");
+  }
 };

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp ,updateUserProfile} from "../../application/userService";
+import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp ,updateUserProfile,forgotPassword,resetPassword} from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail } from "../../infrastructure/userRepository";
@@ -190,3 +190,26 @@ export const updateProfile = async (req: any, res: Response) => {
       res.status(500).json({ error: 'Failed to update profile: ' + error.message });
   }
 };
+
+
+
+export const forgotPasswordHandler = async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      await forgotPassword(email);
+      res.status(200).json({ message: "OTP sent to your email" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+  
+  // Handle password reset
+  export const resetPasswordHandler = async (req: Request, res: Response) => {
+    try {
+      const { email, otp, newPassword } = req.body;
+      await resetPassword(email, otp, newPassword);
+      res.status(200).json({ message: "Password has been reset successfully" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  };

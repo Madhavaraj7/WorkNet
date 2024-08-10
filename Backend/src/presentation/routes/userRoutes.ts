@@ -7,7 +7,9 @@ import {
   login,
   resendOtp,
   googleLoginHandler,
-  updateProfile
+  updateProfile,
+  forgotPasswordHandler,
+  resetPasswordHandler
 } from "../controllers/userController";
 
 // const jwtMiddleware = require('../../MiddleWare/jwt')
@@ -27,6 +29,8 @@ router.post("/resendOtp", resendOtp);
 router.post("/login", login);
 router.post("/googleLogin", googleLoginHandler);
 router.put("/profile", jwtMiddleware,upload.single("profileImage"), updateProfile);  
+router.post("/forgotPassword", forgotPasswordHandler);
+router.post("/resetPassword", resetPasswordHandler);
 
 
 export default router;
