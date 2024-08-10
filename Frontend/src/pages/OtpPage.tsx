@@ -154,9 +154,9 @@ const VerifyOtp: React.FC = () => {
           </Box>
           <p className="text-center text-sm text-gray-900 mt-4">
             Back to
-            <Link to="/login">
+            <Link to="/signup">
               <span className="font-bold text-yellow-400 ml-1 cursor-pointer">
-                Login
+                Signup
               </span>
             </Link>
           </p>

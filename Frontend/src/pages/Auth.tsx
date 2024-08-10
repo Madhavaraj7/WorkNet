@@ -181,6 +181,8 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
         if (googleLoginResult && googleLoginResult.user && googleLoginResult.token) {
           localStorage.setItem("token", googleLoginResult.token);
           localStorage.setItem("user", JSON.stringify(googleLoginResult.user));
+          toast.success("Login Successful!");
+
           navigate("/");
           setIsAuthorized(true);
         } else {

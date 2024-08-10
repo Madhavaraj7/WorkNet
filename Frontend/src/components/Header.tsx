@@ -58,7 +58,7 @@ const Header: React.FC = () => {
   };
 
   const handleLogoutClick = () => {
-    toast.success('Log-Out Successfully');
+    toast.success('Logout Successfully');
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setIsAuthorized(false);
