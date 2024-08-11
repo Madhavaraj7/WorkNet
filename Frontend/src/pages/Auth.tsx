@@ -25,7 +25,6 @@ import { tokenAuthenticationContext } from "../ContextAPI/TokenAuth";
 
 interface AuthProps {
   insideSignup: boolean;
-  setAdminEmail: (email: string) => void;
 }
 
 interface User {
