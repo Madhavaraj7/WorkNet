@@ -63,11 +63,12 @@ export const register = async (req: Request, res: Response) => {
             try {
                 const otp = otpGenerator();
                 await registerUser({
-                    username,
-                    email,
-                    password,
-                    profileImage: profileImageUrl,
-                    otp,
+                  username,
+                  email,
+                  password,
+                  profileImage: profileImageUrl,
+                  otp,
+                  is_verified: 0
                 });
                 await sendEmail(email, otp);
                 res.status(200).json("OTP sent to email");

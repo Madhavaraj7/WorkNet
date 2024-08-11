@@ -266,28 +266,6 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
             )}
           </div>
           <div className="space-y-10 px-10 bg-gray-900 py-12">
-            {!insideSignup && (
-              <>
-              
-              
-                <Button
-                onClick={handleGoogleLogin}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
-                  startIcon={
-                    <img
-                      src={Google}
-                      alt="Google logo"
-                      className="w-6 h-6 mr-2"
-                    />
-                  }
-                >
-                  <span className="text-sm font-semibold text-white">
-                    Sign in with Google
-                  </span>
-                </Button>
-              </>
-            )}
-
             {insideSignup && (
               <div className="flex justify-center items-center mt-10">
                 <label className="text-center">
@@ -372,12 +350,41 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                 ),
               }}
             />
+            
             <Button
               onClick={insideSignup ? handleSignUp : handleLogin}
               className="w-full text-white bg-gradient-to-r from-[#FF5733] to-[#FFC300] border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
             >
               {insideSignup ? "Sign Up" : "Login"}
             </Button>
+           
+            {!insideSignup && (
+              <>
+              <Link to="/forgot-password">
+              <span className="font-bold text-red-600 ml-1 cursor-pointer">
+                Forgot password?
+              </span>
+            </Link>
+              
+              
+                <Button
+                onClick={handleGoogleLogin}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
+                  startIcon={
+                    <img
+                      src={Google}
+                      alt="Google logo"
+                      className="w-6 h-6 mr-2"
+                    />
+                  }
+                >
+                  <span className="text-sm font-semibold text-white">
+                    Sign in with Google
+                  </span>
+                </Button>
+              </>
+            )}
+            
             
             <div className="text-center">
               <span className="text-white">

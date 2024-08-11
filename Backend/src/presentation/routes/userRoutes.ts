@@ -12,6 +12,8 @@ import {
   resetPasswordHandler
 } from "../controllers/userController";
 
+import {adminlogin} from "../controllers/adminController"
+
 // const jwtMiddleware = require('../../MiddleWare/jwt')
 import jwtMiddleware from "../MiddleWare/jwt"
 
@@ -32,5 +34,9 @@ router.put("/profile", jwtMiddleware,upload.single("profileImage"), updateProfil
 router.post("/forgotPassword", forgotPasswordHandler);
 router.post("/resetPassword", resetPasswordHandler);
 
+
+// admin Routes
+
+router.post("/adminLogin",adminlogin)
 
 export default router;

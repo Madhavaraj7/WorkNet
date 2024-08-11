@@ -34,3 +34,15 @@ export const verifyOtp = async (data: any) => {
 export const updateUserProfileAPI=async(reqBody: any,reqHeader: { "Content-Type": string; } | undefined)=>{
   return await commonAPI("PUT",`${SERVER_URL}/profile`,reqBody,reqHeader)
 }
+
+
+// Forgot Password API
+export const ForgotPasswordAPI = async (email: string) => {
+  return await commonAPI("POST", `${SERVER_URL}/forgotPassword`, { email });
+};
+
+// Reset Password API
+export const VerifyResetPasswordAPI = async (email: any, otp: any, newPassword: any) => {
+  const reqBody = { email, otp, newPassword };
+  return await commonAPI("POST", `${SERVER_URL}/resetPassword`, reqBody);
+};

@@ -6,6 +6,7 @@ import OtpPage from './pages/OtpPage';
 import Profile from './pages/Profile';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for Toastify
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   const handleSetAdminEmail = (email: string): void => {
@@ -22,6 +23,8 @@ function App() {
         <Route path='/signup' element={<Auth insideSignup={true} setAdminEmail={handleSetAdminEmail} />} />
         <Route path='/otp' element={<OtpPage />} />
         <Route path='/profile' element={<Profile />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
       </Routes>
     </>
   );

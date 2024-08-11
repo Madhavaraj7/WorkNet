@@ -66,7 +66,8 @@ export const googleLogin = async ({
         email,
         password: "defaultPassword",
         profileImage: profileImagePath || "",
-        otpVerified: true, 
+        otpVerified: true,
+        is_verified: 0
       };
 
       const hashedPassword = await bcrypt.hash(newUser.password, 10);

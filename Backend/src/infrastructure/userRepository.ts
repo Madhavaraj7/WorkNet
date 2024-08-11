@@ -15,6 +15,10 @@ const UserSchema: Schema<UserModel> = new Schema({
   profileImage: { type: String, required: true },
   otp: { type: String },
   otpVerified: { type: Boolean, default: false },
+  is_verified: {
+    type: Number,
+    default: 0,
+  },
 });
 
 // Create the Mongoose model
@@ -47,4 +51,10 @@ export const findUserByEmailAndPassword = async (
 // Function to update the user's profile by user ID
 export const updateUserProfile = async (userId: string, update: Partial<User>) => {
   return UserModel.findByIdAndUpdate(userId, update, { new: true });
+};
+
+
+export const findUserByEmailAdmin = async (email: string): Promise<User | null> => {
+  const user = await UserModel.findOne({ email });
+  return user ? user.toObject() : null;
 };
