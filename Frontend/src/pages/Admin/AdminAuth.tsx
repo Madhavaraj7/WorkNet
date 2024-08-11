@@ -227,6 +227,8 @@ const AdminAuth: React.FC = () => {
             />
             <Button
               onClick={handleLogin}
+              className="w-full text-white bg-gradient-to-r from-[#FF5733] to-[#FFC300] border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
+
               fullWidth
               variant="contained"
               color="primary"
@@ -235,7 +237,7 @@ const AdminAuth: React.FC = () => {
               Login
             </Button>
             <Typography variant="body2" color="textSecondary" align="center" sx={{ mt: 2, color: '#cbd5e0' }}>
-              &copy; {new Date().getFullYear()} Your Company
+              &copy; {new Date().getFullYear()} WORKNET
             </Typography>
           </Box>
         </Paper>

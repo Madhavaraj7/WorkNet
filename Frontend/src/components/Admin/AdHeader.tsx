@@ -20,7 +20,7 @@ import ReviewsIcon from "@mui/icons-material/Reviews";
 import ReportIcon from "@mui/icons-material/Report";
 import MessageIcon from "@mui/icons-material/Message";
 import Person4Icon from "@mui/icons-material/Person4";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Badge, Button } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { toast } from "react-toastify";
@@ -163,13 +163,8 @@ const AdHeader: React.FC<AdHeaderProps> = () => {
             <MenuIcon style={{ color: "#FFFFFF" }} />
           </IconButton>
           <div className="flex items-center">
-            <EngineeringIcon style={{ color: "#F59E0B" }} fontSize="large" />
-            <Typography
-              variant="h4"
-              style={{ color: "#F59E0B", fontWeight: "bold", marginLeft: 8 }}
-            >
-              WorkNet
-            </Typography>
+          <EngineeringIcon fontSize="large" className="text-teal-400" />
+          <Link to="/adHome" className="text-2xl font-bold hover:text-teal-400">WorkNet</Link>
           </div>
           <div className="flex space-x-4">
             <Badge badgeContent={0} color="error">
