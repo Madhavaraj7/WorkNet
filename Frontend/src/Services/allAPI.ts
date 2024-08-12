@@ -51,3 +51,9 @@ export const VerifyResetPasswordAPI = async (email: any, otp: any, newPassword: 
 export const AdminLoginAPI = async (reqBody: any) => {
   return await commonAPI("POST", `${SERVER_URL}/adminLogin`, reqBody);
 }
+
+
+// update User Profile
+export const updateAdminProfileAPI=async(reqBody: any,reqHeader: { "Content-Type": string; } | undefined)=>{
+  return await commonAPI("PUT",`${SERVER_URL}/profile`,reqBody,reqHeader)
+}

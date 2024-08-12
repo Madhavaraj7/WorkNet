@@ -12,10 +12,12 @@ import {
   resetPasswordHandler
 } from "../controllers/userController";
 
-import {adminlogin} from "../controllers/adminController"
+import {adminlogin,adminupdateProfile} from "../controllers/adminController"
 
 // const jwtMiddleware = require('../../MiddleWare/jwt')
 import jwtMiddleware from "../MiddleWare/jwt"
+import AdminjwtMiddleware from "../MiddleWare/AdJwt"
+
 
 
 const router = express.Router();
@@ -38,5 +40,7 @@ router.post("/resetPassword", resetPasswordHandler);
 // admin Routes
 
 router.post("/adminLogin",adminlogin)
+router.put("/adprofile", AdminjwtMiddleware,upload.single("profileImage"), adminupdateProfile);  
+
 
 export default router;

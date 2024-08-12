@@ -58,3 +58,7 @@ export const findUserByEmailAdmin = async (email: string): Promise<User | null> 
   const user = await UserModel.findOne({ email });
   return user ? user.toObject() : null;
 };
+
+export const updateAdminProfile = async (userId: string, update: Partial<User>) => {
+  return UserModel.findByIdAndUpdate(userId, update, { new: true });
+};

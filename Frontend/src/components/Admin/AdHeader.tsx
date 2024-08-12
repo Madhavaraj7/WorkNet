@@ -141,8 +141,8 @@ const AdHeader: React.FC<AdHeaderProps> = () => {
       authContext.setIsAuthorized(false);
       authContext.setUser(undefined);
       setTimeout(() => {
-        navigate("/admin"); // Redirect to the admin login page
-      }, 2000); // Delay to allow toast message to be visible
+        navigate("/admin");
+      }, 2000); 
     }
   };
 
@@ -201,48 +201,100 @@ const AdHeader: React.FC<AdHeaderProps> = () => {
         </DrawerHeader>
         <Divider />
         <List className="mt-5">
-          {[
-            "home",
-            "users",
-            "analytics",
-            "reviews",
-            "report",
-            "messages",
-            "profile",
-          ].map((icon) => (
-            <React.Fragment key={icon}>
-              <div
-                onClick={() => handleIconClick(icon)}
-                className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-700 transition-colors"
-                style={{ color: activeIcon === icon ? "#3B82F6" : "#FFFFFF" }}
-              >
-                {icon === "home" && (
-                  <HomeIcon className="me-3" fontSize="large" />
-                )}
-                {icon === "users" && (
-                  <PeopleAltIcon className="me-3" fontSize="large" />
-                )}
-                {icon === "analytics" && (
-                  <BarChartIcon className="me-3" fontSize="large" />
-                )}
-                {icon === "reviews" && (
-                  <ReviewsIcon className="me-3" fontSize="large" />
-                )}
-                {icon === "report" && (
-                  <ReportIcon className="me-3" fontSize="large" />
-                )}
-                {icon === "messages" && (
-                  <MessageIcon className="me-3" fontSize="large" />
-                )}
-                {icon === "profile" && (
-                  <Person4Icon className="me-3" fontSize="large" />
-                )}
-                <Typography variant="h6">{icon}</Typography>
-              </div>
-              <Divider />
-            </React.Fragment>
-          ))}
-        </List>
+  {[
+    "home",
+    "users",
+    "analytics",
+    "reviews",
+    "report",
+    "messages",
+    "profile",
+  ].map((icon) => (
+    <React.Fragment key={icon}>
+      <div
+        onClick={() => handleIconClick(icon)}
+        className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-700 transition-colors"
+        style={{
+          color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+        }}
+      >
+        {icon === "home" && (
+          <HomeIcon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        {icon === "users" && (
+          <PeopleAltIcon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        {icon === "analytics" && (
+          <BarChartIcon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        {icon === "reviews" && (
+          <ReviewsIcon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        {icon === "report" && (
+          <ReportIcon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        {icon === "messages" && (
+          <MessageIcon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        {icon === "profile" && (
+          <Person4Icon
+            className="me-3"
+            fontSize="large"
+            style={{
+              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+            }}
+          />
+        )}
+        <Typography
+          variant="h6"
+          style={{
+            color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+          }}
+        >
+          {icon}
+        </Typography>
+      </div>
+      <Divider />
+    </React.Fragment>
+  ))}
+</List>
+
       </Drawer>
     </Box>
   );

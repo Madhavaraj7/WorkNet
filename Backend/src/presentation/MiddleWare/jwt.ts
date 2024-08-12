@@ -19,7 +19,7 @@ const jwtMiddleware = (req: CustomRequest, res: Response, next: NextFunction) =>
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string);
         // console.log(decoded);
-        
+        console.log({decoded})
         req.userId = (decoded as { userId: string }).userId;  
         next();
     } catch (error) {
