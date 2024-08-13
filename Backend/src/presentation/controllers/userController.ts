@@ -70,7 +70,9 @@ export const register = async (req: Request, res: Response) => {
                   password,
                   profileImage: profileImageUrl,
                   otp,
-                  is_verified: 0
+                  is_verified: 0,
+                  isBlocked: false, 
+
                 });
                 await sendEmail(email, otp);
                 res.status(200).json("OTP sent to email");

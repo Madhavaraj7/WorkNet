@@ -7,5 +7,7 @@ export interface User {
     otp?: string;
     otpVerified?: boolean; 
     is_verified: number; 
+    isBlocked?: boolean; // Add this property
+
 
 }

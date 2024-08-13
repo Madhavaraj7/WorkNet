@@ -12,6 +12,7 @@ import AdHome from "./pages/Admin/AdHome";
 import PrivateRoute from "./ContextAPI/PrivateRoute";
 import AdminPrivateRoute from "./ContextAPI/AdminPrivateRoute";
 import AuthRoute from "./ContextAPI/AuthRoute";
+import AdProfile from "./pages/Admin/AdProfile";
 
 function App() {
   return (
@@ -44,6 +45,8 @@ function App() {
         <Route path="/admin" element={<AdminAuth />} />
         <Route element={<AdminPrivateRoute />}>
           <Route path="/adhome" element={<AdHome />} />
+          <Route path="/adprofile" element={<AdProfile />} />
+
         </Route>
       </Routes>
     </>

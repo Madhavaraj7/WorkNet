@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { findUserByEmailAdmin,updateAdminProfile } from '../infrastructure/userRepository';
+import { findUserByEmailAdmin,updateAdminProfile,findAllUsers,updateUserBlockStatus } from '../infrastructure/userRepository';
 import { User } from '../domain/user';
 import { errorHandler } from '../utils/errorHandler'; // Assuming errorHandler is a utility function
 
@@ -47,4 +47,15 @@ export const updateUserProfile = async (userId: string, update: Partial<User>) =
       console.error("Error updating user profile:", error);
       throw new Error("Failed to update user profile");
   }
+};
+
+
+// Fetch all users
+export const getAllUsers = async (): Promise<User[]> => {
+  return findAllUsers();
+};
+
+// Block or Unblock a user
+export const blockOrUnblockUser = async (userId: string, isBlocked: boolean): Promise<User | null> => {
+  return updateUserBlockStatus(userId, isBlocked);
 };

@@ -171,7 +171,7 @@ export const resetPassword = async (email: string, otp: string, newPassword: str
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.otp = undefined; // Clear the OTP after successful reset
+    user.otp = undefined;
     await user.save();
 
     return { message: "Password has been reset successfully" };
