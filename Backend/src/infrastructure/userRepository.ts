@@ -19,6 +19,8 @@ const UserSchema: Schema<UserModel> = new Schema({
     type: Number,
     default: 0,
   },
+  isBlocked: { type: Boolean, default: false }, // Added the isBlocked field with a default value
+
 });
 
 // Create the Mongoose model
@@ -66,4 +68,15 @@ export const updateAdminProfile = async (userId: string, update: Partial<User>) 
 // Function to find a user by ID
 export const findUserById = async (userId: string) => {
   return UserModel.findById(userId);
+};
+
+
+// Fetch all users
+export const findAllUsers = async (): Promise<User[]> => {
+  return UserModel.find(); // Returns all users from the database
+};
+
+// Update a user's isBlocked status
+export const updateUserBlockStatus = async (userId: string, isBlocked: boolean): Promise<User | null> => {
+  return UserModel.findByIdAndUpdate(userId, { isBlocked }, { new: true }); // Update and return the updated user
 };
