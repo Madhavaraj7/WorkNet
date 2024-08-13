@@ -7,8 +7,6 @@ import {
 } from "../infrastructure/userRepository";
 import { updateUserProfile as updateUserProfileRepo } from "../infrastructure/userRepository";
 import { sendEmail } from "../utils/sendEmail";
-
-
 import { User } from "../domain/user";
 import { otpGenerator } from "../utils/otpGenerator"; // Make sure this function generates OTPs
 

@@ -56,15 +56,15 @@ const Header: React.FC = () => {
     navigate('/profile');
     handleMenuClose();
   };
-
   const handleLogoutClick = () => {
     toast.success('Logout Successfully');
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setIsAuthorized(false);
-    setUser(undefined);
+    authContext.setIsAuthorized(false)
+    setUser(null); // Ensure the user state is cleared
     handleMenuClose();
-    navigate('/');
+    navigate('/'); // Redirect to the home page or login page
   };
 
   const profileImageUrl = user?.profileImage  

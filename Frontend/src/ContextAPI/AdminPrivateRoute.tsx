@@ -6,7 +6,6 @@ const AdminPrivateRoute: React.FC = () => {
   const authContext = useContext(tokenAuthenticationContext);
 
   if (authContext === undefined) {
-    // Context is undefined, handle this case (perhaps show an error or fallback UI)
     return <Navigate to="/admin" />;
   }
 

@@ -9,9 +9,9 @@ import "react-toastify/dist/ReactToastify.css"; // Import the CSS for Toastify
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuth from "./pages/Admin/AdminAuth";
 import AdHome from "./pages/Admin/AdHome";
-import PrivateRoute from "./ContextAPI/PrivateRoute"; // Updated import
-import AdminPrivateRoute from "./ContextAPI/AdminPrivateRoute"; // Updated import
-import AdProfile from "./pages/Admin/AdProfile";
+import PrivateRoute from "./ContextAPI/PrivateRoute";
+import AdminPrivateRoute from "./ContextAPI/AdminPrivateRoute";
+import AuthRoute from "./ContextAPI/AuthRoute";
 
 function App() {
   return (
@@ -29,18 +29,21 @@ function App() {
       />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Auth insideSignup={false} />} />
-        <Route path="/signup" element={<Auth insideSignup={true} />} />
-        <Route path="/otp" element={<OtpPage />} />
+
+        <Route element={<AuthRoute />}>
+          <Route path="/login" element={<Auth insideSignup={false} />} />
+          <Route path="/signup" element={<Auth insideSignup={true} />} />
+          <Route path="/otp" element={<OtpPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
+
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
-        </Route>{" "}
+        </Route>
+
         <Route path="/admin" element={<AdminAuth />} />
         <Route element={<AdminPrivateRoute />}>
           <Route path="/adhome" element={<AdHome />} />
-          <Route path="/adProfile" element={<AdProfile />} />
-
         </Route>
       </Routes>
     </>

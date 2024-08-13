@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 interface CustomRequest extends Request {
     userId?: string;
-    isVerified?: number; // `isVerified` is either 0 or 1
+    isVerified?: number; 
 }
 
 const adminJwtMiddleware = (req: CustomRequest, res: Response, next: NextFunction) => {
