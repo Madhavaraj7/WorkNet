@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp ,updateUserProfile,forgotPassword,resetPassword} from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
-import { findUserByEmail } from "../../infrastructure/userRepository";
+import { findUserByEmail, findUserById } from "../../infrastructure/userRepository";
 import axios from 'axios';
 import sharp from 'sharp';
 import cloudinary from '../../cloudinaryConfig';
@@ -151,13 +151,20 @@ export const login = async (req: Request, res: Response) => {
 };
 
 
+
 export const updateProfile = async (req: any, res: Response) => {
   try {
     const { userId } = req;
-    const { username, email, password } = req.body;
-    
+    const { username, email, oldPassword, newPassword } = req.body;
+
     const profileImage = req.file ? req.file.buffer : null;
     let profileImageUrl = '';
+
+    // Fetch the user from the database
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     const proceedWithUpdate = async (hashedPassword?: string) => {
       try {
@@ -185,12 +192,30 @@ export const updateProfile = async (req: any, res: Response) => {
           return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
         }
         profileImageUrl = result?.secure_url || '';
-        proceedWithUpdate(password ? await bcrypt.hash(password, 10) : undefined);
+        if (newPassword) {
+          // Verify old password and hash new password
+          const isMatch = await bcrypt.compare(oldPassword, user.password);
+          if (!isMatch) {
+            return res.status(400).json({ error: 'Old password is incorrect. Please use the forgot password option.' });
+          }
+          const hashedPassword = await bcrypt.hash(newPassword, 10);
+          proceedWithUpdate(hashedPassword);
+        } else {
+          proceedWithUpdate();
+        }
       }).end(profileImage);
     } else {
-      // Hash password if provided
-      const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
-      proceedWithUpdate(hashedPassword);
+      // Hash password if provided and old password is correct
+      if (newPassword) {
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ error: 'Old password is incorrect. Please use the forgot password option.' });
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        proceedWithUpdate(hashedPassword);
+      } else {
+        proceedWithUpdate();
+      }
     }
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to update profile: ' + error.message });

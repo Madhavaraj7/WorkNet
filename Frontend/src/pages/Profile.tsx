@@ -13,6 +13,8 @@ interface UserProfile {
   profileImage: File | string;
   username: string;
   email: string;
+  oldPassword?: string;
+  newPassword?: string;
 }
 
 function Profile() {
@@ -22,7 +24,9 @@ function Profile() {
   const [userProfile, setUserProfile] = useState<UserProfile>({
     profileImage: "",
     username: JSON.parse(localStorage.getItem("user") || "{}")?.username || "",
-    email: JSON.parse(localStorage.getItem("user") || "{}")?.email || ""
+    email: JSON.parse(localStorage.getItem("user") || "{}")?.email || "",
+    oldPassword: "",
+    newPassword: ""
   });
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -59,7 +63,7 @@ function Profile() {
   };
 
   const handleUpdate = async () => {
-    const { username, profileImage } = userProfile;
+    const { username, profileImage, oldPassword, newPassword } = userProfile;
     const token = localStorage.getItem("token");
 
     if (!username) {
@@ -67,15 +71,24 @@ function Profile() {
       return;
     }
 
+    if (newPassword && !oldPassword) {
+      toast.warning("Please enter your old password to change the password!");
+      return;
+    }
+
     const reqBody = new FormData();
     reqBody.append("username", username);
     reqBody.append("profileImage", profileImage instanceof File ? profileImage : profileImagePreview);
+    if (newPassword) {
+      reqBody.append("oldPassword", oldPassword || "");
+      reqBody.append("newPassword", newPassword || "");
+    }
 
     if (token) {
       setLoading(true);
       try {
         const reqHeader = {
-          "Content-Type": profileImage instanceof File ? "multipart/form-data" : "application/json",
+          "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${token}`
         };
         const result = await updateUserProfileAPI(reqBody, reqHeader);
@@ -86,10 +99,10 @@ function Profile() {
           setProfileUpdateResponse(result);
           navigate('/');
         } else {
-          toast.info(result.response);
+          toast.info(result.response || "Something went wrong!");
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
         toast.error("An error occurred while updating your profile.");
       } finally {
         setLoading(false);
@@ -139,7 +152,27 @@ function Profile() {
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               InputProps={{ readOnly: true }}
-              sx={{ backgroundColor: "#f5f5f5" }} // Optional: to visually indicate non-editability
+              sx={{ backgroundColor: "#f5f5f5" }}
+            />
+            <TextField
+              name="oldPassword"
+              value={userProfile.oldPassword}
+              onChange={handleFieldChange}
+              type="password"
+              className="w-full"
+              label="Old Password"
+              variant="outlined"
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              name="newPassword"
+              value={userProfile.newPassword}
+              onChange={handleFieldChange}
+              type="password"
+              className="w-full"
+              label="New Password"
+              variant="outlined"
+              InputLabelProps={{ shrink: true }}
             />
             <Button
               onClick={handleUpdate}
@@ -147,7 +180,7 @@ function Profile() {
               variant="contained"
               color="primary"
               size="large"
-              disabled={loading} // Disable the button while loading
+              disabled={loading}
             >
               {loading ? <CircularProgress size={24} /> : "Update"}
             </Button>
