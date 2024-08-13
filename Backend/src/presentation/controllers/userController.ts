@@ -6,6 +6,8 @@ import { findUserByEmail } from "../../infrastructure/userRepository";
 import axios from 'axios';
 import sharp from 'sharp';
 import cloudinary from '../../cloudinaryConfig';
+import bcrypt from 'bcrypt';
+
 
 
 
@@ -151,44 +153,47 @@ export const login = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req: any, res: Response) => {
   try {
-      const { userId } = req;  
-      // console.log(userId);
-      
-      
-      const { username, email } = req.body; 
-       
-      const profileImage = req.file ? req.file.buffer : null;
-      let profileImageUrl = '';
+    const { userId } = req;
+    const { username, email, password } = req.body;
+    
+    const profileImage = req.file ? req.file.buffer : null;
+    let profileImageUrl = '';
 
-      const proceedWithUpdate = async () => {
-          try {
-              const updatedUser = await updateUserProfile(userId, {
-                  username,
-                  email,
-                  profileImage: profileImageUrl || undefined,  
-              });
-              // console.log(updatedUser);
-              
-              res.status(200).json(updatedUser);
-          } catch (error: any) {
-              res.status(400).json({ error: 'Failed to update profile: ' + error.message });
-          }
-      };
+    const proceedWithUpdate = async (hashedPassword?: string) => {
+      try {
+        const updateData: any = {
+          username,
+          email,
+          profileImage: profileImageUrl || undefined,
+        };
 
-      if (profileImage) {
-          // Upload the image to Cloudinary
-          cloudinary.v2.uploader.upload_stream((error, result) => {
-              if (error) {
-                  return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
-              }
-              profileImageUrl = result?.secure_url || '';
-              proceedWithUpdate();
-          }).end(profileImage);
-      } else {
-          proceedWithUpdate();  // No image provided, proceed with updating other fields
+        if (hashedPassword) {
+          updateData.password = hashedPassword;
+        }
+
+        const updatedUser = await updateUserProfile(userId, updateData);
+        res.status(200).json(updatedUser);
+      } catch (error: any) {
+        res.status(400).json({ error: 'Failed to update profile: ' + error.message });
       }
+    };
+
+    if (profileImage) {
+      // Upload the image to Cloudinary
+      cloudinary.v2.uploader.upload_stream(async (error, result) => {
+        if (error) {
+          return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+        }
+        profileImageUrl = result?.secure_url || '';
+        proceedWithUpdate(password ? await bcrypt.hash(password, 10) : undefined);
+      }).end(profileImage);
+    } else {
+      // Hash password if provided
+      const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
+      proceedWithUpdate(hashedPassword);
+    }
   } catch (error: any) {
-      res.status(500).json({ error: 'Failed to update profile: ' + error.message });
+    res.status(500).json({ error: 'Failed to update profile: ' + error.message });
   }
 };
 
