@@ -3,23 +3,23 @@ import jwt from 'jsonwebtoken';
 
 interface CustomRequest extends Request {
     userId?: string;
-    isVerified?: number; 
+    role?: string; 
 }
 
 const adminJwtMiddleware = (req: CustomRequest, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
+console.log("kdsanfkj");
 
     if (!token) {
         return res.status(401).json({ error: 'No token provided' });
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as { userId: string; isVerified: number };
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as { userId: string; role: string };
         req.userId = decoded.userId;
-        req.isVerified = decoded.isVerified;
+        req.role = decoded.role;
 
-        // Check if the user is an admin
-        if (req.isVerified !== 1) {
+        if (req.role !== 'admin') {
             return res.status(403).json({ error: 'User is not an admin' });
         }
 

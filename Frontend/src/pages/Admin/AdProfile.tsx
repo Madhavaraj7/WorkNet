@@ -83,7 +83,6 @@ function AdProfile() {
 
   return (
     <>
-      <AdHeader />
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="flex-grow flex justify-center items-center py-12 px-4">
           <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">

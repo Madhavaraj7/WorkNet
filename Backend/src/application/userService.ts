@@ -65,7 +65,8 @@ export const googleLogin = async ({
         password: "defaultPassword",
         profileImage: profileImagePath || "",
         otpVerified: true,
-        is_verified: 0
+        is_verified: 0,
+        role: "user",
       };
 
       const hashedPassword = await bcrypt.hash(newUser.password, 10);
@@ -109,6 +110,9 @@ export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmail(email);
   if (!user) {
     throw new Error("Invalid Email/Password");
+  }
+  if (user.isBlocked) {
+    throw new Error('User is blocked');
   }
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {

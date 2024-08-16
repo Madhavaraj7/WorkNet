@@ -8,6 +8,5 @@ export interface User {
     otpVerified?: boolean; 
     is_verified: number; 
     isBlocked?: boolean; // Add this property
-
-
+    role: string; // Add role field
 }
