@@ -20,6 +20,9 @@ const UserSchema: Schema<UserModel> = new Schema({
     default: 0,
   },
   isBlocked: { type: Boolean, default: false }, // Added the isBlocked field with a default value
+  role: { type: String, default: 'user' } // Added the role field
+
+
 
 });
 
@@ -76,7 +79,14 @@ export const findAllUsers = async (): Promise<User[]> => {
   return UserModel.find(); // Returns all users from the database
 };
 
-// Update a user's isBlocked status
-export const updateUserBlockStatus = async (userId: string, isBlocked: boolean): Promise<User | null> => {
-  return UserModel.findByIdAndUpdate(userId, { isBlocked }, { new: true }); // Update and return the updated user
+
+
+// Function to block a user by ID
+export const blockUserById = async (userId: string) => {
+  return UserModel.findByIdAndUpdate(userId, { isBlocked: true }, { new: true });
+};
+
+// Function to unblock a user by ID
+export const unblockUserById = async (userId: string) => {
+  return UserModel.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
 };

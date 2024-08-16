@@ -71,8 +71,8 @@ export const register = async (req: Request, res: Response) => {
                   profileImage: profileImageUrl,
                   otp,
                   is_verified: 0,
-                  isBlocked: false, 
-
+                  isBlocked: false,
+                  role: "user",
                 });
                 await sendEmail(email, otp);
                 res.status(200).json("OTP sent to email");

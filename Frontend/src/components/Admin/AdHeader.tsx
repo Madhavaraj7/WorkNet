@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useContext } from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import React, { useState, useContext } from "react";
+import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Typography from "@mui/material/Typography"
 import EngineeringIcon from "@mui/icons-material/Engineering";
+
+import Avatar from "@mui/material/Avatar";
+import { Badge, Button, Divider } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -20,93 +20,36 @@ import ReviewsIcon from "@mui/icons-material/Reviews";
 import ReportIcon from "@mui/icons-material/Report";
 import MessageIcon from "@mui/icons-material/Message";
 import Person4Icon from "@mui/icons-material/Person4";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { Badge, Button } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import { tokenAuthenticationContext } from '../../ContextAPI/TokenAuth'; // Adjust the import path as needed
+import { tokenAuthenticationContext } from '../../ContextAPI/AdminAuth'; // Adjust the import path as needed
 
 const drawerWidth = 240;
 
-const openedMixin = (theme: any) => ({
-  width: drawerWidth,
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: "hidden",
-  backgroundColor: "#2D3748", // Dark gray
-  boxShadow: theme.shadows[4],
-});
-
-const closedMixin = (theme: any) => ({
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: "hidden",
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
-  backgroundColor: "#2D3748", // Dark gray
-});
-
-const DrawerHeader = styled("div")(({ theme }: any) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})<{ open?: boolean }>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: "#1F2937", // bg-gray-900
-  color: "#FFFFFF", // text-white
-  transition: theme.transitions.create(["width", "margin"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  padding: theme.spacing(1, 2), // py-4
-  boxShadow: theme.shadows[10], // shadow-lg
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }: any) => ({
+const Drawer = styled(MuiDrawer)(({ theme }) => ({
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
-  }),
+  "& .MuiDrawer-paper": {
+    width: drawerWidth,
+    backgroundColor: "#2D3748", // Dark gray
+    padding: theme.spacing(2), // Adds padding inside the drawer
+  },
 }));
 
-interface AdHeaderProps {}
+const AppBar = styled(MuiAppBar)(({ theme }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  backgroundColor: "#1F2937", // bg-gray-900
+  color: "#FFFFFF", // text-white
+  padding: theme.spacing(1, 2), // py-4
+  boxShadow: theme.shadows[10], // shadow-lg
+  marginLeft: drawerWidth,
+  width: `calc(100% - ${drawerWidth}px)`,
+}));
 
-const AdHeader: React.FC<AdHeaderProps> = () => {
+const AdHeader: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const theme = useTheme();
-  const [open, setOpen] = useState<boolean>(false);
   const [activeIcon, setActiveIcon] = useState<string>("home");
   const authContext = useContext(tokenAuthenticationContext);
 
@@ -115,56 +58,27 @@ const AdHeader: React.FC<AdHeaderProps> = () => {
     navigate("/ad" + iconName);
   };
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
-  useEffect(() => {
-    if (location.pathname === "/adhome") {
-      setOpen(true);
-      setActiveIcon("home");
-    } else {
-      setOpen(false);
-      setActiveIcon(location.pathname.split("/").pop() || "home");
-    }
-  }, [location.pathname]);
-
   const handleLogout = () => {
     if (authContext) {
       toast.success("Logged Out Successfully");
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      localStorage.removeItem("admin");
+      localStorage.removeItem("adtoken");
       authContext.setIsAuthorized(false);
-      authContext.setUser(undefined);
+      authContext.setAdmin(undefined);
       setTimeout(() => {
         navigate("/admin");
-      }, 2000); 
+      }, 2000);
     }
   };
 
   return (
     <Box>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed">
         <Toolbar className="flex justify-between items-center">
-          <IconButton
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 2,
-              ...(open && { display: "none" }),
-            }}
-          >
-            <MenuIcon style={{ color: "#FFFFFF" }} />
-          </IconButton>
           <div className="flex items-center">
           <EngineeringIcon fontSize="large" className="text-teal-400" />
-          <Link to="/adHome" className="text-2xl font-bold hover:text-teal-400">WorkNet</Link>
+          <Link to="/adHome" className="text-2xl font-bold hover:text-teal-400">WORKNET</Link>
           </div>
           <div className="flex space-x-4">
             <Badge badgeContent={0} color="error">
@@ -189,112 +103,129 @@ const AdHeader: React.FC<AdHeaderProps> = () => {
           </div>
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon style={{ color: "#FFFFFF" }} />
-            ) : (
-              <ChevronLeftIcon style={{ color: "#FFFFFF" }} />
-            )}
-          </IconButton>
-        </DrawerHeader>
+      <Drawer variant="permanent">
+        <Box className="flex flex-col items-center py-5">
+          <Avatar
+            src={authContext?.admin?.profileImage}
+            alt="Admin Profile"
+            sx={{ width: 100, height: 100, border: "4px solid #3B82F6" }}
+          />
+          <Typography
+            variant="h6"
+            className="mt-4 text-white"
+            style={{ fontWeight: 600 }}
+          >
+            {authContext?.admin?.username}
+          </Typography>
+          <Typography variant="body2" className="text-gray-400">
+            Admin
+          </Typography>
+        </Box>
         <Divider />
-        <List className="mt-5">
-  {[
-    "home",
-    "users",
-    "analytics",
-    "reviews",
-    "report",
-    "messages",
-    "profile",
-  ].map((icon) => (
-    <React.Fragment key={icon}>
-      <div
-        onClick={() => handleIconClick(icon)}
-        className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-700 transition-colors"
-        style={{
-          color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-        }}
-      >
-        {icon === "home" && (
-          <HomeIcon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        {icon === "users" && (
-          <PeopleAltIcon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        {icon === "analytics" && (
-          <BarChartIcon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        {icon === "reviews" && (
-          <ReviewsIcon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        {icon === "report" && (
-          <ReportIcon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        {icon === "messages" && (
-          <MessageIcon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        {icon === "profile" && (
-          <Person4Icon
-            className="me-3"
-            fontSize="large"
-            style={{
-              color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-            }}
-          />
-        )}
-        <Typography
-          variant="h6"
-          style={{
-            color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-          }}
-        >
-          {icon}
-        </Typography>
-      </div>
-      <Divider />
-    </React.Fragment>
-  ))}
-</List>
-
+        <List>
+          {[
+            "home",
+            "users",
+            "workers",
+            "analytics",
+            "reviews",
+            "report",
+            "messages",
+            "profile",
+          ].map((icon) => (
+            <React.Fragment key={icon}>
+              <div
+                onClick={() => handleIconClick(icon)}
+                className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-700 transition-colors"
+                style={{
+                  color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                }}
+              >
+                {icon === "home" && (
+                  <HomeIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "users" && (
+                  <PeopleAltIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "workers" && (
+                  <PeopleAltIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "analytics" && (
+                  <BarChartIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "reviews" && (
+                  <ReviewsIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "report" && (
+                  <ReportIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "messages" && (
+                  <MessageIcon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                {icon === "profile" && (
+                  <Person4Icon
+                    className="me-3"
+                    fontSize="large"
+                    style={{
+                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                    }}
+                  />
+                )}
+                <Typography
+                  variant="h6"
+                  style={{
+                    color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
+                  }}
+                >
+                  {icon}
+                </Typography>
+              </div>
+              <Divider />
+            </React.Fragment>
+          ))}
+        </List>
       </Drawer>
     </Box>
   );

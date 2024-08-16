@@ -13,6 +13,8 @@ import PrivateRoute from "./ContextAPI/PrivateRoute";
 import AdminPrivateRoute from "./ContextAPI/AdminPrivateRoute";
 import AuthRoute from "./ContextAPI/AuthRoute";
 import AdProfile from "./pages/Admin/AdProfile";
+import AdUsers from "./pages/Admin/AdUsers";
+import AdminLayout from "./components/Admin/AdminLayout"; // Adjust the path as needed
 
 function App() {
   return (
@@ -44,9 +46,11 @@ function App() {
 
         <Route path="/admin" element={<AdminAuth />} />
         <Route element={<AdminPrivateRoute />}>
-          <Route path="/adhome" element={<AdHome />} />
-          <Route path="/adprofile" element={<AdProfile />} />
-
+          <Route  element={<AdminLayout />}>
+            <Route path="/adhome" element={<AdHome />} />
+            <Route path="/adprofile" element={<AdProfile />} />
+            <Route path="/adusers" element={<AdUsers />} />
+          </Route>
         </Route>
       </Routes>
     </>

@@ -12,7 +12,7 @@ import {
   resetPasswordHandler
 } from "../controllers/userController";
 
-import {adminlogin,adminupdateProfile, getUsersList, toggleBlockUser} from "../controllers/adminController"
+import {adminlogin,adminupdateProfile, blockUserController, getUsersList, unblockUserController} from "../controllers/adminController"
 
 // const jwtMiddleware = require('../../MiddleWare/jwt')
 import jwtMiddleware from "../MiddleWare/jwt"
@@ -41,7 +41,9 @@ router.post("/resetPassword", resetPasswordHandler);
 router.post("/adminLogin",adminlogin)
 router.put("/adprofile", AdminjwtMiddleware,upload.single("profileImage"), adminupdateProfile);  
 router.get('/getAllUsers', AdminjwtMiddleware, getUsersList); 
-router.put('/blockUser', AdminjwtMiddleware, toggleBlockUser); 
+router.put("/blockUser/:id", AdminjwtMiddleware, blockUserController);
+router.put("/unblockUser/:id", AdminjwtMiddleware, unblockUserController);
+
 
 
 export default router;
