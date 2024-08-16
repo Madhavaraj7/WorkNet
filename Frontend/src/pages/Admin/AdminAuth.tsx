@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
   InputAdornment,
@@ -11,18 +11,19 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { AdminLoginAPI } from "../../Services/allAPI"; // Adjust path as necessary
+import { AdminLoginAPI } from "../../Services/allAPI"; 
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { tokenAuthenticationContext } from "../../ContextAPI/TokenAuth";
+import { tokenAuthenticationContext } from "../../ContextAPI/AdminAuth"; 
 
 const AdminAuth: React.FC = () => {
-  const { setIsAuthorized }: any = useContext(tokenAuthenticationContext);
+  const { setIsAuthorized,setAdmin,admin }: any = useContext(tokenAuthenticationContext); // Consume setAdmin from context
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -52,12 +53,13 @@ const AdminAuth: React.FC = () => {
     try {
       const result = await AdminLoginAPI({ email, password });
       setLoading(false);
-
+      console.log(result);
+      
       if (result && result.user && result.token) {
         localStorage.setItem("adtoken", result.token);
         localStorage.setItem("admin", JSON.stringify(result.user));
         setIsAuthorized(true);
-
+        setAdmin(result.user); 
         toast.success("Login Successful!");
         navigate("/adhome");
       } else {
@@ -76,6 +78,12 @@ const AdminAuth: React.FC = () => {
   ) => {
     event.preventDefault();
   };
+
+  useEffect(()=>{
+    if(admin?.email){
+      navigate("/adusers");
+    }
+  },[admin])
 
   return (
     <>
