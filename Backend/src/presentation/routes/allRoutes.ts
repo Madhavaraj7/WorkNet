@@ -12,11 +12,14 @@ import {
   resetPasswordHandler
 } from "../controllers/userController";
 
-import {adminlogin,adminupdateProfile, blockUserController, getUsersList, unblockUserController} from "../controllers/adminController"
+import {adminlogin,adminupdateProfile, blockUserController, getAllWorkersController, getUsersList, unblockUserController, updateWorkerStatusController} from "../controllers/adminController"
 
 // const jwtMiddleware = require('../../MiddleWare/jwt')
 import jwtMiddleware from "../MiddleWare/jwt"
 import AdminjwtMiddleware from "../MiddleWare/AdJwt"
+import { uploadMiddleware } from '../MiddleWare/multerConfig';
+import { registerWorkerController } from "../controllers/workerController";
+
 
 
 
@@ -37,12 +40,22 @@ router.post("/forgotPassword", forgotPasswordHandler);
 router.post("/resetPassword", resetPasswordHandler);
 
 
+//worker Routes
+router.post('/register', jwtMiddleware, uploadMiddleware, registerWorkerController);
+
+
+
 // admin Routes
 router.post("/adminLogin",adminlogin)
 router.put("/adprofile", AdminjwtMiddleware,upload.single("profileImage"), adminupdateProfile);  
 router.get('/getAllUsers', AdminjwtMiddleware, getUsersList); 
 router.put("/blockUser/:id", AdminjwtMiddleware, blockUserController);
 router.put("/unblockUser/:id", AdminjwtMiddleware, unblockUserController);
+router.get('/getAllWorkers',AdminjwtMiddleware,getAllWorkersController)
+router.put('/updateWorkerStatus/:id', AdminjwtMiddleware, updateWorkerStatusController);
+
+
+
 
 
 
