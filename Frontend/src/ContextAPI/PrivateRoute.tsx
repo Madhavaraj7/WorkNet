@@ -10,6 +10,8 @@ const PrivateRoute: React.FC = () => {
   }
 
   const { isAuthorized } = authContext;
+  console.log({isAuthorized});
+  
 
   return isAuthorized ? <Outlet /> : <Navigate to="/login" />;
 };

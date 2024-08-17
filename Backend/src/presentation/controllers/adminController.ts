@@ -2,11 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import {
   blockUser,
   getAllUsers,
+  getAllWorkers,
   loginUser,
   unblockUser,
   updateUserProfile,
+  updateWorkerStatus,
 } from "../../application/adminService";
 import cloudinary from "../../cloudinaryConfig";
+import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 
 // Define the custom request interface for better type safety
 interface CustomRequest extends Request {
@@ -63,8 +66,8 @@ export const adminupdateProfile = async (req: CustomRequest, res: Response) => {
 
     if (profileImage) {
       // Upload the image to Cloudinary
-      cloudinary.v2.uploader
-        .upload_stream((error, result) => {
+      cloudinary.uploader.upload_stream(
+        (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
           if (error) {
             return res
               .status(500)
@@ -72,8 +75,8 @@ export const adminupdateProfile = async (req: CustomRequest, res: Response) => {
           }
           profileImageUrl = result?.secure_url || "";
           proceedWithUpdate();
-        })
-        .end(profileImage);
+        }
+      ).end(profileImage);
     } else {
       proceedWithUpdate(); // No image provided, proceed with updating other fields
     }
@@ -104,7 +107,7 @@ export const getUsersList = async (
 export const blockUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.id;
-    console.log("bakend",userId);
+    console.log("backend", userId);
     
     const blockedUser = await blockUser(userId);
     res.status(200).json({ message: "User blocked successfully", user: blockedUser });
@@ -121,5 +124,31 @@ export const unblockUserController = async (req: Request, res: Response, next: N
     res.status(200).json({ message: "User unblocked successfully", user: unblockedUser });
   } catch (error) {
     next(error);
+  }
+};
+
+
+export const getAllWorkersController = async (req: Request, res: Response) => {
+  try {
+    const allWorkers = await getAllWorkers();
+    res.status(200).json(allWorkers);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve workers' });
+  }
+};
+
+export const updateWorkerStatusController = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (status !== 'approved' && status !== 'rejected') {
+    return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  try {
+    const updatedWorker = await updateWorkerStatus(id, status);
+    res.status(200).json(updatedWorker);
+  } catch (error:any) {
+    res.status(500).json({ message: error.message });
   }
 };
