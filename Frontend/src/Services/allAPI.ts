@@ -94,3 +94,27 @@ export const unblockUserAPI = async (userId: string, token: string) => {
 export const registerWorkerAPI = async (reqBody: any, reqHeader?: RequestHeaders) => {
   return await commonAPI("POST", `${SERVER_URL}/register`, reqBody, reqHeader);
 }
+
+// Get All Workers API
+export const getAdminAllworkersAPI = async (token: string) => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/getAllWorkers`, undefined, {
+      Authorization: `Bearer ${token}`,
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch workers');
+  }
+};
+
+// Update Worker Status API
+export const updateStatusAPI = async (workerId: string, status: string, token: string) => {
+  try {
+    const response = await commonAPI('PUT', `${SERVER_URL}/updateWorkerStatus/${workerId}`, { status }, {
+      Authorization: `Bearer ${token}`,
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to update worker status');
+  }
+};
