@@ -140,6 +140,8 @@ export const getAllWorkersController = async (req: Request, res: Response) => {
 export const updateWorkerStatusController = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status } = req.body;
+  console.log(status);
+  
 
   if (status !== 'approved' && status !== 'rejected') {
     return res.status(400).json({ message: 'Invalid status value' });

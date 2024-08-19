@@ -16,6 +16,7 @@ import AdProfile from "./pages/Admin/AdProfile";
 import AdUsers from "./pages/Admin/AdUsers";
 import AdminLayout from "./components/Admin/AdminLayout"; 
 import WorkerRegister from "./pages/WorkerRegister";
+import WorkerApprov from "./pages/Admin/WorkerApprov";
 
 function App() {
   return (
@@ -53,6 +54,8 @@ function App() {
             <Route path="/adhome" element={<AdHome />} />
             <Route path="/adprofile" element={<AdProfile />} />
             <Route path="/adusers" element={<AdUsers />} />
+            <Route path="/adapprove" element={<WorkerApprov />} />
+
           </Route>
         </Route>
       </Routes>
