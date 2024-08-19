@@ -88,3 +88,9 @@ export const unblockUserAPI = async (userId: string, token: string) => {
     },
   });
 };
+
+
+// Worker Registration API
+export const registerWorkerAPI = async (reqBody: any, reqHeader?: RequestHeaders) => {
+  return await commonAPI("POST", `${SERVER_URL}/register`, reqBody, reqHeader);
+}
