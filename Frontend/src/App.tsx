@@ -5,7 +5,7 @@ import Auth from "./pages/Auth";
 import OtpPage from "./pages/OtpPage";
 import Profile from "./pages/Profile";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import the CSS for Toastify
+import "react-toastify/dist/ReactToastify.css"; 
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuth from "./pages/Admin/AdminAuth";
 import AdHome from "./pages/Admin/AdHome";
@@ -14,7 +14,8 @@ import AdminPrivateRoute from "./ContextAPI/AdminPrivateRoute";
 import AuthRoute from "./ContextAPI/AuthRoute";
 import AdProfile from "./pages/Admin/AdProfile";
 import AdUsers from "./pages/Admin/AdUsers";
-import AdminLayout from "./components/Admin/AdminLayout"; // Adjust the path as needed
+import AdminLayout from "./components/Admin/AdminLayout"; 
+import WorkerRegister from "./pages/WorkerRegister";
 
 function App() {
   return (
@@ -42,6 +43,8 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
+          <Route path="/register" element={<WorkerRegister />} />
+
         </Route>
 
         <Route path="/admin" element={<AdminAuth />} />

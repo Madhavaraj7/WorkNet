@@ -9,6 +9,11 @@ export const createWorker = async (workerData: any): Promise<any> => {
   }
 };
 
+
+export const findWorkerByUserIdInDB = async (userId: string): Promise<any> => {
+  return await Worker.findOne({ userId });
+};
+
 export const getWorkerById = async (workerId: string): Promise<any> => {
   try {
     return await Worker.findById(workerId).exec();
