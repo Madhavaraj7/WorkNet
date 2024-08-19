@@ -22,6 +22,7 @@ import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { getAdminAllworkersAPI, updateStatusAPI } from "../../Services/allAPI";
+import { toast } from "react-toastify";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -55,6 +56,8 @@ const WorkerApprov: React.FC = () => {
   const getAllWorkers = async () => {
     if (token) {
       const result = await getAdminAllworkersAPI(token);
+      console.log("lllll", result);
+
       if (result.length) {
         setAllWorkers(result);
       } else {
@@ -69,14 +72,26 @@ const WorkerApprov: React.FC = () => {
     const { value } = event.target;
     const updatedWorkers = [...allworkers];
     updatedWorkers[index].status = value;
+
     if (token) {
-      const result = await updateStatusAPI(id, value, token);
-      if (result.length) {
-        setAllWorkers(updatedWorkers);
-      } else {
-        console.log(result);
+      try {
+        const result = await updateStatusAPI(id, value, token);
+
+        console.log("API result:", result);
+
+        if (result.userId) {
+          toast.success(`Status changed to ${value}`);
+          setAllWorkers(updatedWorkers);
+        } else {
+          toast.error("Failed to change status. Please try again.");
+          console.log("Update result:", result);
+        }
+      } catch (error) {
+        toast.error("An error occurred while changing status.");
+        console.error("Error updating status:", error);
       }
     } else {
+      toast.error("Token not found. Please log in again.");
       console.log("Token not found");
     }
   };
@@ -156,7 +171,7 @@ const WorkerApprov: React.FC = () => {
                 <CheckCircleOutlineIcon color="success" />
                 &nbsp;Approved
               </MenuItem>
-              <MenuItem value="block">
+              <MenuItem value="rejected">
                 <BlockIcon fontSize="small" color="error" />
                 &nbsp;rejected
               </MenuItem>
@@ -240,22 +255,17 @@ const WorkerApprov: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center gap-2">
-                      <img
-                        src={worker.workImages[0]}
-                        alt="Work"
-                        width={50}
-                        height={50}
-                        className="border-2 cursor-pointer transition-transform duration-300 transform hover:scale-110"
-                        style={{
-                          borderRadius: "4px",
-                          objectFit: "cover",
-                        }}
+                      <button
+                        className="px-6 py-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 font-semibold"
                         onClick={() =>
                           handleImageClick(worker.workImages, index)
                         }
-                      />
+                      >
+                        View Images
+                      </button>
                     </div>
                   </TableCell>
+
                   <TableCell
                     className="text-center"
                     sx={{ fontSize: "16px", padding: "12px" }}
@@ -285,7 +295,7 @@ const WorkerApprov: React.FC = () => {
                           <CheckCircleOutlineIcon color="success" />
                           &nbsp;Approved
                         </MenuItem>
-                        <MenuItem value="block">
+                        <MenuItem value="rejected">
                           <BlockIcon color="error" />
                           &nbsp;rejected
                         </MenuItem>
@@ -294,83 +304,116 @@ const WorkerApprov: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ))}
+            {!pendingWorkerResp && (
+              <TableRow>
+                <TableCell colSpan={8} sx={{ textAlign: "center", py: 4 }}>
+                  <p
+                    style={{
+                      color: "#F56565", // Tailwind's text-red-500 color
+                      fontSize: "18px",
+                      fontWeight: "bold",
+                      padding: "16px 0",
+                    }}
+                  >
+                    No workers found for the selected status.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
       <Modal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      open={openModal}
+      onClose={() => setOpenModal(false)}
+      sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+    >
+      <Box
+        sx={{
+          width: { xs: "90%", sm: "80%", md: "70%" },
+          maxWidth: "800px",
+          maxHeight: "90%",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 24,
+          p: 3,
+          position: "relative",
+          overflow: "hidden", // Ensure no overflow
+          border: "1px solid rgba(0, 0, 0, 0.12)",
+          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 240, 240, 0.8))",
+        }}
       >
+        <IconButton
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            color: "text.primary",
+            zIndex: 1,
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            '&:hover': {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+            },
+          }}
+          onClick={() => setOpenModal(false)}
+        >
+          <ArrowBackIosNewIcon />
+        </IconButton>
         <Box
           sx={{
-            width: { xs: "90%", sm: "80%", md: "70%" },
-            maxWidth: "800px",
-            maxHeight: "90%",
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 2,
-            position: "relative",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            overflow: "hidden",
           }}
         >
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              color: "text.primary",
-              zIndex: 1,
+          <img
+            src={currentImages[currentImageIndex]}
+            alt="Work"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "80vh",
+              borderRadius: "12px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             }}
-            onClick={() => setOpenModal(false)}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <img
-              src={currentImages[currentImageIndex]}
-              alt="Work"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "80vh",
-                borderRadius: "8px",
-              }}
-            />
-          </Box>
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: "50%",
-              right: 16,
-              color: "text.primary",
-              zIndex: 1,
-            }}
-            onClick={handleNextImage}
-          >
-            <ArrowForwardIosIcon />
-          </IconButton>
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: 16,
-              color: "text.primary",
-              zIndex: 1,
-            }}
-            onClick={handlePrevImage}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
+          />
         </Box>
-      </Modal>
+        <IconButton
+          sx={{
+            position: "absolute",
+            top: "50%",
+            right: 16,
+            color: "text.primary",
+            zIndex: 1,
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            '&:hover': {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+            },
+          }}
+          onClick={handleNextImage}
+        >
+          <ArrowForwardIosIcon />
+        </IconButton>
+        <IconButton
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: 16,
+            color: "text.primary",
+            zIndex: 1,
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            '&:hover': {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+            },
+          }}
+          onClick={handlePrevImage}
+        >
+          <ArrowBackIosNewIcon />
+        </IconButton>
+      </Box>
+    </Modal>
     </Box>
   );
 };

@@ -107,17 +107,19 @@ export const getAllWorkers = async () => {
 };
 
 export const updateWorkerStatus = async (
-  userId: string,
+  _id: string,
   status: "approved" | "rejected"
 ) => {
   try {
-    const worker = await Worker.findOne({ userId });
+    const worker = await Worker.findOne({ _id });
+    console.log("worker",worker);
+    
     if (!worker) {
       throw new Error("Worker not found");
     }
 
     const updatedWorker = await Worker.findOneAndUpdate(
-      { userId },
+      { _id },
       { status },
       { new: true }
     );
