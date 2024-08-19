@@ -140,7 +140,9 @@ export const getAllWorkersController = async (req: Request, res: Response) => {
 export const updateWorkerStatusController = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status } = req.body;
-  console.log(status);
+  console.log("status in backend",status);
+  console.log("status in id",id);
+
   
 
   if (status !== 'approved' && status !== 'rejected') {
