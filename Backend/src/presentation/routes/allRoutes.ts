@@ -1,4 +1,3 @@
-
 import express from "express";
 import multer from "multer";
 import {
@@ -9,19 +8,30 @@ import {
   googleLoginHandler,
   updateProfile,
   forgotPasswordHandler,
-  resetPasswordHandler
+  resetPasswordHandler,
 } from "../controllers/userController";
 
-import {adminlogin,adminupdateProfile, blockUserController, getAllWorkersController, getUsersList, unblockUserController, updateWorkerStatusController} from "../controllers/adminController"
+import {
+  adminlogin,
+  adminupdateProfile,
+  blockUserController,
+  getAllWorkersController,
+  getUsersList,
+  unblockUserController,
+  updateWorkerStatusController,
+} from "../controllers/adminController";
 
 // const jwtMiddleware = require('../../MiddleWare/jwt')
-import jwtMiddleware from "../MiddleWare/jwt"
-import AdminjwtMiddleware from "../MiddleWare/AdJwt"
-import { uploadMiddleware } from '../MiddleWare/multerConfig';
-import { blockWorkerController,  getLoginedUserWorksController,  registerWorkerController, unblockWorkerController } from "../controllers/workerController";
-
-
-
+import jwtMiddleware from "../MiddleWare/jwt";
+import AdminjwtMiddleware from "../MiddleWare/AdJwt";
+import { uploadMiddleware } from "../MiddleWare/multerConfig";
+import {
+  blockWorkerController,
+  getLoginedUserWorksController,
+  registerWorkerController,
+  unblockWorkerController,
+  updateWorkerController,
+} from "../controllers/workerController";
 
 const router = express.Router();
 
@@ -35,32 +45,52 @@ router.post("/verifyOtp", verifyOtp);
 router.post("/resendOtp", resendOtp);
 router.post("/login", login);
 router.post("/googleLogin", googleLoginHandler);
-router.put("/profile", jwtMiddleware,upload.single("profileImage"), updateProfile);  
+router.put(
+  "/profile",
+  jwtMiddleware,
+  upload.single("profileImage"),
+  updateProfile
+);
 router.post("/forgotPassword", forgotPasswordHandler);
 router.post("/resetPassword", resetPasswordHandler);
 
-
 //worker Routes
-router.post('/register', jwtMiddleware, uploadMiddleware, registerWorkerController);
-router.get('/getUserWorkDetails', jwtMiddleware, getLoginedUserWorksController);
-
-
-
-
+router.post(
+  "/register",
+  jwtMiddleware,
+  uploadMiddleware,
+  registerWorkerController
+);
+router.get("/getUserWorkDetails", jwtMiddleware, getLoginedUserWorksController);
+//update worker profile pending
+router.put(
+  "/updateWorker",
+  jwtMiddleware,
+  upload.fields([
+    { name: "registerImage", maxCount: 1 },
+    { name: "workImages", maxCount: 12 },
+  ]),
+  updateWorkerController
+);
 
 // admin Routes
-router.post("/adminLogin",adminlogin)
-router.put("/adprofile", AdminjwtMiddleware,upload.single("profileImage"), adminupdateProfile);  
-router.get('/getAllUsers', AdminjwtMiddleware, getUsersList); 
+router.post("/adminLogin", adminlogin);
+router.put(
+  "/adprofile",
+  AdminjwtMiddleware,
+  upload.single("profileImage"),
+  adminupdateProfile
+);
+router.get("/getAllUsers", AdminjwtMiddleware, getUsersList);
 router.put("/blockUser/:id", AdminjwtMiddleware, blockUserController);
 router.put("/unblockUser/:id", AdminjwtMiddleware, unblockUserController);
-router.get('/getAllWorkers',AdminjwtMiddleware,getAllWorkersController)
-router.put('/updateWorkerStatus/:id', AdminjwtMiddleware, updateWorkerStatusController);
-router.put('/blockWorker/:id', AdminjwtMiddleware, blockWorkerController);
-router.put('/unblockWorker/:id', AdminjwtMiddleware, unblockWorkerController);
-
-
-
-
+router.get("/getAllWorkers", AdminjwtMiddleware, getAllWorkersController);
+router.put(
+  "/updateWorkerStatus/:id",
+  AdminjwtMiddleware,
+  updateWorkerStatusController
+);
+router.put("/blockWorker/:id", AdminjwtMiddleware, blockWorkerController);
+router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
 
 export default router;
