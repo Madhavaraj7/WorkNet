@@ -18,7 +18,7 @@ import {adminlogin,adminupdateProfile, blockUserController, getAllWorkersControl
 import jwtMiddleware from "../MiddleWare/jwt"
 import AdminjwtMiddleware from "../MiddleWare/AdJwt"
 import { uploadMiddleware } from '../MiddleWare/multerConfig';
-import { registerWorkerController } from "../controllers/workerController";
+import { blockWorkerController, registerWorkerController, unblockWorkerController } from "../controllers/workerController";
 
 
 
@@ -53,7 +53,8 @@ router.put("/blockUser/:id", AdminjwtMiddleware, blockUserController);
 router.put("/unblockUser/:id", AdminjwtMiddleware, unblockUserController);
 router.get('/getAllWorkers',AdminjwtMiddleware,getAllWorkersController)
 router.put('/updateWorkerStatus/:id', AdminjwtMiddleware, updateWorkerStatusController);
-
+router.put('/blockWorker/:id', AdminjwtMiddleware, blockWorkerController);
+router.put('/unblockWorker/:id', AdminjwtMiddleware, unblockWorkerController);
 
 
 

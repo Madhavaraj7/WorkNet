@@ -118,3 +118,18 @@ export const updateStatusAPI = async (workerId: string, status: string, token: s
     throw new Error('Failed to update worker status');
   }
 };
+
+
+// Block Worker API
+export const blockWorkerAPI = async (workerId: string, token: string) => {
+  return await commonAPI('PUT', `${SERVER_URL}/blockWorker/${workerId}`, {}, {
+    Authorization: `Bearer ${token}`,
+  });
+};
+
+// Unblock Worker API
+export const unblockWorkerAPI = async (workerId: string, token: string) => {
+  return await commonAPI('PUT', `${SERVER_URL}/unblockWorker/${workerId}`, {}, {
+    Authorization: `Bearer ${token}`,
+  });
+};

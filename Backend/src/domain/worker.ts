@@ -19,6 +19,8 @@ interface IWorker extends Document {
   userId: mongoose.Schema.Types.ObjectId; // Reference to the User model
   averageReview?: string;
   status: string;
+  isBlocked?: boolean; 
+
 }
 
 const workerSchema = new Schema<IWorker>({
@@ -91,7 +93,11 @@ const workerSchema = new Schema<IWorker>({
     type: String,
     required: true,
     default: 'pending', // Default status is "pending"
-  }
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 export const Worker = mongoose.model<IWorker>('Worker', workerSchema);

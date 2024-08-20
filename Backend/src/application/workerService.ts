@@ -1,4 +1,4 @@
-import { createWorker, findWorkerByUserIdInDB } from '../infrastructure/workerRepository';
+import { blockWorker, createWorker, findWorkerByUserIdInDB, unblockWorker } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
 
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
@@ -37,4 +37,13 @@ export const findWorkerByUserId = async (userId: string): Promise<any> => {
     } catch (err: any) {
         throw new Error('Error finding worker: ' + err.message);
     }
+  };
+
+
+  export const blockWorkerService = async (workerId: string): Promise<any> => {
+    return await blockWorker(workerId);
+  };
+  
+  export const unblockWorkerService = async (workerId: string): Promise<any> => {
+    return await unblockWorker(workerId);
   };

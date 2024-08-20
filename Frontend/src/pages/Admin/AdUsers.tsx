@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { getAllUsersAPI, blockUserAPI, unblockUserAPI } from '../../Services/allAPI';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Avatar, TextField, IconButton, Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Avatar,
+  TextField,
+  IconButton,
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  CircularProgress,
+  Box,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast} from 'react-toastify';
 
 interface User {
   _id: string;
@@ -12,7 +30,6 @@ interface User {
   profileImage: string;
   isBlocked: boolean;
 }
-
 
 const AdUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -82,10 +99,23 @@ const AdUsers: React.FC = () => {
     }
   };
 
-  if (loading) return <Typography variant="h6" align="center">Loading...</Typography>;
-  if (error) return <Typography variant="h6" color="error" align="center">{error}</Typography>;
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  const filteredUsers = users.filter(user =>
+  if (error) {
+    return (
+      <Typography variant="h6" color="error" align="center">
+        {error}
+      </Typography>
+    );
+  }
+
+  const filteredUsers = users.filter((user) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -93,11 +123,13 @@ const AdUsers: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <Typography variant="h4" className="font-semibold text-gray-800">User Management</Typography>
+      <h1 className="text-3xl font-bold text-gray-700">User Mangement</h1>
+
       </div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center mb-4">
+        
         <TextField
-          label="Search"
+          label="Search Users"
           variant="outlined"
           size="small"
           value={searchTerm}
@@ -109,10 +141,10 @@ const AdUsers: React.FC = () => {
               </IconButton>
             ),
           }}
-          className="w-80"
+          className="w-80 bg-white rounded-md shadow-sm"
         />
       </div>
-      <TableContainer component={Paper} className="shadow-md">
+      <TableContainer component={Paper} className="shadow-md rounded-lg">
         <Table>
           <TableHead>
             <TableRow>
@@ -151,7 +183,9 @@ const AdUsers: React.FC = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center">No users found</TableCell>
+                <TableCell colSpan={5} align="center">
+                  No users found
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -163,27 +197,23 @@ const AdUsers: React.FC = () => {
         open={openDialog}
         onClose={handleCloseDialog}
       >
-        <DialogTitle>
-          {currentUser?.isBlocked ? 'Unblock User' : 'Block User'}
-        </DialogTitle>
+        <DialogTitle>{currentUser?.isBlocked ? 'Unblock User' : 'Block User'}</DialogTitle>
         <DialogContent>
           <Typography>
             Are you sure you want to {currentUser?.isBlocked ? 'unblock' : 'block'} this user?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button
-            onClick={handleConfirmAction}
-            color="primary"
-          >
+          <Button onClick={handleCloseDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmAction} color="primary">
             Confirm
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Toast Container */}
-      <ToastContainer />
     </div>
   );
 }
