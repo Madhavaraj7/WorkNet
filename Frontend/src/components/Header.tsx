@@ -27,6 +27,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
+    
     if (token && userData) {
       setIsAuthorized(true);
       setUser(JSON.parse(userData));
@@ -60,6 +61,8 @@ const Header: React.FC = () => {
     toast.success('Logout Successfully');
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('worker');
+
     setIsAuthorized(false);
     authContext.setIsAuthorized(false)
     setUser(null); // Ensure the user state is cleared

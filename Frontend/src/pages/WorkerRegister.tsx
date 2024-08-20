@@ -216,6 +216,8 @@ function WorkerRegister() {
           console.log(result);
 
           if (result.userId) {
+            // localStorage.setItem("worker", JSON.stringify(registerData));
+
             setRegisterData({
               registerImage: null,
               name: "",

@@ -18,7 +18,7 @@ import {adminlogin,adminupdateProfile, blockUserController, getAllWorkersControl
 import jwtMiddleware from "../MiddleWare/jwt"
 import AdminjwtMiddleware from "../MiddleWare/AdJwt"
 import { uploadMiddleware } from '../MiddleWare/multerConfig';
-import { blockWorkerController, registerWorkerController, unblockWorkerController } from "../controllers/workerController";
+import { blockWorkerController,  getLoginedUserWorksController,  registerWorkerController, unblockWorkerController } from "../controllers/workerController";
 
 
 
@@ -42,6 +42,9 @@ router.post("/resetPassword", resetPasswordHandler);
 
 //worker Routes
 router.post('/register', jwtMiddleware, uploadMiddleware, registerWorkerController);
+router.get('/getUserWorkDetails', jwtMiddleware, getLoginedUserWorksController);
+
+
 
 
 

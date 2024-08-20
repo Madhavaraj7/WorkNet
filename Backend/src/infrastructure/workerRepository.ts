@@ -11,15 +11,13 @@ export const createWorker = async (workerData: any): Promise<any> => {
 
 
 export const findWorkerByUserIdInDB = async (userId: string): Promise<any> => {
+  console.log("hello iam");
+  
   return await Worker.findOne({ userId });
 };
 
-export const getWorkerById = async (workerId: string): Promise<any> => {
-  try {
-    return await Worker.findById(workerId).exec();
-  } catch (err:any) {
-    throw new Error('Error retrieving worker: ' + err.message);
-  }
+export const getWorkerById = async (userId: string): Promise<any> => {
+  return await Worker.findOne({ userId });
 };
 
 

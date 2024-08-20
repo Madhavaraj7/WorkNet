@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { registerWorker, findWorkerByUserId, unblockWorkerService, blockWorkerService } from '../../application/workerService';
+import { registerWorker, findWorkerByUserId, unblockWorkerService, blockWorkerService, getLoginedUserWorksService } from '../../application/workerService';
 
 interface CustomRequest extends Request {
   userId?: string;
@@ -15,19 +15,21 @@ export const registerWorkerController = async (req: CustomRequest, res: any): Pr
           return res.status(400).json({ message: 'userId is required' });
       }
 
-      // Check if the user already registered a worker
       const existingWorker = await findWorkerByUserId(userId);
+      console.log(existingWorker,"backend ");
+      
       if (existingWorker) {
           return res.status(409).json({ message: 'Worker already registered' });
       }
+     
 
-      // Include userId in the worker data
       const newWorker = await registerWorker({ ...workerData, userId }, files);
       res.status(200).json(newWorker);
   } catch (err: any) {
       res.status(500).json({ message: err.message });
   }
 };
+
 
 
 
@@ -56,5 +58,26 @@ export const unblockWorkerController = async (req: Request, res: Response): Prom
     }
   } catch (error: any) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const getLoginedUserWorksController = async (req: CustomRequest, res: Response): Promise<void> => {
+  const userId = req.userId;
+  // console.log(userId,"get");
+  
+
+  try {
+      const loginedUserWorks = await getLoginedUserWorksService(userId as string);
+      // console.log("con",loginedUserWorks);
+      
+
+      if (loginedUserWorks) {
+          res.status(200).json(loginedUserWorks);
+      } else {
+          res.status(403).json("You are not a worker. If you are a worker, please register!!");
+      }
+  } catch (err: any) {
+      res.status(401).json({ message: err.message });
   }
 };

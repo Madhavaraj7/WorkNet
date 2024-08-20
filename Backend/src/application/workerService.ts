@@ -1,4 +1,4 @@
-import { blockWorker, createWorker, findWorkerByUserIdInDB, unblockWorker } from '../infrastructure/workerRepository';
+import { blockWorker, createWorker, findWorkerByUserIdInDB, getWorkerById, unblockWorker } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
 
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
@@ -31,7 +31,6 @@ export const registerWorker = async (workerData: any, files: any): Promise<any> 
 
 export const findWorkerByUserId = async (userId: string): Promise<any> => {
     try {
-        // Query the database to find a worker by userId
         const worker = await findWorkerByUserIdInDB(userId);
         return worker;
     } catch (err: any) {
@@ -47,3 +46,15 @@ export const findWorkerByUserId = async (userId: string): Promise<any> => {
   export const unblockWorkerService = async (workerId: string): Promise<any> => {
     return await unblockWorker(workerId);
   };
+
+// Get worker details by ID
+export const getLoginedUserWorksService = async (userId: string): Promise<any> => {
+  try {
+    const loginedUserWorks = await findWorkerByUserIdInDB(userId);
+    console.log("get login",loginedUserWorks);
+    
+    return loginedUserWorks;
+  } catch (err: any) {
+    throw new Error('Error fetching works: ' + err.message);
+  }
+};
