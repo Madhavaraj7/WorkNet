@@ -23,3 +23,10 @@ export const getWorkerById = async (workerId: string): Promise<any> => {
 };
 
 
+export const blockWorker = async (_id: string): Promise<any> => {
+  return await Worker.findByIdAndUpdate(_id, { isBlocked: true }, { new: true });
+};
+
+export const unblockWorker = async (_id: string): Promise<any> => {
+  return await Worker.findByIdAndUpdate(_id, { isBlocked: false }, { new: true });
+};
