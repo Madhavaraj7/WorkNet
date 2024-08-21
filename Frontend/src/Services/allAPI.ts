@@ -159,3 +159,9 @@ export const getAllWorkersAPI = async () => {
     throw new Error('Failed to fetch workers');
   }
 };
+
+
+// Show One Worker
+export const getAWorkerAPI=async(wId: any)=>{
+  return await commonAPI("GET",`${SERVER_URL}/worker/${wId}`,"")
+}

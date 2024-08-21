@@ -20,6 +20,7 @@ import WorkerApprov from "./pages/Admin/WorkerApprov";
 import AdWorkers from "./pages/Admin/AdWorkers";
 import UserEditableWorkCard from "./pages/UserEditableWorkCard";
 import Workers from "./pages/Workers";
+import Worker from "./pages/Worker";
 
 function App() {
   return (
@@ -46,6 +47,8 @@ function App() {
         </Route>
 
         <Route path="/workers" element={<Workers />} />
+        <Route path='/worker/:wId' element={<Worker/>}/>
+
 
 
         

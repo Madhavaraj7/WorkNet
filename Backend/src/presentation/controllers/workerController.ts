@@ -161,9 +161,13 @@ const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
 
 export const getWorkerController = async (req: Request, res: Response): Promise<void> => {
   const { wId } = req.params;
+  console.log("hello",wId);
+  
   
   try {
     const worker = await getWorkerByIdService(wId);
+    console.log("controller",worker);
+    
     if (worker) {
       res.status(200).json(worker);
     } else {
