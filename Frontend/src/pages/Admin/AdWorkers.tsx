@@ -16,12 +16,14 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  TextField,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import SearchIcon from "@mui/icons-material/Search";
 import { getAdminAllworkersAPI, blockWorkerAPI, unblockWorkerAPI } from "../../Services/allAPI";
 import { toast } from 'react-toastify';
 
@@ -47,6 +49,7 @@ interface Worker {
 
 const AdWorkers: React.FC = () => {
   const [allWorkers, setAllWorkers] = useState<Worker[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [currentWorker, setCurrentWorker] = useState<Worker | null>(null);
@@ -97,8 +100,6 @@ const AdWorkers: React.FC = () => {
 
   const handleBlockUnblockWorker = async () => {
     if (currentWorker) {
-      console.log(currentWorker);
-      
       try {
         if (!currentWorker.isBlocked) {
           await blockWorkerAPI(currentWorker._id, token || '');
@@ -119,6 +120,10 @@ const AdWorkers: React.FC = () => {
     getAllWorkers();
   }, []);
 
+  const filteredWorkers = allWorkers.filter((worker) =>
+    worker.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box
       component="main"
@@ -129,8 +134,23 @@ const AdWorkers: React.FC = () => {
         paddingRight: { xs: 2, md: 3 },
       }}
     >
-      <div className="flex justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-700">Admin Management</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold text-gray-700">Worker Management</h1>
+        <TextField
+          label="Search Worker"
+          variant="outlined"
+          size="small"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <IconButton>
+                <SearchIcon />
+              </IconButton>
+            ),
+          }}
+          className="w-80 bg-white rounded-md shadow-sm"
+        />
       </div>
 
       <TableContainer
@@ -162,7 +182,7 @@ const AdWorkers: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {allWorkers.map((worker, index) => (
+            {filteredWorkers.map((worker, index) => (
               <TableRow
                 key={worker._id}
                 className="hover:bg-gray-100"
@@ -201,12 +221,24 @@ const AdWorkers: React.FC = () => {
                   {worker.categories}
                 </TableCell>
                 <TableCell
-                  className="text-center cursor-pointer"
-                  sx={{ fontSize: "16px", padding: "12px" }}
-                  onClick={() => handleImageClick(worker.workImages, 0)}
-                >
-                  View Images
-                </TableCell>
+  className="text-center cursor-pointer"
+  sx={{ fontSize: "16px", padding: "12px" }}
+>
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={() => handleImageClick(worker.workImages, 0)}
+    sx={{
+      backgroundColor: '#1976d2',
+      color: 'white',
+      '&:hover': {
+        backgroundColor: '#115293',
+      },
+    }}
+  >
+    View Images
+  </Button>
+</TableCell>
                 <TableCell
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
@@ -234,50 +266,121 @@ const AdWorkers: React.FC = () => {
 
       {/* Modal for Viewing Images */}
       <Modal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      open={openModal}
+      onClose={() => setOpenModal(false)}
+      aria-labelledby="modal-title"
+      aria-describedby="modal-description"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(4px)',
+        transition: 'opacity 0.3s ease-in-out',
+      }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          width: '600px', // Fixed width
+          height: '400px', // Fixed height
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+        }}
       >
-        <Box sx={{ position: "relative" }}>
-          <img
-            src={currentImages[currentImageIndex]}
-            alt="Worker Work"
-            style={{ maxHeight: "80vh", maxWidth: "80vw" }}
-          />
-          <IconButton
-            onClick={handlePrevImage}
-            sx={{ position: "absolute", left: 0, top: "50%" }}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
-          <IconButton
-            onClick={handleNextImage}
-            sx={{ position: "absolute", right: 0, top: "50%" }}
-          >
-            <ArrowForwardIosIcon />
-          </IconButton>
-        </Box>
-      </Modal>
+        <img
+          src={currentImages[currentImageIndex]}
+          alt="Worker Work"
+          style={{
+            width: '100%', // Scale image to fit within fixed dimensions
+            height: '100%',
+            objectFit: 'contain', // Ensure the image maintains its aspect ratio
+          }}
+        />
+        <IconButton
+          onClick={handlePrevImage}
+          sx={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Previous Image"
+        >
+          <ArrowBackIosNewIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={handleNextImage}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Next Image"
+        >
+          <ArrowForwardIosIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={() => setOpenModal(false)}
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Close Modal"
+        >
+          <span aria-hidden="true" style={{ fontSize: '24px', fontWeight: 'bold' }}>&times;</span>
+        </IconButton>
+      </Box>
+    </Modal>
 
-      {/* Confirmation Dialog */}
+      {/* Dialog for Block/Unblock Confirmation */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>
-          {currentWorker?.isBlocked ? "Unblock Worker" : "Block Worker"}
+          {currentWorker && currentWorker.isBlocked ? "Unblock Worker" : "Block Worker"}
         </DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to {currentWorker?.isBlocked ? "unblock" : "block"} this worker?
+            Are you sure you want to {currentWorker && currentWorker.isBlocked ? "unblock" : "block"} this worker?
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
             Cancel
           </Button>
-          <Button
-            onClick={handleBlockUnblockWorker}
-            color={currentWorker?.isBlocked ? "success" : "error"}
-          >
-            {currentWorker?.isBlocked ? "Unblock" : "Block"}
+          <Button onClick={handleBlockUnblockWorker} color="secondary">
+            {currentWorker && currentWorker.isBlocked ? "Unblock" : "Block"}
           </Button>
         </DialogActions>
       </Dialog>

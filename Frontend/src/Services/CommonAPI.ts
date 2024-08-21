@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // If you don't need a specific axios instance, you can use default axios
-export const commonAPI = async (method: string, url: string, body?: any, headers?: Record<string, string>) => {
+export const commonAPI = async (method: string, url: string, body?: any, headers?: Record<string, string>, p0?: { Authorization: string; }) => {
   try {
     const response = await axios.request({
       url,

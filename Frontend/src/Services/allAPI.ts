@@ -133,3 +133,29 @@ export const unblockWorkerAPI = async (workerId: string, token: string) => {
     Authorization: `Bearer ${token}`,
   });
 };
+
+
+// Get Worker Details API
+
+export const getLoginedUserWorksAPI = async (token: string) => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/getUserWorkDetails`, undefined, {
+      Authorization: `Bearer ${token}`,
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch user works');
+  }
+};
+
+
+// Get All Workers API
+export const getAllWorkersAPI = async () => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/getWorkers`, undefined, {
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch workers');
+  }
+};

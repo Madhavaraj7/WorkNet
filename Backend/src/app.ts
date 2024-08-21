@@ -17,6 +17,8 @@ app.use(morgan("dev"))
 app.use('/uploads', express.static('uploads'));
 
 
+
+
 app.use(bodyParser.json());
 app.use('/api/users', allRoutes);
 

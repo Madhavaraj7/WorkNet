@@ -327,90 +327,99 @@ const WorkerApprov: React.FC = () => {
       <Modal
       open={openModal}
       onClose={() => setOpenModal(false)}
-      sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      aria-labelledby="modal-title"
+      aria-describedby="modal-description"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(4px)',
+        transition: 'opacity 0.3s ease-in-out',
+      }}
     >
       <Box
         sx={{
-          width: { xs: "90%", sm: "80%", md: "70%" },
-          maxWidth: "800px",
-          maxHeight: "90%",
-          bgcolor: "background.paper",
-          borderRadius: 3,
-          boxShadow: 24,
-          p: 3,
-          position: "relative",
-          overflow: "hidden", // Ensure no overflow
-          border: "1px solid rgba(0, 0, 0, 0.12)",
-          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 240, 240, 0.8))",
+          position: 'relative',
+          width: '600px', // Fixed width
+          height: '400px', // Fixed height
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
         }}
       >
+        <img
+          src={currentImages[currentImageIndex]}
+          alt="Worker Work"
+          style={{
+            width: '100%', // Scale image to fit within fixed dimensions
+            height: '100%',
+            objectFit: 'contain', // Ensure the image maintains its aspect ratio
+          }}
+        />
         <IconButton
-          sx={{
-            position: "absolute",
-            top: 16,
-            left: 16,
-            color: "text.primary",
-            zIndex: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            '&:hover': {
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-            },
-          }}
-          onClick={() => setOpenModal(false)}
-        >
-          <ArrowBackIosNewIcon />
-        </IconButton>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src={currentImages[currentImageIndex]}
-            alt="Work"
-            style={{
-              maxWidth: "100%",
-              maxHeight: "80vh",
-              borderRadius: "12px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            }}
-          />
-        </Box>
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: "50%",
-            right: 16,
-            color: "text.primary",
-            zIndex: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            '&:hover': {
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-            },
-          }}
-          onClick={handleNextImage}
-        >
-          <ArrowForwardIosIcon />
-        </IconButton>
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: 16,
-            color: "text.primary",
-            zIndex: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            '&:hover': {
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-            },
-          }}
           onClick={handlePrevImage}
+          sx={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Previous Image"
         >
-          <ArrowBackIosNewIcon />
+          <ArrowBackIosNewIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={handleNextImage}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Next Image"
+        >
+          <ArrowForwardIosIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={() => setOpenModal(false)}
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Close Modal"
+        >
+          <span aria-hidden="true" style={{ fontSize: '24px', fontWeight: 'bold' }}>&times;</span>
         </IconButton>
       </Box>
     </Modal>
