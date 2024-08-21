@@ -185,6 +185,7 @@ function Worker() {
               <img
                 src={workerDetails.registerImage}
                 alt={workerDetails.name}
+        
                 className="w-40 h-40 rounded-full object-cover border-4 border-gray-200 shadow-md"
               />
               <Box className="text-center md:text-left md:ml-6 mt-4 md:mt-0">
