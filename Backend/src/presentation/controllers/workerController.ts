@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { registerWorker, findWorkerByUserId, unblockWorkerService, blockWorkerService, getLoginedUserWorksService, findWorkerById, updateWorkerById } from '../../application/workerService';
-import { uploadToCloudinary } from '../../cloudinaryConfig';
+import { registerWorker, findWorkerByUserId, unblockWorkerService, blockWorkerService, getLoginedUserWorksService, findWorkerById, updateWorkerById, getAllWorkersService, getWorkerByIdService } from '../../application/workerService';
+import cloudinary, { uploadToCloudinary } from '../../cloudinaryConfig';
 
 interface CustomRequest extends Request {
   userId?: string;
@@ -31,7 +31,14 @@ export const registerWorkerController = async (req: CustomRequest, res: any): Pr
   }
 };
 
-
+export const getWorkersController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const workers = await getAllWorkersService();
+    res.status(200).json(workers);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 
 export const blockWorkerController = async (req: Request, res: Response): Promise<void> => {
@@ -90,31 +97,40 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
   try {
     const userId = req.userId;
     const workerData = req.body;
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] }; // Type-cast here
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     if (!userId) {
       return res.status(401).json({ message: 'User ID is required' });
     }
 
-    // Fetch existing worker by userId
     const existingWorker = await findWorkerByUserId(userId);
-    console.log("update worker", existingWorker);
-    
     if (!existingWorker) {
       return res.status(404).json({ message: 'Worker not found' });
     }
 
     // Handle register image upload
-    let registerImageUrl = existingWorker.registerImage; 
-    if (files.registerImage?.[0]) { 
+    let registerImageUrl = existingWorker.registerImage;
+    if (files.registerImage?.[0]) {
+      // Remove old register image if it exists
+      if (registerImageUrl) {
+        await deleteFromCloudinary(registerImageUrl);
+      }
       registerImageUrl = await uploadToCloudinary(files.registerImage[0]);
     }
 
     // Handle work images upload
-    const workImageUrls = existingWorker.workImages; 
+    const workImageUrls: string[] = [];
     if (files.workImages) {
-      const workImagePromises = files.workImages.map((file: Express.Multer.File) => uploadToCloudinary(file));
+      // Remove old work images if they exist
+      for (const oldImageUrl of existingWorker.workImages) {
+        await deleteFromCloudinary(oldImageUrl);
+      }
+      // Upload new work images
+      const workImagePromises = files.workImages.map((file: any) => uploadToCloudinary(file));
       workImageUrls.push(...await Promise.all(workImagePromises));
+    } else {
+      // If no new work images are provided, keep the existing ones
+      workImageUrls.push(...existingWorker.workImages);
     }
 
     // Update worker data
@@ -122,9 +138,37 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
       ...workerData,
       registerImage: registerImageUrl,
       workImages: workImageUrls,
+      status: "pending",
     });
 
     res.status(200).json(updatedWorker);
+  } catch (err: any) {
+    console.error('Error:', err); // Log detailed error
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Helper function to delete an image from Cloudinary
+const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
+  // Extract the public ID from the image URL
+  const publicId = imageUrl.split('/').pop()?.split('.')[0];
+  if (publicId) {
+    await cloudinary.uploader.destroy(publicId);
+  }
+};
+
+
+
+export const getWorkerController = async (req: Request, res: Response): Promise<void> => {
+  const { wId } = req.params;
+  
+  try {
+    const worker = await getWorkerByIdService(wId);
+    if (worker) {
+      res.status(200).json(worker);
+    } else {
+      res.status(404).json({ message: 'Worker not found' });
+    }
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }

@@ -147,3 +147,15 @@ export const getLoginedUserWorksAPI = async (token: string) => {
     throw new Error('Failed to fetch user works');
   }
 };
+
+
+// Get All Workers API
+export const getAllWorkersAPI = async () => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/getWorkers`, undefined, {
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch workers');
+  }
+};

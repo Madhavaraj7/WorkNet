@@ -155,6 +155,10 @@ function Profile() {
     navigate("/register");
   };
 
+  const handleClickUpdate = () => {
+    navigate("/updateWorker");
+  };
+
   return (
     <>
       <Header />
@@ -331,8 +335,8 @@ function Profile() {
                 </div>
 
                 <Button
-                  onClick={() =>
-                    navigate(`/update-worker/${workerDetails._id}`)
+                  onClick={
+                  (handleClickUpdate)
                   }
                   fullWidth
                   variant="contained"

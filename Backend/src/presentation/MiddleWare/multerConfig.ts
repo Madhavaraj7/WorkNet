@@ -8,3 +8,5 @@ export const uploadMiddleware = upload.fields([
   { name: 'registerImage', maxCount: 1 },
   { name: 'workImages', maxCount: 12 }
 ]);
+
+

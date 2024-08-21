@@ -37,3 +37,13 @@ export const findWorkerByIdInDB = async (userId: string): Promise<any> => {
 export const updateWorkerByIdInDB = async (userId: string, updateData: any): Promise<any> => {
   return await Worker.findOneAndUpdate({ userId }, updateData, { new: true });
 };;
+
+export const getAllWorkers = async (): Promise<any> => {
+  try {
+    return await Worker.find({});
+  } catch (err: any) {
+    throw new Error('Error fetching workers from database: ' + err.message);
+  }
+};
+
+

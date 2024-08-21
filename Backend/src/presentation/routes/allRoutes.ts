@@ -28,6 +28,8 @@ import { uploadMiddleware } from "../MiddleWare/multerConfig";
 import {
   blockWorkerController,
   getLoginedUserWorksController,
+  getWorkerController,
+  getWorkersController,
   registerWorkerController,
   unblockWorkerController,
   updateWorkerController,
@@ -53,6 +55,10 @@ router.put(
 );
 router.post("/forgotPassword", forgotPasswordHandler);
 router.post("/resetPassword", resetPasswordHandler);
+router.get('/getWorkers', getWorkersController);
+router.get('/worker/:wId', getWorkerController);
+
+
 
 //worker Routes
 router.post(
@@ -66,12 +72,7 @@ router.get("/getUserWorkDetails", jwtMiddleware, getLoginedUserWorksController);
 router.put(
   "/updateWorker",
   jwtMiddleware,
-  upload.fields([
-    { name: "registerImage", maxCount: 1 },
-    { name: "workImages", maxCount: 12 },
-  ]),
-  updateWorkerController
-);
+  uploadMiddleware, updateWorkerController)
 
 // admin Routes
 router.post("/adminLogin", adminlogin);

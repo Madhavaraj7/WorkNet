@@ -5,7 +5,7 @@ import Auth from "./pages/Auth";
 import OtpPage from "./pages/OtpPage";
 import Profile from "./pages/Profile";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; 
+import "react-toastify/dist/ReactToastify.css";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuth from "./pages/Admin/AdminAuth";
 import AdHome from "./pages/Admin/AdHome";
@@ -14,10 +14,12 @@ import AdminPrivateRoute from "./ContextAPI/AdminPrivateRoute";
 import AuthRoute from "./ContextAPI/AuthRoute";
 import AdProfile from "./pages/Admin/AdProfile";
 import AdUsers from "./pages/Admin/AdUsers";
-import AdminLayout from "./components/Admin/AdminLayout"; 
+import AdminLayout from "./components/Admin/AdminLayout";
 import WorkerRegister from "./pages/WorkerRegister";
 import WorkerApprov from "./pages/Admin/WorkerApprov";
 import AdWorkers from "./pages/Admin/AdWorkers";
+import UserEditableWorkCard from "./pages/UserEditableWorkCard";
+import Workers from "./pages/Workers";
 
 function App() {
   return (
@@ -43,22 +45,25 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
+        <Route path="/workers" element={<Workers />} />
+
+
+        
+
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<WorkerRegister />} />
-
+          <Route path="/updateWorker" element={<UserEditableWorkCard />} />
         </Route>
 
         <Route path="/admin" element={<AdminAuth />} />
         <Route element={<AdminPrivateRoute />}>
-          <Route  element={<AdminLayout />}>
+          <Route element={<AdminLayout />}>
             <Route path="/adhome" element={<AdHome />} />
             <Route path="/adprofile" element={<AdProfile />} />
             <Route path="/adusers" element={<AdUsers />} />
             <Route path="/adapprove" element={<WorkerApprov />} />
             <Route path="/adworkers" element={<AdWorkers />} />
-
-
           </Route>
         </Route>
       </Routes>

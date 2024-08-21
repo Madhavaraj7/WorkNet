@@ -1,4 +1,4 @@
-import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, getWorkerById, unblockWorker, updateWorkerByIdInDB } from '../infrastructure/workerRepository';
+import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, getAllWorkers, getWorkerById, unblockWorker, updateWorkerByIdInDB } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
 
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
@@ -66,7 +66,7 @@ export const getLoginedUserWorksService = async (userId: string): Promise<any> =
 export const updateWorkerById = async (userId: string, updateData: any): Promise<any> => {
   try {
     const updatedWorker = await updateWorkerByIdInDB(userId, updateData);
-    console.log("updated",updatedWorker);
+    // console.log("updated",updatedWorker);
     
     return updatedWorker;
   } catch (err: any) {
@@ -76,4 +76,24 @@ export const updateWorkerById = async (userId: string, updateData: any): Promise
 
 export const findWorkerById = async (userId: string): Promise<any> => {
   return await findWorkerByIdInDB(userId);
+};
+
+
+export const getAllWorkersService = async (): Promise<any> => {
+  try {
+    const workers = await getAllWorkers();
+    return workers;
+  } catch (err: any) {
+    throw new Error('Error fetching all workers: ' + err.message);
+  }
+};
+
+
+export const getWorkerByIdService = async (workerId: string): Promise<any> => {
+  try {
+    const worker = await getWorkerById(workerId);
+    return worker;
+  } catch (err: any) {
+    throw new Error('Error fetching worker by ID: ' + err.message);
+  }
 };
