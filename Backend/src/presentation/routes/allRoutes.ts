@@ -15,6 +15,7 @@ import {
   adminlogin,
   adminupdateProfile,
   blockUserController,
+  deleteWorkerController,
   getAllWorkersController,
   getUsersList,
   unblockUserController,
@@ -93,5 +94,7 @@ router.put(
 );
 router.put("/blockWorker/:id", AdminjwtMiddleware, blockWorkerController);
 router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
+router.delete('/deleteWorker/:id', AdminjwtMiddleware, deleteWorkerController); // Add the delete worker route
+
 
 export default router;

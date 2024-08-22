@@ -22,9 +22,8 @@ import { styled } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import BlockIcon from "@mui/icons-material/Block";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
-import { getAdminAllworkersAPI, blockWorkerAPI, unblockWorkerAPI } from "../../Services/allAPI";
+import { getAdminAllworkersAPI, deleteWorkerAPI } from "../../Services/allAPI";
 import { toast } from 'react-toastify';
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -45,6 +44,7 @@ interface Worker {
   workImages: string[];
   createdAt: string;
   isBlocked: boolean;
+  status: string;
 }
 
 const AdWorkers: React.FC = () => {
@@ -98,20 +98,15 @@ const AdWorkers: React.FC = () => {
     setCurrentWorker(null);
   };
 
-  const handleBlockUnblockWorker = async () => {
+  const handleDeleteWorker = async () => {
     if (currentWorker) {
       try {
-        if (!currentWorker.isBlocked) {
-          await blockWorkerAPI(currentWorker._id, token || '');
-          toast.success("Worker blocked successfully");
-        } else {
-          await unblockWorkerAPI(currentWorker._id, token || '');
-          toast.success("Worker unblocked successfully");
-        }
-        getAllWorkers(); 
+        await deleteWorkerAPI(currentWorker._id, token || '');
+        toast.success("Worker deleted successfully");
+        getAllWorkers();
         handleCloseDialog();
       } catch (error) {
-        toast.error("Failed to update worker status");
+        toast.error("Failed to delete worker");
       }
     }
   };
@@ -120,9 +115,11 @@ const AdWorkers: React.FC = () => {
     getAllWorkers();
   }, []);
 
-  const filteredWorkers = allWorkers.filter((worker) =>
-    worker.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredWorkers = allWorkers
+    .filter((worker) => worker.status === "approved")
+    .filter((worker) =>
+      worker.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   return (
     <Box
@@ -243,7 +240,7 @@ const AdWorkers: React.FC = () => {
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
                 >
-                  {new Date(worker.createdAt).toLocaleDateString()}
+                  {new Date(worker.createdAt).toLocaleDateString("en-GB")}
                 </TableCell>
                 <TableCell
                   className="text-center"
@@ -251,11 +248,11 @@ const AdWorkers: React.FC = () => {
                 >
                   <Button
                     variant="contained"
-                    color={worker.isBlocked ? "success" : "error"}
-                    startIcon={worker.isBlocked ? <CheckCircleOutlineIcon /> : <BlockIcon />}
+                    color="error"
+                    startIcon={<BlockIcon />}
                     onClick={() => handleOpenDialog(worker)}
                   >
-                    {worker.isBlocked ? "Unblock" : "Block"}
+                    Delete
                   </Button>
                 </TableCell>
               </TableRow>
@@ -264,7 +261,7 @@ const AdWorkers: React.FC = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal for Viewing Images */}
+      {/* Image Modal */}
       <Modal
       open={openModal}
       onClose={() => setOpenModal(false)}
@@ -365,22 +362,26 @@ const AdWorkers: React.FC = () => {
       </Box>
     </Modal>
 
-      {/* Dialog for Block/Unblock Confirmation */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>
-          {currentWorker && currentWorker.isBlocked ? "Unblock Worker" : "Block Worker"}
+      {/* Delete Worker Dialog */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="dialog-title"
+      >
+        <DialogTitle id="dialog-title">
+          Delete Worker
         </DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to {currentWorker && currentWorker.isBlocked ? "unblock" : "block"} this worker?
+            Are you sure you want to delete this worker? This action cannot be undone!.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleBlockUnblockWorker} color="secondary">
-            {currentWorker && currentWorker.isBlocked ? "Unblock" : "Block"}
+          <Button onClick={handleDeleteWorker} color="primary" autoFocus>
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>

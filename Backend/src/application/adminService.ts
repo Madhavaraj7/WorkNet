@@ -10,7 +10,7 @@ import {
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
 import { errorHandler } from "../utils/errorHandler"; // Assuming errorHandler is a utility function
-import { getAllWorkersFromDB } from "../infrastructure/adminRepository";
+import { deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
 import { Worker } from "../domain/worker"; // Adjust the path according to your structure
 import mongoose from "mongoose";
 
@@ -129,4 +129,14 @@ export const updateWorkerStatus = async (
     console.error(`Failed to update worker status: ${error.message}`);
     throw new Error(`Failed to update worker status: ${error.message}`);
   }
+};
+
+
+
+export const deleteWorker = async (workerId: string) => {
+  const worker = await Worker.findById(workerId);
+  if (!worker) {
+    throw errorHandler(404, 'Worker not found');
+  }
+  return await deleteWorkerById(workerId);
 };
