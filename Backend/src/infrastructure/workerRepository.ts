@@ -16,8 +16,8 @@ export const findWorkerByUserIdInDB = async (userId: string): Promise<any> => {
   return await Worker.findOne({ userId });
 };
 
-export const getWorkerById = async (userId: string): Promise<any> => {
-  return await Worker.findOne({ userId });
+export const getWorkerById = async (_id: string): Promise<any> => {
+  return await Worker.findOne({ _id });
 };
 
 

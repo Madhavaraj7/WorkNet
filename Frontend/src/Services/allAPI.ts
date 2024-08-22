@@ -159,3 +159,17 @@ export const getAllWorkersAPI = async () => {
     throw new Error('Failed to fetch workers');
   }
 };
+
+
+// Show One Worker
+export const getAWorkerAPI=async(wId: any)=>{
+  return await commonAPI("GET",`${SERVER_URL}/worker/${wId}`,"")
+}
+
+
+// Delete Worker API
+export const deleteWorkerAPI = async (workerId: string, token: string) => {
+  return await commonAPI("DELETE", `${SERVER_URL}/deleteWorker/${workerId}`, undefined, {
+    Authorization: `Bearer ${token}`,
+  });
+};

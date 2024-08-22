@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import {
   blockUser,
+  deleteWorker,
   getAllUsers,
   getAllWorkers,
   loginUser,
@@ -154,5 +155,16 @@ export const updateWorkerStatusController = async (req: Request, res: Response) 
     res.status(200).json(updatedWorker);
   } catch (error:any) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const deleteWorkerController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const workerId = req.params.id;
+    await deleteWorker(workerId);
+    res.status(200).json({ message: 'Worker deleted successfully' });
+  } catch (error) {
+    next(error);
   }
 };

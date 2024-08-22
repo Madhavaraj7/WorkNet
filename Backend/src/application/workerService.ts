@@ -89,9 +89,11 @@ export const getAllWorkersService = async (): Promise<any> => {
 };
 
 
-export const getWorkerByIdService = async (workerId: string): Promise<any> => {
+export const getWorkerByIdService = async (userId: string): Promise<any> => {
   try {
-    const worker = await getWorkerById(workerId);
+    const worker = await getWorkerById(userId);
+    console.log(worker);
+    
     return worker;
   } catch (err: any) {
     throw new Error('Error fetching worker by ID: ' + err.message);
