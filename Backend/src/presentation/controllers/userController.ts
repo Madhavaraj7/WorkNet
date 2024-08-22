@@ -5,7 +5,7 @@ import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail, findUserById } from "../../infrastructure/userRepository";
 import axios from 'axios';
 import sharp from 'sharp';
-import cloudinary from '../../cloudinaryConfig'; // Ensure the import path is correct
+import cloudinary from '../../cloudinaryConfig'; 
 import bcrypt from 'bcrypt';
 
 // Handle Google login
@@ -27,7 +27,7 @@ export const googleLoginHandler = async (req: Request, res: Response) => {
             .toBuffer();
 
         cloudinary.uploader.upload_stream(
-            (error: any, result: any) => { // Add type annotations for the callback parameters
+            (error: any, result: any) => { 
                 if (error) {
                     return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
                 }
@@ -58,7 +58,6 @@ export const register = async (req: Request, res: Response) => {
         const profileImage = req.file ? req.file.buffer : req.body.profileImage;
         let profileImageUrl = '';
 
-        // Define the proceedWithRegistration function
         const proceedWithRegistration = async () => {
             try {
                 const otp = otpGenerator();
@@ -99,7 +98,6 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-// Other handlers remain the same
 
 export const verifyOtp = async (req: Request, res: Response) => {
     try {

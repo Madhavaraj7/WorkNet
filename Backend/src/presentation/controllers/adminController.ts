@@ -12,7 +12,6 @@ import {
 import cloudinary from "../../cloudinaryConfig";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 
-// Define the custom request interface for better type safety
 interface CustomRequest extends Request {
   userId?: string;
   role?: string;
@@ -102,7 +101,6 @@ export const getUsersList = async (
   }
 };
 
-// Block or Unblock a user
 
 // Block a user
 export const blockUserController = async (req: Request, res: Response, next: NextFunction) => {

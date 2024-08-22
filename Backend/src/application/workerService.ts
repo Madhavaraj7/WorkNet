@@ -1,24 +1,22 @@
 import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, getAllWorkers, getWorkerById, unblockWorker, updateWorkerByIdInDB } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
 
+// register a worker
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
   try {
-      // Handle register image upload
       let registerImageUrl = '';
       if (files.registerImage) {
           registerImageUrl = await uploadToCloudinary(files.registerImage[0]);
       }
 
-      // Handle work images upload
       const workImageUrls: string[] = [];
       if (files.workImages) {
           const workImagePromises = files.workImages.map((file: any) => uploadToCloudinary(file));
           workImageUrls.push(...await Promise.all(workImagePromises));
       }
 
-      // Create the worker data
       const worker = {
-          ...workerData, // userId is included here
+          ...workerData, 
           registerImage: registerImageUrl,
           workImages: workImageUrls,
       };
@@ -29,10 +27,11 @@ export const registerWorker = async (workerData: any, files: any): Promise<any> 
   }
 };
 
+// find worker by using userID
 export const findWorkerByUserId = async (userId: string): Promise<any> => {
     try {
         const worker = await findWorkerByUserIdInDB(userId);
-        console.log(worker);
+        // console.log(worker);
         
         return worker;
     } catch (err: any) {
@@ -41,10 +40,12 @@ export const findWorkerByUserId = async (userId: string): Promise<any> => {
   };
 
 
+// block the worker
   export const blockWorkerService = async (workerId: string): Promise<any> => {
     return await blockWorker(workerId);
   };
   
+// unblock the worker
   export const unblockWorkerService = async (workerId: string): Promise<any> => {
     return await unblockWorker(workerId);
   };
@@ -53,7 +54,7 @@ export const findWorkerByUserId = async (userId: string): Promise<any> => {
 export const getLoginedUserWorksService = async (userId: string): Promise<any> => {
   try {
     const loginedUserWorks = await findWorkerByUserIdInDB(userId);
-    console.log("get login",loginedUserWorks);
+    // console.log("get login",loginedUserWorks);
     
     return loginedUserWorks;
   } catch (err: any) {
@@ -62,7 +63,7 @@ export const getLoginedUserWorksService = async (userId: string): Promise<any> =
 };
 
 
-
+// update the worker
 export const updateWorkerById = async (userId: string, updateData: any): Promise<any> => {
   try {
     const updatedWorker = await updateWorkerByIdInDB(userId, updateData);
@@ -74,11 +75,13 @@ export const updateWorkerById = async (userId: string, updateData: any): Promise
   }
 };
 
+
+// find the worker
 export const findWorkerById = async (userId: string): Promise<any> => {
   return await findWorkerByIdInDB(userId);
 };
 
-
+// get all workerService
 export const getAllWorkersService = async (): Promise<any> => {
   try {
     const workers = await getAllWorkers();
@@ -88,11 +91,11 @@ export const getAllWorkersService = async (): Promise<any> => {
   }
 };
 
-
+// get workerId
 export const getWorkerByIdService = async (userId: string): Promise<any> => {
   try {
     const worker = await getWorkerById(userId);
-    console.log(worker);
+    // console.log(worker);
     
     return worker;
   } catch (err: any) {

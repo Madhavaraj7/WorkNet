@@ -6,7 +6,6 @@ export const getAllWorkersFromDB = async () => {
 };
 
 
-
 export const deleteWorkerById = async (_id: string) => {
   return Worker.findByIdAndDelete(_id);
 };

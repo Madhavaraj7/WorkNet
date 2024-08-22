@@ -7,7 +7,7 @@ interface CustomRequest extends Request {
 
 const jwtMiddleware = (req: CustomRequest, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
-    console.log(token);
+    // console.log(token);
     
 
     if (!token) {
@@ -15,7 +15,7 @@ const jwtMiddleware = (req: CustomRequest, res: Response, next: NextFunction) =>
     }
 
     try {
-        console.log("hello");
+        // console.log("hello");
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string);
         // console.log(decoded);

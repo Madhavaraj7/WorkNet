@@ -12,7 +12,7 @@ export interface Worker {
   city: string;
   state: string;
   categories: string[];
-  status: string; // Added status field
+  status: string; 
 }
 
 interface WorkerCardProps {
@@ -21,7 +21,7 @@ interface WorkerCardProps {
 
 const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
   if (worker.status !== "approved") {
-    return null; // Render nothing if the worker's status is not approved
+    return null; 
   }
 
   return (

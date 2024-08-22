@@ -9,10 +9,9 @@ import {
   unblockUserById,
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
-import { errorHandler } from "../utils/errorHandler"; // Assuming errorHandler is a utility function
+import { errorHandler } from "../utils/errorHandler"; 
 import { deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
-import { Worker } from "../domain/worker"; // Adjust the path according to your structure
-import mongoose from "mongoose";
+import { Worker } from "../domain/worker"; 
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -102,10 +101,12 @@ export const unblockUser = async (userId: string): Promise<User | null> => {
   return unblockUserById(userId);
 };
 
+// Function to Get all workers
 export const getAllWorkers = async () => {
   return await getAllWorkersFromDB();
 };
 
+// Function to Update all workers status
 export const updateWorkerStatus = async (
   _id: string,
   status: "approved" | "rejected"
@@ -132,7 +133,7 @@ export const updateWorkerStatus = async (
 };
 
 
-
+// Function to delete a worker
 export const deleteWorker = async (workerId: string) => {
   const worker = await Worker.findById(workerId);
   if (!worker) {

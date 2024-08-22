@@ -8,8 +8,8 @@ interface CustomRequest extends Request {
 
 const adminJwtMiddleware = (req: CustomRequest, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
-console.log("kdsanfkj");
-console.log(token);
+// console.log("kdsanfkj");
+// console.log(token);
 
 
     if (!token) {
@@ -17,13 +17,13 @@ console.log(token);
     }
 
     try {
-        console.log("try");
+        // console.log("try");
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as { userId: string; role: string };
         req.userId = decoded.userId;
         req.role = decoded.role;
 
-        console.log(decoded);
+        // console.log(decoded);
         
 
         if (req.role !== 'admin') {

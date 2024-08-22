@@ -148,7 +148,6 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
   }
 };
 
-// Helper function to delete an image from Cloudinary
 const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
   // Extract the public ID from the image URL
   const publicId = imageUrl.split('/').pop()?.split('.')[0];

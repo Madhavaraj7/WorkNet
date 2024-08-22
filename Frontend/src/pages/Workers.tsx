@@ -134,7 +134,7 @@ const Workers: React.FC = () => {
           </div>
 
           {/* Pagination */}
-          {/* <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8">
             <Stack spacing={2}>
               <Pagination
                 count={totalPages}
@@ -145,7 +145,7 @@ const Workers: React.FC = () => {
                 boundaryCount={1}
               />
             </Stack>
-          </div> */}
+          </div>
         </section>
       </main>
       <Footer />
