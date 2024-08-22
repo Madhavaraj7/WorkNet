@@ -46,6 +46,8 @@ interface RegisterData {
 function WorkerRegister() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [registerData, setRegisterData] = useState<RegisterData>({
     registerImage: null,
     name: "",
@@ -188,6 +190,8 @@ function WorkerRegister() {
     }
 
     if (workImages.length >= 3) {
+      setLoading(true); // Set loading to true
+
       const reqBody = new FormData();
       reqBody.append("registerImage", registerImage);
       reqBody.append("name", name);
@@ -246,6 +250,8 @@ function WorkerRegister() {
             toast.error("An unexpected error occurred!");
           }
           console.log(err);
+        } finally {
+          setLoading(false); // Set loading to false after the process
         }
       }
     } else {
@@ -664,9 +670,10 @@ function WorkerRegister() {
                     variant="contained"
                     color="primary"
                     onClick={handleSubmit}
+                    disabled={loading} // Disable button when loading
                     fullWidth
                   >
-                    Register
+                    {loading ? <CircularProgress size={24} /> : "Register"}{" "}
                   </Button>
                 </Box>
               </CardContent>

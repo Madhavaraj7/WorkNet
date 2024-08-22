@@ -94,7 +94,7 @@ router.put(
 );
 router.put("/blockWorker/:id", AdminjwtMiddleware, blockWorkerController);
 router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
-router.delete('/deleteWorker/:id', AdminjwtMiddleware, deleteWorkerController); // Add the delete worker route
+router.delete('/deleteWorker/:id', AdminjwtMiddleware, deleteWorkerController); 
 
 
 export default router;
