@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { registerWorkerAPI } from "../Services/allAPI";
+import { registerWorkerAPI, getCategoriesAPI } from "../Services/allAPI";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { city } from "../assets/AllCities/Cities";
@@ -47,6 +47,7 @@ function WorkerRegister() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]); // State to hold categories
 
   const [registerData, setRegisterData] = useState<RegisterData>({
     registerImage: null,
@@ -92,17 +93,37 @@ function WorkerRegister() {
     },
   };
 
-  const categories = [
-    "Plumbing",
-    "Electrical",
-    "Carpentry",
-    "Painting",
-    "Welding",
-    "TileWork",
-    "Centring",
-    "Construction",
-    "Fabrication",
-  ];
+  // const categories = [
+  //   "Plumbing",
+  //   "Electrical",
+  //   "Carpentry",
+  //   "Painting",
+  //   "Welding",
+  //   "TileWork",
+  //   "Centring",
+  //   "Construction",
+  //   "Fabrication",
+  // ];
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategoriesAPI(); 
+        console.log("categ", response);
+
+        const categoryNames = response.map(
+          (category: { name: string }) => category.name
+        );
+        setCategories(categoryNames); 
+        console.log(categoryNames);
+        
+      } catch (error) {
+        toast.error("Failed to fetch categories");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const workingDaysOptions = [
     "All Days",
@@ -413,14 +434,13 @@ function WorkerRegister() {
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth >
                       <InputLabel>Categories</InputLabel>
-
                       <Select
-                        label="Categories"
                         multiple
-                        value={registerData.categories}
+                        value={registerData.categories || []} // Ensure it's an array
                         onChange={handleChange}
+                        input={<OutlinedInput label="Categories" />}
                         renderValue={(selected) => (
                           <Box
                             sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
@@ -430,18 +450,9 @@ function WorkerRegister() {
                             ))}
                           </Box>
                         )}
-                        MenuProps={MenuProps}
                       >
                         {categories.map((category) => (
-                          <MenuItem
-                            key={category}
-                            value={category}
-                            style={getStyles(
-                              category,
-                              registerData.categories,
-                              theme
-                            )}
-                          >
+                          <MenuItem key={category} value={category}>
                             {category}
                           </MenuItem>
                         ))}

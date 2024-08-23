@@ -1,56 +1,71 @@
 import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, getAllWorkers, getWorkerById, unblockWorker, updateWorkerByIdInDB } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
-import { Category } from '../domain/category';
+import { Category, ICategory } from '../domain/category';
 import mongoose from 'mongoose';
 
 // register a worker
+// Assuming you need to handle both names and IDs
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
   try {
-      let registerImageUrl = '';
-      if (files.registerImage) {
-          registerImageUrl = await uploadToCloudinary(files.registerImage[0]);
+    let registerImageUrl = '';
+    if (files.registerImage) {
+      registerImageUrl = await uploadToCloudinary(files.registerImage[0]);
+    }
+
+    const workImageUrls: string[] = [];
+    if (files.workImages) {
+      const workImagePromises = files.workImages.map((file: any) => uploadToCloudinary(file));
+      workImageUrls.push(...await Promise.all(workImagePromises));
+    }
+
+    let categoryIds: string[] = [];
+    if (Array.isArray(workerData.categories)) {
+      const isIdArray = workerData.categories.every((cat: any) => mongoose.Types.ObjectId.isValid(cat));
+      if (isIdArray) {
+        categoryIds = workerData.categories as string[];
+      } else {
+        const categoryNames = workerData.categories as string[];
+        const categories = await Category.find({ name: { $in: categoryNames } }) as ICategory[];
+        categoryIds = categories.map(cat => cat._id.toString()); 
       }
-
-      const workImageUrls: string[] = [];
-      if (files.workImages) {
-          const workImagePromises = files.workImages.map((file: any) => uploadToCloudinary(file));
-          workImageUrls.push(...await Promise.all(workImagePromises));
+    } else if (typeof workerData.categories === 'string') {
+      const category = await Category.findOne({ name: workerData.categories }) as ICategory | null;
+      if (category) {
+        categoryIds = [category._id.toString()]; 
+      } else {
+        throw new Error(`Category not found with name: ${workerData.categories}`);
       }
+    }
 
-      // Ensure categories is an array
-      let categoryIds: string[] = [];
-      if (Array.isArray(workerData.categories)) {
-          categoryIds = workerData.categories;
-      } else if (typeof workerData.categories === 'string') {
-          categoryIds = [workerData.categories];
-      }
+    // Validate category IDs
+    const validCategoryIds = await Promise.all(
+      categoryIds.map(async (_id: string) => {
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+          throw new Error(`Invalid category ID: ${_id}`);
+        }
 
-      // Validate and map category IDs
-      const validCategoryIds = await Promise.all(
-        categoryIds.map(async (categoryId: string) => {
-          if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-            throw new Error(`Invalid category ID: ${categoryId}`);
-          }
-          const category = await Category.findById(categoryId);
-          if (!category) {
-            throw new Error(`Category not found with ID: ${categoryId}`);
-          }
-          return category._id;
-        })
-      );
+        const category = await Category.findById(_id) as ICategory | null;
+        if (!category) {
+          throw new Error(`Category not found with ID: ${_id}`);
+        }
+        return category._id.toString(); // Ensure _id is converted to string
+      })
+    );
 
-      const worker = {
-          ...workerData,
-          categories: validCategoryIds, // Ensure this is an array of valid ObjectId references
-          registerImage: registerImageUrl,
-          workImages: workImageUrls,
-      };
+    // Create worker object
+    const worker = {
+      ...workerData,
+      categories: validCategoryIds,
+      registerImage: registerImageUrl,
+      workImages: workImageUrls,
+    };
 
-      return await createWorker(worker);
+    return await createWorker(worker);
   } catch (err: any) {
-      throw new Error('Error registering worker: ' + err.message);
+    throw new Error('Error registering worker: ' + err.message);
   }
 };
+
 
 // find worker by using userID
 export const findWorkerByUserId = async (userId: string): Promise<any> => {

@@ -1,8 +1,10 @@
 // src/domain/category.ts
 
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
+// Updated interface with _id included
 export interface ICategory extends Document {
+  _id: mongoose.Types.ObjectId; 
   name: string;
   description?: string;
   createdAt: Date;
@@ -16,4 +18,5 @@ const CategorySchema: Schema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-export const Category = mongoose.model<ICategory>("Category", CategorySchema);
+// Ensure the model is typed correctly with ICategory
+export const Category = mongoose.model<ICategory>('Category', CategorySchema);
