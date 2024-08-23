@@ -21,6 +21,7 @@ import AdWorkers from "./pages/Admin/AdWorkers";
 import UserEditableWorkCard from "./pages/UserEditableWorkCard";
 import Workers from "./pages/Workers";
 import Worker from "./pages/Worker";
+import AdCategory from "./pages/Admin/AdCategory";
 
 function App() {
   return (
@@ -67,6 +68,8 @@ function App() {
             <Route path="/adusers" element={<AdUsers />} />
             <Route path="/adapprove" element={<WorkerApprov />} />
             <Route path="/adworkers" element={<AdWorkers />} />
+            <Route path="/adCategory" element={<AdCategory />} />
+
           </Route>
         </Route>
       </Routes>

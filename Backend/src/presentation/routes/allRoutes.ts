@@ -18,6 +18,7 @@ import {
   adminupdateProfile,
   blockUserController,
   deleteWorkerController,
+  editCategoryController,
   getAllWorkersController,
   getUsersList,
   unblockUserController,
@@ -111,8 +112,10 @@ router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
 router.delete('/deleteWorker/:id', AdminjwtMiddleware, deleteWorkerController); 
 
 
-
+router.get('/Adcategories', AdminjwtMiddleware, getCategoriesController);
 router.post("/categories",AdminjwtMiddleware, addCategoryController);
+router.put("/editCategory/:id",  editCategoryController);
+
 
 
 export default router;

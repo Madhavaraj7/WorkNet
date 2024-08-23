@@ -8,11 +8,14 @@ import {
   getAllWorkers,
   loginUser,
   unblockUser,
+  updateCategory,
   updateUserProfile,
   updateWorkerStatus,
 } from "../../application/adminService";
 import cloudinary from "../../cloudinaryConfig";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
+import { getAllCategories } from "../../infrastructure/userRepository";
+import mongoose from "mongoose";
 
 interface CustomRequest extends Request {
   userId?: string;
@@ -184,6 +187,52 @@ export const addCategoryController = async (req: Request, res: Response, next: N
     const newCategory = await addCategory(name, description);
     res.status(201).json(newCategory);
   } catch (error) {
+    next(error);
+  }
+};
+
+export const getCategoriesController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const categories = await getAllCategories();
+    res.status(200).json(categories);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
+export const editCategoryController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+
+  console.log(id);
+  
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid category ID' });
+  }
+
+  try {
+    // Call the update service
+    const updatedCategory = await updateCategory(id, { name, description });
+
+    console.log(updateCategory);
+    
+
+    if (updatedCategory) {
+      res.status(200).json(updatedCategory);
+    } else {
+      res.status(404).json({ message: 'Category not found' });
+    }
+  } catch (error) {
+    // Pass the error to the next middleware (usually an error handler)
     next(error);
   }
 };

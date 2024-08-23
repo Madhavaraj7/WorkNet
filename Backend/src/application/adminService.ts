@@ -12,7 +12,8 @@ import { User } from "../domain/user";
 import { errorHandler } from "../utils/errorHandler"; 
 import { createCategory, deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
 import { Worker } from "../domain/worker"; 
-import { Category } from "../domain/category";
+import { Category, ICategory } from "../domain/category";
+import mongoose from "mongoose";
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -150,6 +151,35 @@ export const addCategory = async (name: string, description?: string) => {
   return newCategory;
 };
 
+export const updateCategory = async (
+  _id: string,
+  updateData: Partial<ICategory>
+) => {
+  // Validate the _id
+  if (!mongoose.Types.ObjectId.isValid(_id)) {
+    throw new Error('Invalid category ID');
+  }
+
+  try {
+    // Find and update the category
+    const updatedCategory = await Category.findByIdAndUpdate(_id, updateData, {
+      new: true,
+      runValidators: true, // Ensure validators are run during the update
+    });
+
+    console.log(updateCategory);
+    
+
+    if (!updatedCategory) {
+      throw new Error('Category not found');
+    }
+
+    return updatedCategory;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw new Error('Failed to update category');
+  }
+};
 
 export const findCategoryByName = async (name: string) => {
   return Category.findOne({ name });
