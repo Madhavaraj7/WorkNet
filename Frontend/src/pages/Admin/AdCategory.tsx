@@ -211,9 +211,9 @@ const AdCategory: React.FC = () => {
           </Button>
           <TextField
             placeholder="Search Category..."
+            variant="outlined"
             size="small"
 
-            variant="outlined"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             InputProps={{

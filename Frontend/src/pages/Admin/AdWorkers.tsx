@@ -294,60 +294,105 @@ const AdWorkers: React.FC = () => {
       </Stack>
 
       {/* Modal for viewing images */}
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "80%",
-            height: "80%",
-            bgcolor: "white",
-            boxShadow: 24,
-            p: 4,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+      <Modal
+      open={openModal}
+      onClose={() => setOpenModal(false)}
+      aria-labelledby="modal-title"
+      aria-describedby="modal-description"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(4px)',
+        transition: 'opacity 0.3s ease-in-out',
+      }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          width: '600px', // Fixed width
+          height: '400px', // Fixed height
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+        }}
+      >
+        <img
+          src={currentImages[currentImageIndex]}
+          alt="Worker Work"
+          style={{
+            width: '100%', // Scale image to fit within fixed dimensions
+            height: '100%',
+            objectFit: 'contain', // Ensure the image maintains its aspect ratio
           }}
+        />
+        <IconButton
+          onClick={handlePrevImage}
+          sx={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Previous Image"
         >
-          <IconButton
-            onClick={handlePrevImage}
-            sx={{
-              position: "absolute",
-              left: "5%",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "black",
-            }}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
-
-          <img
-            src={currentImages[currentImageIndex]}
-            alt="Worker Image"
-            style={{
-              maxHeight: "100%",
-              maxWidth: "100%",
-              borderRadius: "10px",
-            }}
-          />
-
-          <IconButton
-            onClick={handleNextImage}
-            sx={{
-              position: "absolute",
-              right: "5%",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "black",
-            }}
-          >
-            <ArrowForwardIosIcon />
-          </IconButton>
-        </Box>
-      </Modal>
+          <ArrowBackIosNewIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={handleNextImage}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Next Image"
+        >
+          <ArrowForwardIosIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={() => setOpenModal(false)}
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            },
+          }}
+          aria-label="Close Modal"
+        >
+          <span aria-hidden="true" style={{ fontSize: '24px', fontWeight: 'bold' }}>&times;</span>
+        </IconButton>
+      </Box>
+    </Modal>
 
       {/* Dialog for deleting a worker */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
