@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import {
+  addCategory,
   blockUser,
   deleteWorker,
+  findCategoryByName,
   getAllUsers,
   getAllWorkers,
   loginUser,
@@ -162,6 +164,25 @@ export const deleteWorkerController = async (req: Request, res: Response, next: 
     const workerId = req.params.id;
     await deleteWorker(workerId);
     res.status(200).json({ message: 'Worker deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+// Controller to add a new category
+export const addCategoryController = async (req: Request, res: Response, next: NextFunction) => {
+  const { name, description } = req.body;
+  
+  try {
+    const existingCategory = await findCategoryByName(name);
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
+    
+    const newCategory = await addCategory(name, description);
+    res.status(201).json(newCategory);
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { User } from "../domain/user";
+import { Category } from "../domain/category";
 
 interface UserModel extends User, Document {
   otp?: string;
@@ -91,5 +92,10 @@ export const unblockUserById = async (userId: string) => {
   return UserModel.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
 };
 
+
+
+export const getAllCategories = async () => {
+  return Category.find();
+};
 
 

@@ -122,38 +122,43 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
         navigate("/otp", { state: { email: user.email } });
       }
     } catch (err) {
-      // console.error('SignUpAPI error:', err); // Debugging line
       toast.error("An error occurred during signup. Please try again.");
     }
   };
 
   const handleLogin = async () => {
     const { email, password } = user;
+  
     if (!validateForm(email, password)) return;
-
+  
     try {
-      setOpen(true);
+      setOpen(true); 
       const result = await LoginAPI(user);
-      // console.log('LoginAPI result:', result); // Debugging line
+  
       setOpen(false);
-
+  
       if (result && result.user && result.token) {
         localStorage.setItem("token", result.token);
         localStorage.setItem("user", JSON.stringify(result.user));
+  
         setIsAuthorized(true);
         setUser(result.user);
-
+  
         toast.success("Login Successful!");
         navigate("/");
       } else {
         toast.error("Invalid login credentials. Please try again.");
       }
-    } catch (err) {
+    } catch (err:any) {
       setOpen(false);
-      // console.error('LoginAPI error:', err); // Debugging line
-      toast.error("An error occurred during login. Please try again.");
+  
+      const errorMessage = err.response?.data?.error || "An error occurred during login. Please try again.";
+      toast.error(errorMessage);
+  
+      console.error('LoginAPI error:', err);
     }
   };
+  
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {

@@ -1,5 +1,7 @@
 import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, getAllWorkers, getWorkerById, unblockWorker, updateWorkerByIdInDB } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
+import { Category } from '../domain/category';
+import mongoose from 'mongoose';
 
 // register a worker
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
@@ -15,8 +17,31 @@ export const registerWorker = async (workerData: any, files: any): Promise<any> 
           workImageUrls.push(...await Promise.all(workImagePromises));
       }
 
+      // Ensure categories is an array
+      let categoryIds: string[] = [];
+      if (Array.isArray(workerData.categories)) {
+          categoryIds = workerData.categories;
+      } else if (typeof workerData.categories === 'string') {
+          categoryIds = [workerData.categories];
+      }
+
+      // Validate and map category IDs
+      const validCategoryIds = await Promise.all(
+        categoryIds.map(async (categoryId: string) => {
+          if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            throw new Error(`Invalid category ID: ${categoryId}`);
+          }
+          const category = await Category.findById(categoryId);
+          if (!category) {
+            throw new Error(`Category not found with ID: ${categoryId}`);
+          }
+          return category._id;
+        })
+      );
+
       const worker = {
-          ...workerData, 
+          ...workerData,
+          categories: validCategoryIds, // Ensure this is an array of valid ObjectId references
           registerImage: registerImageUrl,
           workImages: workImageUrls,
       };
@@ -95,7 +120,7 @@ export const getAllWorkersService = async (): Promise<any> => {
 export const getWorkerByIdService = async (userId: string): Promise<any> => {
   try {
     const worker = await getWorkerById(userId);
-    // console.log(worker);
+    console.log(worker);
     
     return worker;
   } catch (err: any) {

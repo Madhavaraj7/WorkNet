@@ -6,7 +6,7 @@ interface IWorker extends Document {
   name: string;
   phoneNumber: number;
   whatsappNumber: number;
-  categories: string[];
+  categories: mongoose.Schema.Types.ObjectId[];  // Reference to Category model
   experience: number;
   workingDays: string;
   availableTime: string;
@@ -20,7 +20,6 @@ interface IWorker extends Document {
   averageReview?: string;
   status: string;
   isBlocked?: boolean; 
-
 }
 
 const workerSchema = new Schema<IWorker>({
@@ -41,10 +40,11 @@ const workerSchema = new Schema<IWorker>({
     type: Number,
     required: true,
   },
-  categories: {
-    type: [String],
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',  // Reference to the Category model
     required: true,
-  },
+  }],
   experience: {
     type: Number,
     required: true,

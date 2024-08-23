@@ -248,11 +248,15 @@ const WorkerApprov: React.FC = () => {
                     {worker.phoneNumber}
                   </TableCell>
                   <TableCell
-                    className="text-center"
-                    sx={{ fontSize: "16px", padding: "12px" }}
-                  >
-                    {worker.categories}
-                  </TableCell>
+                  className="text-center"
+                  sx={{ fontSize: "16px", padding: "12px" }}
+                >
+                  {Array.isArray(worker.categories)
+                    ? worker.categories
+                        .map((category) => category.name)
+                        .join(", ")
+                    : "No categories"}
+                </TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center gap-2">
                       <button

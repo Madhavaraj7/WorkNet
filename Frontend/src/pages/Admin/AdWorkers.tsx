@@ -17,6 +17,8 @@ import {
   DialogTitle,
   Typography,
   TextField,
+  Pagination,
+  Stack,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -24,7 +26,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import BlockIcon from "@mui/icons-material/Block";
 import SearchIcon from "@mui/icons-material/Search";
 import { getAdminAllworkersAPI, deleteWorkerAPI } from "../../Services/allAPI";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -55,6 +57,8 @@ const AdWorkers: React.FC = () => {
   const [currentWorker, setCurrentWorker] = useState<Worker | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [currentImages, setCurrentImages] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [workersPerPage] = useState(5); 
   const token = localStorage.getItem("adtoken");
 
   const getAllWorkers = async () => {
@@ -101,7 +105,7 @@ const AdWorkers: React.FC = () => {
   const handleDeleteWorker = async () => {
     if (currentWorker) {
       try {
-        await deleteWorkerAPI(currentWorker._id, token || '');
+        await deleteWorkerAPI(currentWorker._id, token || "");
         toast.success("Worker deleted successfully");
         getAllWorkers();
         handleCloseDialog();
@@ -120,6 +124,14 @@ const AdWorkers: React.FC = () => {
     .filter((worker) =>
       worker.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+  const indexOfLastWorker = page * workersPerPage;
+  const indexOfFirstWorker = indexOfLastWorker - workersPerPage;
+  const currentWorkers = filteredWorkers.slice(
+    indexOfFirstWorker,
+    indexOfLastWorker
+  );
+  const totalPages = Math.ceil(filteredWorkers.length / workersPerPage);
 
   return (
     <Box
@@ -179,7 +191,7 @@ const AdWorkers: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredWorkers.map((worker, index) => (
+            {currentWorkers.map((worker, index) => (
               <TableRow
                 key={worker._id}
                 className="hover:bg-gray-100"
@@ -189,7 +201,7 @@ const AdWorkers: React.FC = () => {
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
                 >
-                  {index + 1}
+                  {index + 1 + indexOfFirstWorker}
                 </TableCell>
                 <TableCell className="text-center">
                   <img
@@ -215,27 +227,31 @@ const AdWorkers: React.FC = () => {
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
                 >
-                  {worker.categories}
+                  {Array.isArray(worker.categories)
+                    ? worker.categories
+                        .map((category) => category.name)
+                        .join(", ")
+                    : "No categories"}
                 </TableCell>
                 <TableCell
-  className="text-center cursor-pointer"
-  sx={{ fontSize: "16px", padding: "12px" }}
->
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={() => handleImageClick(worker.workImages, 0)}
-    sx={{
-      backgroundColor: '#1976d2',
-      color: 'white',
-      '&:hover': {
-        backgroundColor: '#115293',
-      },
-    }}
-  >
-    View Images
-  </Button>
-</TableCell>
+                  className="text-center cursor-pointer"
+                  sx={{ fontSize: "16px", padding: "12px" }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleImageClick(worker.workImages, 0)}
+                    sx={{
+                      backgroundColor: "#1976d2",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#115293",
+                      },
+                    }}
+                  >
+                    View Images
+                  </Button>
+                </TableCell>
                 <TableCell
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
@@ -261,127 +277,96 @@ const AdWorkers: React.FC = () => {
         </Table>
       </TableContainer>
 
-      {/* Image Modal */}
-      <Modal
-      open={openModal}
-      onClose={() => setOpenModal(false)}
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backdropFilter: 'blur(4px)',
-        transition: 'opacity 0.3s ease-in-out',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'relative',
-          width: '600px', // Fixed width
-          height: '400px', // Fixed height
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2,
-        }}
+      <Stack
+        spacing={2}
+        sx={{ mt: 4 }}
+        alignItems="center"
+        justifyContent="center"
       >
-        <img
-          src={currentImages[currentImageIndex]}
-          alt="Worker Work"
-          style={{
-            width: '100%', // Scale image to fit within fixed dimensions
-            height: '100%',
-            objectFit: 'contain', // Ensure the image maintains its aspect ratio
-          }}
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_event, value) => setPage(value)}
+          color="primary"
+          siblingCount={1}
+          boundaryCount={1}
         />
-        <IconButton
-          onClick={handlePrevImage}
-          sx={{
-            position: 'absolute',
-            left: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            },
-          }}
-          aria-label="Previous Image"
-        >
-          <ArrowBackIosNewIcon fontSize="large" />
-        </IconButton>
-        <IconButton
-          onClick={handleNextImage}
-          sx={{
-            position: 'absolute',
-            right: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            },
-          }}
-          aria-label="Next Image"
-        >
-          <ArrowForwardIosIcon fontSize="large" />
-        </IconButton>
-        <IconButton
-          onClick={() => setOpenModal(false)}
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            zIndex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            },
-          }}
-          aria-label="Close Modal"
-        >
-          <span aria-hidden="true" style={{ fontSize: '24px', fontWeight: 'bold' }}>&times;</span>
-        </IconButton>
-      </Box>
-    </Modal>
+      </Stack>
 
-      {/* Delete Worker Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby="dialog-title"
-      >
-        <DialogTitle id="dialog-title">
-          Delete Worker
-        </DialogTitle>
+      {/* Modal for viewing images */}
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80%",
+            height: "80%",
+            bgcolor: "white",
+            boxShadow: 24,
+            p: 4,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton
+            onClick={handlePrevImage}
+            sx={{
+              position: "absolute",
+              left: "5%",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "black",
+            }}
+          >
+            <ArrowBackIosNewIcon />
+          </IconButton>
+
+          <img
+            src={currentImages[currentImageIndex]}
+            alt="Worker Image"
+            style={{
+              maxHeight: "100%",
+              maxWidth: "100%",
+              borderRadius: "10px",
+            }}
+          />
+
+          <IconButton
+            onClick={handleNextImage}
+            sx={{
+              position: "absolute",
+              right: "5%",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "black",
+            }}
+          >
+            <ArrowForwardIosIcon />
+          </IconButton>
+        </Box>
+      </Modal>
+
+      {/* Dialog for deleting a worker */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Delete Worker</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this worker? This action cannot be undone!.
+            Are you sure you want to delete this worker?
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleDeleteWorker} color="primary" autoFocus>
-            Confirm
+          <Button
+            onClick={handleDeleteWorker}
+            color="error"
+            variant="contained"
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

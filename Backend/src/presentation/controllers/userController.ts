@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp, updateUserProfile, forgotPassword, resetPassword } from "../../application/userService";
+import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp, updateUserProfile, forgotPassword, resetPassword, fetchAllCategories } from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail, findUserById } from "../../infrastructure/userRepository";
@@ -241,5 +241,17 @@ export const forgotPasswordHandler = async (req: Request, res: Response) => {
       res.status(200).json({ message: "Password has been reset successfully" });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  };
+
+
+
+  // Controller to get all categories
+export const getCategoriesController = async (req: Request, res: Response) => {
+    try {
+      const categories = await fetchAllCategories();
+      res.status(200).json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch categories' });
     }
   };

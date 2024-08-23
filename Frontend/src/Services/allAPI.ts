@@ -173,3 +173,15 @@ export const deleteWorkerAPI = async (workerId: string, token: string) => {
     Authorization: `Bearer ${token}`,
   });
 };
+
+
+// Get Categories API
+export const getCategoriesAPI = async () => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/categories`, undefined, {
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch categories');
+  }
+};

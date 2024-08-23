@@ -17,7 +17,7 @@ export const findWorkerByUserIdInDB = async (userId: string): Promise<any> => {
 };
 
 export const getWorkerById = async (_id: string): Promise<any> => {
-  return await Worker.findOne({ _id });
+  return await Worker.findOne({ _id }).populate('categories');
 };
 
 
@@ -38,9 +38,10 @@ export const updateWorkerByIdInDB = async (userId: string, updateData: any): Pro
   return await Worker.findOneAndUpdate({ userId }, updateData, { new: true });
 };;
 
+// Worker Repository
 export const getAllWorkers = async (): Promise<any> => {
   try {
-    return await Worker.find({});
+    return await Worker.find({}).populate('categories', 'name description');
   } catch (err: any) {
     throw new Error('Error fetching workers from database: ' + err.message);
   }

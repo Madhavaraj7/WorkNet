@@ -10,8 +10,9 @@ import {
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
 import { errorHandler } from "../utils/errorHandler"; 
-import { deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
+import { createCategory, deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
 import { Worker } from "../domain/worker"; 
+import { Category } from "../domain/category";
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -140,4 +141,16 @@ export const deleteWorker = async (workerId: string) => {
     throw errorHandler(404, 'Worker not found');
   }
   return await deleteWorkerById(workerId);
+};
+
+
+// Function to add a new category
+export const addCategory = async (name: string, description?: string) => {
+  const newCategory = await createCategory({ name, description });
+  return newCategory;
+};
+
+
+export const findCategoryByName = async (name: string) => {
+  return Category.findOne({ name });
 };
