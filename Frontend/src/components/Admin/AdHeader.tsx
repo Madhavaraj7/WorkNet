@@ -127,7 +127,7 @@ const AdHeader: React.FC = () => {
             "home",
             "users",
             "workers",
-            "analytics",
+            "Category",
             "reviews",
             "report",
             "messages",
@@ -168,7 +168,7 @@ const AdHeader: React.FC = () => {
                     }}
                   />
                 )}
-                {icon === "analytics" && (
+                {icon === "Category" && (
                   <BarChartIcon
                     className="me-3"
                     fontSize="large"

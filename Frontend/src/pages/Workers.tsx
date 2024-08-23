@@ -1,23 +1,10 @@
-// src/Components/Workers.tsx
 import React, { useEffect, useState } from "react";
 import WorkerCard from "../components/WorkerCard";
-import { getAllWorkersAPI } from "../Services/allAPI";
+import { getAllWorkersAPI, getCategoriesAPI } from "../Services/allAPI";
 import { Worker } from "../components/WorkerCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import { Alert, Pagination, Stack } from "@mui/material";
-
-const categories = [
-  "Plumbing",
-  "Electrical",
-  "Carpentry",
-  "Painting",
-  "Welding",
-  "TileWork",
-  "Centring",
-  "Construction",
-  "Fabrication",
-];
+import { Alert, Pagination, Stack, Button } from "@mui/material";
 
 const Workers: React.FC = () => {
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -25,33 +12,50 @@ const Workers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ name: string }[]>([]);
   const [page, setPage] = useState(1);
   const [workersPerPage] = useState(8);
 
   useEffect(() => {
-    const fetchWorkers = async () => {
+    const fetchData = async () => {
       try {
-        // const token = localStorage.getItem("token");
-        // if (!token) {
-        //   throw new Error("No token found");
-        // }
-        const data = await getAllWorkersAPI();
-        setWorkers(data);
-        setFilteredWorkers(data);
+        // Fetch workers
+        const workersData = await getAllWorkersAPI();
+        setWorkers(workersData);
+        setFilteredWorkers(workersData);
+
+        // Fetch categories
+        const categoriesData = await getCategoriesAPI();
+        console.log(categoriesData);
+
+        // Assuming categoriesData is an array of objects with a name property
+        if (Array.isArray(categoriesData)) {
+          setCategories(categoriesData);
+        } else {
+          setError("Invalid categories data format");
+        }
       } catch (error) {
-        setError("Failed to fetch workers");
+        setError("Failed to fetch data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWorkers();
+    fetchData();
   }, []);
 
   useEffect(() => {
     if (selectedCategory) {
       setFilteredWorkers(
-        workers.filter((worker) => worker.categories.includes(selectedCategory))
+        workers.filter(worker =>
+          Array.isArray(worker.categories)
+            ? worker.categories.some(category =>
+                typeof category === "string"
+                  ? category === selectedCategory
+                  : category.name === selectedCategory
+              )
+            : false
+        )
       );
     } else {
       setFilteredWorkers(workers);
@@ -93,28 +97,22 @@ const Workers: React.FC = () => {
 
           {/* Category Filter */}
           <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <button
-              className={`px-6 py-3 rounded-full text-lg font-semibold ${
-                !selectedCategory
-                  ? "bg-blue-700 text-white"
-                  : "bg-gray-300 text-gray-700"
-              }`}
+            <Button
+              variant={!selectedCategory ? "contained" : "outlined"}
+              color={!selectedCategory ? "primary" : "inherit"}
               onClick={() => setSelectedCategory(null)}
             >
               All Categories
-            </button>
+            </Button>
             {categories.map((category) => (
-              <button
-                key={category}
-                className={`px-6 py-3 rounded-full text-lg font-semibold ${
-                  selectedCategory === category
-                    ? "bg-blue-700 text-white"
-                    : "bg-gray-300 text-gray-700"
-                }`}
-                onClick={() => setSelectedCategory(category)}
+              <Button
+                key={category.name}
+                variant={selectedCategory === category.name ? "contained" : "outlined"}
+                color={selectedCategory === category.name ? "primary" : "inherit"}
+                onClick={() => setSelectedCategory(category.name)}
               >
-                {category}
-              </button>
+                {category.name}
+              </Button>
             ))}
           </div>
 
@@ -125,7 +123,7 @@ const Workers: React.FC = () => {
                 <WorkerCard key={worker._id} worker={worker} />
               ))
             ) : (
-                <div className="flex justify-center items-center col-span-full">
+              <div className="flex justify-center items-center col-span-full">
                 <Alert variant="outlined" severity="info" className="w-full max-w-md text-center">
                   No workers available for the selected category. Please try another category.
                 </Alert>
@@ -134,7 +132,7 @@ const Workers: React.FC = () => {
           </div>
 
           {/* Pagination */}
-          {/* <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8">
             <Stack spacing={2}>
               <Pagination
                 count={totalPages}
@@ -145,7 +143,7 @@ const Workers: React.FC = () => {
                 boundaryCount={1}
               />
             </Stack>
-          </div> */}
+          </div>
         </section>
       </main>
       <Footer />

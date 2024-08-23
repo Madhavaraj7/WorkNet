@@ -143,14 +143,22 @@ function Profile() {
         } else {
           toast.info(result.response || "Something went wrong!");
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("An error occurred while updating your profile.");
+      } catch (err: any) {
+        if (err.response && err.response.status === 403) {
+          toast.warning("Your account is blocked. Please contact support.");
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          navigate("/");
+        } else {
+          console.error(err);
+          toast.error("An error occurred while updating your profile.");
+        }
       } finally {
         setLoading(false);
       }
     }
   };
+
   const handleClick = () => {
     navigate("/register");
   };
@@ -335,9 +343,7 @@ function Profile() {
                 </div>
 
                 <Button
-                  onClick={
-                  (handleClickUpdate)
-                  }
+                  onClick={handleClickUpdate}
                   fullWidth
                   variant="contained"
                   color="primary"

@@ -3,6 +3,9 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { Link } from "react-router-dom";
 import { Button, Tooltip } from "@mui/material";
 
+interface Category {
+  name: string;
+}
 export interface Worker {
   _id: string;
   name: string;
@@ -11,8 +14,8 @@ export interface Worker {
   place: string;
   city: string;
   state: string;
-  categories: string[];
-  status: string; // Added status field
+  categories: Category[] | string[]; // Adjust based on your actual data structure
+  status: string;
 }
 
 interface WorkerCardProps {
@@ -21,7 +24,7 @@ interface WorkerCardProps {
 
 const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
   if (worker.status !== "approved") {
-    return null; // Render nothing if the worker's status is not approved
+    return null;
   }
 
   return (
@@ -33,11 +36,15 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
           alt={worker.name}
         />
         <div className="p-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">{worker.name}</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            {worker.name}
+          </h2>
           {worker.avarageReview > 0 && (
             <div className="flex items-center mb-2">
               <span
-                className={`text-lg font-semibold ${worker.avarageReview < 3 ? 'text-red-500' : 'text-green-500'}`}
+                className={`text-lg font-semibold ${
+                  worker.avarageReview < 3 ? "text-red-500" : "text-green-500"
+                }`}
               >
                 {worker.avarageReview}
               </span>
@@ -50,16 +57,22 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
           </div>
           {/* Category Badges */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {worker.categories.map(category => (
-              <Tooltip key={category} title={`Category: ${category}`} arrow>
-                <span
-                  className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold"
+            {Array.isArray(worker.categories) && worker.categories.length > 0 ? (
+              worker.categories.map((category, index) => (
+                <button
+                  key={index}
+                  className="px-4 py-2 rounded-full text-sm font-semibold bg-blue-300 text-blue-800 shadow-md hover:bg-blue-400 hover:text-white transition duration-300 ease-in-out"
                 >
-                  {category}
-                </span>
-              </Tooltip>
-            ))}
+                  {typeof category === "string" ? category : category.name}
+                </button>
+              ))
+            ) : (
+              <span className="px-4 py-2 rounded-full text-sm font-semibold bg-gray-300 text-gray-700 shadow-md">
+                No categories
+              </span>
+            )}
           </div>
+
           <Link to={`/worker/${worker._id}`}>
             <Button
               variant="contained"

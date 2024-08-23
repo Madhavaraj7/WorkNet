@@ -1,12 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { User } from './user'; // Adjust the import path as necessary
+import { User } from './user'; 
 
 interface IWorker extends Document {
   registerImage: string;
   name: string;
   phoneNumber: number;
   whatsappNumber: number;
-  categories: string[];
+  categories: mongoose.Schema.Types.ObjectId[];  // Reference to Category model
   experience: number;
   workingDays: string;
   availableTime: string;
@@ -16,11 +16,10 @@ interface IWorker extends Document {
   city: string;
   place: string;
   workImages: string[];
-  userId: mongoose.Schema.Types.ObjectId; // Reference to the User model
+  userId: mongoose.Schema.Types.ObjectId; 
   averageReview?: string;
   status: string;
   isBlocked?: boolean; 
-
 }
 
 const workerSchema = new Schema<IWorker>({
@@ -41,10 +40,11 @@ const workerSchema = new Schema<IWorker>({
     type: Number,
     required: true,
   },
-  categories: {
-    type: [String],
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',  // Reference to the Category model
     required: true,
-  },
+  }],
   experience: {
     type: Number,
     required: true,
@@ -83,7 +83,7 @@ const workerSchema = new Schema<IWorker>({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
+    ref: 'User', 
     required: true,
   },
   averageReview: {
@@ -92,7 +92,7 @@ const workerSchema = new Schema<IWorker>({
   status: {
     type: String,
     required: true,
-    default: 'pending', // Default status is "pending"
+    default: 'pending', 
   },
   isBlocked: {
     type: Boolean,

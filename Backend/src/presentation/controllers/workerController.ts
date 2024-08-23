@@ -17,12 +17,9 @@ export const registerWorkerController = async (req: CustomRequest, res: any): Pr
       }
 
       const existingWorker = await findWorkerByUserId(userId);
-      console.log(existingWorker,"backend ");
-      
       if (existingWorker) {
           return res.status(409).json({ message: 'Worker already registered' });
       }
-     
 
       const newWorker = await registerWorker({ ...workerData, userId }, files);
       res.status(200).json(newWorker);
@@ -148,7 +145,6 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
   }
 };
 
-// Helper function to delete an image from Cloudinary
 const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
   // Extract the public ID from the image URL
   const publicId = imageUrl.split('/').pop()?.split('.')[0];

@@ -9,9 +9,10 @@ import {
   unblockUserById,
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
-import { errorHandler } from "../utils/errorHandler"; // Assuming errorHandler is a utility function
-import { deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
-import { Worker } from "../domain/worker"; // Adjust the path according to your structure
+import { errorHandler } from "../utils/errorHandler"; 
+import { createCategory, deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
+import { Worker } from "../domain/worker"; 
+import { Category, ICategory } from "../domain/category";
 import mongoose from "mongoose";
 
 // Function to log in an admin user
@@ -102,10 +103,12 @@ export const unblockUser = async (userId: string): Promise<User | null> => {
   return unblockUserById(userId);
 };
 
+// Function to Get all workers
 export const getAllWorkers = async () => {
   return await getAllWorkersFromDB();
 };
 
+// Function to Update all workers status
 export const updateWorkerStatus = async (
   _id: string,
   status: "approved" | "rejected"
@@ -132,11 +135,52 @@ export const updateWorkerStatus = async (
 };
 
 
-
+// Function to delete a worker
 export const deleteWorker = async (workerId: string) => {
   const worker = await Worker.findById(workerId);
   if (!worker) {
     throw errorHandler(404, 'Worker not found');
   }
   return await deleteWorkerById(workerId);
+};
+
+
+// Function to add a new category
+export const addCategory = async (name: string, description?: string) => {
+  const newCategory = await createCategory({ name, description });
+  return newCategory;
+};
+
+export const updateCategory = async (
+  _id: string,
+  updateData: Partial<ICategory>
+) => {
+  // Validate the _id
+  if (!mongoose.Types.ObjectId.isValid(_id)) {
+    throw new Error('Invalid category ID');
+  }
+
+  try {
+    // Find and update the category
+    const updatedCategory = await Category.findByIdAndUpdate(_id, updateData, {
+      new: true,
+      runValidators: true, // Ensure validators are run during the update
+    });
+
+    console.log(updateCategory);
+    
+
+    if (!updatedCategory) {
+      throw new Error('Category not found');
+    }
+
+    return updatedCategory;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw new Error('Failed to update category');
+  }
+};
+
+export const findCategoryByName = async (name: string) => {
+  return Category.findOne({ name });
 };

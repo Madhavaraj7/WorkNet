@@ -173,3 +173,63 @@ export const deleteWorkerAPI = async (workerId: string, token: string) => {
     Authorization: `Bearer ${token}`,
   });
 };
+
+
+// Get Categories API
+export const getCategoriesAPI = async () => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/categories`, undefined, {
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch categories');
+  }
+};
+
+
+// Get All Categories (Admin)
+export const getAdminCategoriesAPI = async (token: string) => {
+  try {
+    const response = await commonAPI('GET', `${SERVER_URL}/Adcategories`, undefined, {
+      Authorization: `Bearer ${token}`,
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to fetch categories');
+  }
+};
+
+// Add New Category (Admin)
+export const addCategoryAPI = async (categoryData: any, token: string) => {
+  try {
+    const response = await commonAPI('POST', `${SERVER_URL}/categories`, categoryData, {
+      Authorization: `Bearer ${token}`,
+    });
+    return response;
+  } catch (error) {
+    throw new Error('Failed to add category');
+  }
+};
+
+
+
+export const editCategoryAPI = async (id: string, categoryData: any, token: string) => {
+  try {
+    console.log('Editing category with ID:', id); // Debugging line
+
+    const response = await commonAPI(
+      "PUT",
+      `${SERVER_URL}/editCategory/${id}`, // Ensure this URL matches your backend
+      categoryData,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error('Error in editCategoryAPI:', error); // Log error details
+    throw new Error('Failed to edit category');
+  }
+};
+

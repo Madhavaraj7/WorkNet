@@ -1,18 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 import {
+  addCategory,
   blockUser,
   deleteWorker,
+  findCategoryByName,
   getAllUsers,
   getAllWorkers,
   loginUser,
   unblockUser,
+  updateCategory,
   updateUserProfile,
   updateWorkerStatus,
 } from "../../application/adminService";
 import cloudinary from "../../cloudinaryConfig";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
+import { getAllCategories } from "../../infrastructure/userRepository";
+import mongoose from "mongoose";
 
-// Define the custom request interface for better type safety
 interface CustomRequest extends Request {
   userId?: string;
   role?: string;
@@ -102,7 +106,6 @@ export const getUsersList = async (
   }
 };
 
-// Block or Unblock a user
 
 // Block a user
 export const blockUserController = async (req: Request, res: Response, next: NextFunction) => {
@@ -165,6 +168,71 @@ export const deleteWorkerController = async (req: Request, res: Response, next: 
     await deleteWorker(workerId);
     res.status(200).json({ message: 'Worker deleted successfully' });
   } catch (error) {
+    next(error);
+  }
+};
+
+
+
+// Controller to add a new category
+export const addCategoryController = async (req: Request, res: Response, next: NextFunction) => {
+  const { name, description } = req.body;
+  
+  try {
+    const existingCategory = await findCategoryByName(name);
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
+    
+    const newCategory = await addCategory(name, description);
+    res.status(201).json(newCategory);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCategoriesController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const categories = await getAllCategories();
+    res.status(200).json(categories);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
+export const editCategoryController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+
+  console.log(id);
+  
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid category ID' });
+  }
+
+  try {
+    // Call the update service
+    const updatedCategory = await updateCategory(id, { name, description });
+
+    console.log(updateCategory);
+    
+
+    if (updatedCategory) {
+      res.status(200).json(updatedCategory);
+    } else {
+      res.status(404).json({ message: 'Category not found' });
+    }
+  } catch (error) {
+    // Pass the error to the next middleware (usually an error handler)
     next(error);
   }
 };

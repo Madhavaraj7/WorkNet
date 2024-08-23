@@ -1,13 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { User } from "../domain/user";
+import { Category } from "../domain/category";
 
-// Extending the User interface with mongoose Document
 interface UserModel extends User, Document {
   otp?: string;
   otpVerified?: boolean;
 }
 
-// Define the Mongoose schema for the User
 const UserSchema: Schema<UserModel> = new Schema({
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -19,15 +18,17 @@ const UserSchema: Schema<UserModel> = new Schema({
     type: Number,
     default: 0,
   },
-  isBlocked: { type: Boolean, default: false }, // Added the isBlocked field with a default value
-  role: { type: String, default: 'user' } // Added the role field
+  isBlocked: { type: Boolean, default: false }, 
+  role: { type: String, default: 'user' } 
 
 
 
 });
 
-// Create the Mongoose model
 const UserModel = mongoose.model<UserModel>("User", UserSchema);
+
+
+
 
 // Function to create a new user
 export const createUser = async (user: User) => {
@@ -76,7 +77,7 @@ export const findUserById = async (userId: string) => {
 
 // Fetch all users
 export const findAllUsers = async (): Promise<User[]> => {
-  return UserModel.find(); // Returns all users from the database
+  return UserModel.find(); 
 };
 
 
@@ -91,5 +92,10 @@ export const unblockUserById = async (userId: string) => {
   return UserModel.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
 };
 
+
+
+export const getAllCategories = async () => {
+  return Category.find();
+};
 
 

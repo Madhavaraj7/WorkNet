@@ -9,13 +9,16 @@ import {
   updateProfile,
   forgotPasswordHandler,
   resetPasswordHandler,
+  getCategoriesController,
 } from "../controllers/userController";
 
 import {
+  addCategoryController,
   adminlogin,
   adminupdateProfile,
   blockUserController,
   deleteWorkerController,
+  editCategoryController,
   getAllWorkersController,
   getUsersList,
   unblockUserController,
@@ -35,6 +38,7 @@ import {
   unblockWorkerController,
   updateWorkerController,
 } from "../controllers/workerController";
+import checkUserStatusMiddleware from "../MiddleWare/checkUserStatusMiddleware";
 
 const router = express.Router();
 
@@ -51,13 +55,17 @@ router.post("/googleLogin", googleLoginHandler);
 router.put(
   "/profile",
   jwtMiddleware,
+  checkUserStatusMiddleware,
   upload.single("profileImage"),
   updateProfile
 );
 router.post("/forgotPassword", forgotPasswordHandler);
 router.post("/resetPassword", resetPasswordHandler);
-router.get('/getWorkers', getWorkersController);
+router.get('/getWorkers',  
+  getWorkersController);
 router.get('/worker/:wId', getWorkerController);
+router.get("/categories",  getCategoriesController);
+
 
 
 
@@ -66,14 +74,21 @@ router.post(
   "/register",
   jwtMiddleware,
   uploadMiddleware,
+  checkUserStatusMiddleware,
+
   registerWorkerController
 );
-router.get("/getUserWorkDetails", jwtMiddleware, getLoginedUserWorksController);
+router.get("/getUserWorkDetails", jwtMiddleware,  checkUserStatusMiddleware,
+  getLoginedUserWorksController);
 //update worker profile pending
 router.put(
   "/updateWorker",
   jwtMiddleware,
   uploadMiddleware, updateWorkerController)
+
+
+
+
 
 // admin Routes
 router.post("/adminLogin", adminlogin);
@@ -95,6 +110,12 @@ router.put(
 router.put("/blockWorker/:id", AdminjwtMiddleware, blockWorkerController);
 router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
 router.delete('/deleteWorker/:id', AdminjwtMiddleware, deleteWorkerController); 
+
+
+router.get('/Adcategories', AdminjwtMiddleware, getCategoriesController);
+router.post("/categories",AdminjwtMiddleware, addCategoryController);
+router.put("/editCategory/:id",  editCategoryController);
+
 
 
 export default router;

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import {
   createUser,
   findUserByEmail,
+  getAllCategories,
   updateUser,
 } from "../infrastructure/userRepository";
 import { updateUserProfile as updateUserProfileRepo } from "../infrastructure/userRepository";
@@ -183,4 +184,8 @@ export const resetPassword = async (email: string, otp: string, newPassword: str
     console.error("Error during password reset:", error);
     throw new Error("Failed to reset password");
   }
+};
+
+export const fetchAllCategories = async () => {
+  return getAllCategories();
 };
