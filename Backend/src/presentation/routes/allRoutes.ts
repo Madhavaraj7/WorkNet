@@ -27,6 +27,8 @@ import {
 
 // const jwtMiddleware = require('../../MiddleWare/jwt')
 import jwtMiddleware from "../MiddleWare/jwt";
+import workerRoleMiddleware from "../MiddleWare/workerRoleMiddleware";
+
 import AdminjwtMiddleware from "../MiddleWare/AdJwt";
 import { uploadMiddleware } from "../MiddleWare/multerConfig";
 import {
@@ -39,6 +41,7 @@ import {
   updateWorkerController,
 } from "../controllers/workerController";
 import checkUserStatusMiddleware from "../MiddleWare/checkUserStatusMiddleware";
+import { createSlotController} from "../controllers/slotController";
 
 const router = express.Router();
 
@@ -84,6 +87,9 @@ router.put(
   "/updateWorker",
   jwtMiddleware,
   uploadMiddleware, updateWorkerController)
+
+
+  router.post('/create-slot',workerRoleMiddleware,createSlotController);
 
 
 

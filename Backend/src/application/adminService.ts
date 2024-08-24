@@ -13,6 +13,8 @@ import { errorHandler } from "../utils/errorHandler";
 import { createCategory, deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
 import { Worker } from "../domain/worker"; 
 import { Category, ICategory } from "../domain/category";
+import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
+
 import mongoose from "mongoose";
 
 // Function to log in an admin user
@@ -114,18 +116,30 @@ export const updateWorkerStatus = async (
   status: "approved" | "rejected"
 ) => {
   try {
+    // Find the worker by _id
     const worker = await Worker.findOne({ _id });
-    console.log("worker",worker);
-    
+    console.log("worker", worker);
+
+    // If worker is not found, throw an error
     if (!worker) {
       throw new Error("Worker not found");
     }
 
+    // Update the worker's status
     const updatedWorker = await Worker.findOneAndUpdate(
       { _id },
       { status },
       { new: true }
     );
+
+  
+    if (status === "approved") {
+      await UserModel.findOneAndUpdate(
+        { _id: worker.userId }, 
+        { role: "worker" },
+        { new: true }
+      );
+    }
 
     return updatedWorker;
   } catch (error: any) {
@@ -133,6 +147,7 @@ export const updateWorkerStatus = async (
     throw new Error(`Failed to update worker status: ${error.message}`);
   }
 };
+
 
 
 // Function to delete a worker
