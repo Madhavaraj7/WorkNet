@@ -1,5 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { User } from './user'; 
+
+interface IKycDocument {
+  documentType: string;  
+  documentImage: string;  
+}
 
 interface IWorker extends Document {
   registerImage: string;
@@ -19,7 +23,9 @@ interface IWorker extends Document {
   userId: mongoose.Schema.Types.ObjectId; 
   averageReview?: string;
   status: string;
-  isBlocked?: boolean; 
+  isBlocked?: boolean;
+  amount: number;  // New field
+  kycDetails: IKycDocument[];  // New field
 }
 
 const workerSchema = new Schema<IWorker>({
@@ -73,10 +79,7 @@ const workerSchema = new Schema<IWorker>({
     type: String,
     required: true,
   },
-  place: {
-    type: String,
-    required: true,
-  },
+  
   workImages: {
     type: [String],
     required: true,
@@ -98,6 +101,20 @@ const workerSchema = new Schema<IWorker>({
     type: Boolean,
     default: false,
   },
+  amount: {
+    type: Number,
+    required: true,
+  },
+  kycDetails: [{
+    documentType: {
+      type: String,
+      required: true,
+    },
+    documentImage: {
+      type: String,
+      required: true,
+    },
+  }],
 }, { timestamps: true });
 
 export const Worker = mongoose.model<IWorker>('Worker', workerSchema);

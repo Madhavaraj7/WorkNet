@@ -4,7 +4,13 @@ import { getAllWorkersAPI, getCategoriesAPI } from "../Services/allAPI";
 import { Worker } from "../components/WorkerCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import { Alert, Pagination, Stack, Button } from "@mui/material";
+import { Alert, Pagination, Stack, Button, InputAdornment, TextField } from "@mui/material";
+import { city } from "../assets/AllCities/Cities";
+import SearchIcon from '@mui/icons-material/Search';
+import { Search } from "@mui/icons-material";
+
+
+const states = Array.from(new Set(city.map((city) => city.state)));
 
 const Workers: React.FC = () => {
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -13,6 +19,8 @@ const Workers: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ name: string }[]>([]);
+  const [citySearch, setCitySearch] = useState<string>("");
+  const [stateSearch, setStateSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const [workersPerPage] = useState(8);
 
@@ -45,22 +53,42 @@ const Workers: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let filtered = workers;
+
     if (selectedCategory) {
-      setFilteredWorkers(
-        workers.filter(worker =>
-          Array.isArray(worker.categories)
-            ? worker.categories.some(category =>
-                typeof category === "string"
-                  ? category === selectedCategory
-                  : category.name === selectedCategory
-              )
-            : false
+      filtered = filtered.filter((worker) =>
+        Array.isArray(worker.categories)
+          ? worker.categories.some((category) =>
+              typeof category === "string"
+                ? category === selectedCategory
+                : category.name === selectedCategory
+            )
+          : false
+      );
+    }
+
+    if (citySearch) {
+      filtered = filtered.filter((worker) =>
+        city.some(
+          (city) =>
+            city.name.toLowerCase().includes(citySearch.toLowerCase()) &&
+            worker.city === city.name
         )
       );
-    } else {
-      setFilteredWorkers(workers);
     }
-  }, [selectedCategory, workers]);
+
+    if (stateSearch) {
+      filtered = filtered.filter((worker) =>
+        city.some(
+          (city) =>
+            city.state.toLowerCase().includes(stateSearch.toLowerCase()) &&
+            worker.state === city.state
+        )
+      );
+    }
+
+    setFilteredWorkers(filtered);
+  }, [selectedCategory, workers, citySearch, stateSearch]);
 
   // Pagination logic
   const indexOfLastWorker = page * workersPerPage;
@@ -95,6 +123,69 @@ const Workers: React.FC = () => {
             Discover Our Skilled Workers
           </h1>
 
+          <div className="flex flex-col md:flex-row gap-4 mb-8">
+      <TextField
+        placeholder="Search by state"
+        variant="outlined"
+        size="small"
+        value={stateSearch}
+        onChange={(e) => setStateSearch(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search fontSize="small" />
+            </InputAdornment>
+          ),
+        }}
+        className="w-80 bg-white rounded-md shadow-sm"
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '8px', // Rounded corners
+            padding: '8px', // Padding inside input
+            '& fieldset': {
+              borderColor: 'gray',
+            },
+            '&:hover fieldset': {
+              borderColor: 'blue',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: 'blue',
+            },
+          },
+        }}
+      />
+      <TextField
+        placeholder="Search by city"
+        variant="outlined"
+        size="small"
+        value={citySearch}
+        onChange={(e) => setCitySearch(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search fontSize="small" />
+            </InputAdornment>
+          ),
+        }}
+        className="w-80 bg-white rounded-md shadow-sm"
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '8px', // Rounded corners
+            padding: '8px', // Padding inside input
+            '& fieldset': {
+              borderColor: 'gray',
+            },
+            '&:hover fieldset': {
+              borderColor: 'blue',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: 'blue',
+            },
+          },
+        }}
+      />
+    </div>
+
           {/* Category Filter */}
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <Button
@@ -107,8 +198,12 @@ const Workers: React.FC = () => {
             {categories.map((category) => (
               <Button
                 key={category.name}
-                variant={selectedCategory === category.name ? "contained" : "outlined"}
-                color={selectedCategory === category.name ? "primary" : "inherit"}
+                variant={
+                  selectedCategory === category.name ? "contained" : "outlined"
+                }
+                color={
+                  selectedCategory === category.name ? "primary" : "inherit"
+                }
                 onClick={() => setSelectedCategory(category.name)}
               >
                 {category.name}
@@ -124,8 +219,13 @@ const Workers: React.FC = () => {
               ))
             ) : (
               <div className="flex justify-center items-center col-span-full">
-                <Alert variant="outlined" severity="info" className="w-full max-w-md text-center">
-                  No workers available for the selected category. Please try another category.
+                <Alert
+                  variant="outlined"
+                  severity="info"
+                  className="w-full max-w-md text-center"
+                >
+                  No workers available for the selected category. Please try
+                  another category.
                 </Alert>
               </div>
             )}

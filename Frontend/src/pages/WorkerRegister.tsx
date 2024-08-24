@@ -17,14 +17,21 @@ import {
   CircularProgress,
   Backdrop,
   SelectChangeEvent,
+  CardActions,
+  CardMedia,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { registerWorkerAPI } from "../Services/allAPI";
+import { registerWorkerAPI, getCategoriesAPI } from "../Services/allAPI";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { city } from "../assets/AllCities/Cities";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
+// interface IKycDocument {
+//   documentType: string;
+//   documentImage: File | null; // File to store the uploaded image
+// }
 
 interface RegisterData {
   registerImage: File | null;
@@ -39,14 +46,17 @@ interface RegisterData {
   paymentMode: string;
   state: string;
   city: string;
-  place: string;
   workImages: File[];
+  amount: string; // New field for amount
+  kycDocumentType: string; // For dropdown selection
+  kycDocumentImage: File | null; // For storing the uploaded image
 }
 
 function WorkerRegister() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]); // State to hold categories
 
   const [registerData, setRegisterData] = useState<RegisterData>({
     registerImage: null,
@@ -61,8 +71,10 @@ function WorkerRegister() {
     paymentMode: "",
     state: "",
     city: "",
-    place: "",
     workImages: [],
+    amount: "", // Initialize amount field
+    kycDocumentType: "",
+    kycDocumentImage: null,
   });
   const [regImagePreview, setRegImagePreview] = useState<string>("");
   const [preview, setPreview] = useState<string[]>([]);
@@ -92,17 +104,36 @@ function WorkerRegister() {
     },
   };
 
-  const categories = [
-    "Plumbing",
-    "Electrical",
-    "Carpentry",
-    "Painting",
-    "Welding",
-    "TileWork",
-    "Centring",
-    "Construction",
-    "Fabrication",
-  ];
+  // const categories = [
+  //   "Plumbing",
+  //   "Electrical",
+  //   "Carpentry",
+  //   "Painting",
+  //   "Welding",
+  //   "TileWork",
+  //   "Centring",
+  //   "Construction",
+  //   "Fabrication",
+  // ];
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategoriesAPI();
+        console.log("categ", response);
+
+        const categoryNames = response.map(
+          (category: { name: string }) => category.name
+        );
+        setCategories(categoryNames);
+        console.log(categoryNames);
+      } catch (error) {
+        toast.error("Failed to fetch categories");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const workingDaysOptions = [
     "All Days",
@@ -165,8 +196,10 @@ function WorkerRegister() {
       paymentMode,
       state,
       city,
-      place,
       workImages,
+      amount,
+      kycDocumentType,
+      kycDocumentImage,
     } = registerData;
 
     if (
@@ -182,7 +215,9 @@ function WorkerRegister() {
       !paymentMode ||
       !state ||
       !city ||
-      !place ||
+      !amount ||
+      !kycDocumentType ||
+      !kycDocumentImage || // Ensure KYC fields are filled
       workImages.length === 0
     ) {
       toast.warning("Please fill the form completely!");
@@ -205,7 +240,9 @@ function WorkerRegister() {
       reqBody.append("paymentMode", paymentMode);
       reqBody.append("state", state);
       reqBody.append("city", city);
-      reqBody.append("place", place);
+      reqBody.append("amount", amount);
+      reqBody.append("kycDocumentType", kycDocumentType);
+      reqBody.append("kycDocumentImage", kycDocumentImage as File); // Append KYC image
       for (const image of workImages) {
         reqBody.append("workImages", image);
       }
@@ -235,8 +272,10 @@ function WorkerRegister() {
               paymentMode: "",
               state: "",
               city: "",
-              place: "",
               workImages: [],
+              amount: "",
+              kycDocumentType: "",
+              kycDocumentImage: null,
             });
             toast.success("Your Registration Successfully!");
             navigate("/");
@@ -415,12 +454,11 @@ function WorkerRegister() {
                   <Grid item xs={12} md={6}>
                     <FormControl fullWidth>
                       <InputLabel>Categories</InputLabel>
-
                       <Select
-                        label="Categories"
                         multiple
-                        value={registerData.categories}
+                        value={registerData.categories || []} // Ensure it's an array
                         onChange={handleChange}
+                        input={<OutlinedInput label="Categories" />}
                         renderValue={(selected) => (
                           <Box
                             sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
@@ -430,18 +468,9 @@ function WorkerRegister() {
                             ))}
                           </Box>
                         )}
-                        MenuProps={MenuProps}
                       >
                         {categories.map((category) => (
-                          <MenuItem
-                            key={category}
-                            value={category}
-                            style={getStyles(
-                              category,
-                              registerData.categories,
-                              theme
-                            )}
-                          >
+                          <MenuItem key={category} value={category}>
                             {category}
                           </MenuItem>
                         ))}
@@ -542,6 +571,21 @@ function WorkerRegister() {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Amount"
+                      variant="outlined"
+                      type="number"
+                      value={registerData.amount}
+                      onChange={(e) =>
+                        setRegisterData({
+                          ...registerData,
+                          amount: e.target.value,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
                     <FormControl fullWidth>
                       <InputLabel>State</InputLabel>
                       <Select
@@ -582,20 +626,6 @@ function WorkerRegister() {
                         ))}
                       </Select>
                     </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Place"
-                      variant="outlined"
-                      value={registerData.place}
-                      onChange={(e) =>
-                        setRegisterData({
-                          ...registerData,
-                          place: e.target.value,
-                        })
-                      }
-                    />
                   </Grid>
                 </Grid>
 
@@ -665,6 +695,115 @@ function WorkerRegister() {
                     />
                   </Button>
                 </Box>
+                <Grid
+                  container
+                  spacing={4}
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Grid item xs={12} md={6}>
+                    <div className="flex flex-col items-center mt-8">
+                      <h3 className="text-2xl font-bold mb-2 text-center">
+                        Upload Your KYC Details
+                      </h3>
+                      <p className="text-red-500 text-sm text-center mb-4">
+                        *Upload a valid document*
+                      </p>
+                    </div>
+
+                    <FormControl fullWidth variant="outlined" className="mb-6">
+                      {" "}
+                      {/* Increased bottom margin */}
+                      <InputLabel>Document Type</InputLabel>
+                      <Select
+                        value={registerData.kycDocumentType}
+                        onChange={(e) =>
+                          setRegisterData({
+                            ...registerData,
+                            kycDocumentType: e.target.value as string,
+                          })
+                        }
+                        label="Document Type"
+                      >
+                        <MenuItem value="Aadhaar Card">Aadhaar Card</MenuItem>
+                        <MenuItem value="Driving License">
+                          Driving License
+                        </MenuItem>
+                        {/* Add more document types if needed */}
+                      </Select>
+                    </FormControl>
+                    <br />
+                    <br />
+
+
+                    <label htmlFor="upload-kyc-document">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        id="upload-kyc-document"
+                        onChange={(e) => {
+                          const file = e.target.files
+                            ? e.target.files[0]
+                            : null;
+                          setRegisterData({
+                            ...registerData,
+                            kycDocumentImage: file,
+                          });
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        component="span"
+                        fullWidth
+                        className="mb-4"
+                      >
+                        Upload KYC Document
+                      </Button>
+                    </label>
+                    <br />
+                    <br />
+
+
+
+                    {registerData.kycDocumentImage && (
+                      <div className="flex justify-center mt-4">
+                        <Card style={{ width: "100%", maxWidth: "100%" }}>
+                          {" "}
+                          {/* Set width to 100% */}
+                          <CardMedia
+                            component="img"
+                            image={URL.createObjectURL(
+                              registerData.kycDocumentImage
+                            )}
+                            alt="KYC Document"
+                            style={{
+                              height: 150,
+                              objectFit: "contain",
+                              width: "100%",
+                            }} // Match the width
+                          />
+                          <CardActions className="justify-center">
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              onClick={() =>
+                                setRegisterData({
+                                  ...registerData,
+                                  kycDocumentImage: null,
+                                })
+                              }
+                            >
+                              Remove Image
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </div>
+                    )}
+                  </Grid>
+                </Grid>
+
                 <Box mt={4}>
                   <Button
                     variant="contained"
