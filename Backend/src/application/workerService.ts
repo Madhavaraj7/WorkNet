@@ -1,23 +1,40 @@
 import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, getAllWorkers, getWorkerById, unblockWorker, updateWorkerByIdInDB } from '../infrastructure/workerRepository';
 import { uploadToCloudinary } from '../cloudinaryConfig';
 import { Category, ICategory } from '../domain/category';
+import { User } from '../domain/user';
+import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
+
+
 import mongoose from 'mongoose';
 
 // register a worker
 // Assuming you need to handle both names and IDs
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
   try {
+    // Handle registerImage upload
     let registerImageUrl = '';
     if (files.registerImage) {
       registerImageUrl = await uploadToCloudinary(files.registerImage[0]);
     }
 
+    // Handle workImages upload
     const workImageUrls: string[] = [];
     if (files.workImages) {
       const workImagePromises = files.workImages.map((file: any) => uploadToCloudinary(file));
       workImageUrls.push(...await Promise.all(workImagePromises));
     }
 
+    // Handle kycDetails upload
+    const kycDetails: { documentType: string; documentImage: string }[] = [];
+    if (files.kycDocumentImage && workerData.kycDocumentType) {
+      const documentImage = await uploadToCloudinary(files.kycDocumentImage[0]);
+      kycDetails.push({
+        documentType: workerData.kycDocumentType,
+        documentImage,
+      });
+    }
+
+    // Handle categories
     let categoryIds: string[] = [];
     if (Array.isArray(workerData.categories)) {
       const isIdArray = workerData.categories.every((cat: any) => mongoose.Types.ObjectId.isValid(cat));
@@ -48,7 +65,7 @@ export const registerWorker = async (workerData: any, files: any): Promise<any> 
         if (!category) {
           throw new Error(`Category not found with ID: ${_id}`);
         }
-        return category._id.toString(); // Ensure _id is converted to string
+        return category._id.toString();
       })
     );
 
@@ -58,13 +75,22 @@ export const registerWorker = async (workerData: any, files: any): Promise<any> 
       categories: validCategoryIds,
       registerImage: registerImageUrl,
       workImages: workImageUrls,
+      kycDetails,  // Add KYC details to worker object
     };
 
-    return await createWorker(worker);
+    const newWorker = await createWorker(worker);
+
+    await UserModel.updateOne(
+      { _id: workerData.userId }, 
+      { $set: { role: 'worker' } }
+    );
+
+    return newWorker;
   } catch (err: any) {
     throw new Error('Error registering worker: ' + err.message);
   }
 };
+
 
 
 // find worker by using userID

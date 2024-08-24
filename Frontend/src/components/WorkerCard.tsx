@@ -80,7 +80,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
               fullWidth
               className="text-white"
             >
-              Read More
+              View Details
             </Button>
           </Link>
         </div>

@@ -75,7 +75,6 @@ router.post(
   jwtMiddleware,
   uploadMiddleware,
   checkUserStatusMiddleware,
-
   registerWorkerController
 );
 router.get("/getUserWorkDetails", jwtMiddleware,  checkUserStatusMiddleware,
