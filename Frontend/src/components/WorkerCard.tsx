@@ -53,7 +53,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
           )}
           <div className="flex items-center text-gray-600 text-sm mb-4">
             <LocationOnIcon className="text-blue-500 mr-2" />
-            <span>{`${worker.place}, ${worker.city}, ${worker.state}`}</span>
+            <span>{` ${worker.city}, ${worker.state}`}</span>
           </div>
           {/* Category Badges */}
           <div className="flex flex-wrap gap-2 mb-4">
