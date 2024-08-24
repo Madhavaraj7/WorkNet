@@ -82,7 +82,7 @@ export const registerWorker = async (workerData: any, files: any): Promise<any> 
 
     await UserModel.updateOne(
       { _id: workerData.userId }, 
-      { $set: { role: 'worker' } }
+      { $set: { role: 'pendingworker' } }
     );
 
     return newWorker;
