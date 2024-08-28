@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent } from "react";
+import React, { useEffect, useState, ChangeEvent, useContext } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -27,6 +27,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { city } from "../assets/AllCities/Cities";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { tokenAuthenticationContext } from "../ContextAPI/TokenAuth";
 
 // interface IKycDocument {
 //   documentType: string;
@@ -54,9 +55,12 @@ interface RegisterData {
 
 function WorkerRegister() {
   const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]); // State to hold categories
+
+
 
   const [registerData, setRegisterData] = useState<RegisterData>({
     registerImage: null,
@@ -80,6 +84,7 @@ function WorkerRegister() {
   const [preview, setPreview] = useState<string[]>([]);
   const [IndianStates, setIndianStates] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
+
   const theme = useTheme();
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -277,7 +282,7 @@ function WorkerRegister() {
               kycDocumentType: "",
               kycDocumentImage: null,
             });
-            toast.success("Your Registration Successfully!");
+            toast.success("Your Registration Successfully please wait for admin approvel!");
             navigate("/");
           } else {
             toast.info(result.response || "Registration failed");

@@ -36,7 +36,7 @@ export const findWorkerByIdInDB = async (userId: string): Promise<any> => {
 
 export const updateWorkerByIdInDB = async (userId: string, updateData: any): Promise<any> => {
   return await Worker.findOneAndUpdate({ userId }, updateData, { new: true });
-};;
+};
 
 // Worker Repository
 export const getAllWorkers = async (): Promise<any> => {

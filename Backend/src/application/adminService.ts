@@ -16,6 +16,7 @@ import { Category, ICategory } from "../domain/category";
 import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
 
 import mongoose from "mongoose";
+import { sendEmail } from "../utils/sendEamilForApprove";
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -132,7 +133,14 @@ export const updateWorkerStatus = async (
       { new: true }
     );
 
-  
+    // Fetch the associated user by worker.userId
+    const user = await UserModel.findOne({ _id: worker.userId });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // If the status is approved, update the user's role to "worker"
     if (status === "approved") {
       await UserModel.findOneAndUpdate(
         { _id: worker.userId }, 
@@ -141,13 +149,24 @@ export const updateWorkerStatus = async (
       );
     }
 
+    // Send email notification based on the status
+    const emailSubject = status === "approved" ? "Worker Status Approved" : "Worker Status Rejected";
+    const emailBody = status === "approved"
+      ? "Congratulations! Your worker status has been approved please login again."
+      : "We regret to inform you that your worker status has been rejected.";
+
+    await sendEmail ({
+      to: user.email,
+      subject: emailSubject,
+      body: emailBody,
+    });
+
     return updatedWorker;
   } catch (error: any) {
     console.error(`Failed to update worker status: ${error.message}`);
     throw new Error(`Failed to update worker status: ${error.message}`);
   }
 };
-
 
 
 // Function to delete a worker

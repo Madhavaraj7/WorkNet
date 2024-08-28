@@ -1,10 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
-import { TextField, CircularProgress, Button } from "@mui/material";
+import {
+  TextField,
+  CircularProgress,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  CardContent,
+  Card,
+  TablePagination,
+} from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import {
   updateUserProfileAPI,
   getLoginedUserWorksAPI,
+  updateWorkerAPI,
+  createSlotAPI,
+  getSlotsByWorkerAPI,
 } from "../Services/allAPI";
 import { SERVER_URL } from "../Services/serverURL";
 import { toast } from "react-toastify";
@@ -21,6 +36,10 @@ interface UserProfile {
 }
 
 interface WorkerDetails {
+  whatsappNumber: any;
+  kycDetails: any;
+  amount: any;
+  profileImage: File | string;
   _id: string;
   registerImage: string;
   name: string;
@@ -35,6 +54,12 @@ interface WorkerDetails {
   city: string;
   place: string;
   workImages: string[];
+  workerHours: string; // Added
+  slots?: Array<{ startDate: string; endDate: string }>; // Added
+}
+interface Slot {
+  startDate: string;
+  endDate: string;
 }
 
 function Profile() {
@@ -54,6 +79,14 @@ function Profile() {
     null
   );
   const [loading, setLoading] = useState<boolean>(false);
+  const [workerImagePreview, setWorkerImagePreview] = useState<string>("");
+  const [newSlot, setNewSlot] = useState<Slot>({ startDate: "", endDate: "" });
+  const [newSlots, setNewSlots] = useState<Slot[]>([]);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 2; // Fixed number of rows per page
+
+  
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -69,6 +102,7 @@ function Profile() {
         try {
           const data = await getLoginedUserWorksAPI(token);
           setWorkerDetails(data);
+          setWorkerImagePreview(data.registerImage || "");
         } catch (err) {
           console.error(err);
         }
@@ -78,27 +112,64 @@ function Profile() {
     fetchWorkerDetails();
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    isWorker: boolean = false
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImagePreview(reader.result as string);
+        if (isWorker) {
+          setWorkerImagePreview(reader.result as string);
+          setWorkerDetails((prev) =>
+            prev ? { ...prev, profileImage: file } : prev
+          );
+        } else {
+          setProfileImagePreview(reader.result as string);
+          setUserProfile((prev) => ({
+            ...prev,
+            profileImage: file,
+          }));
+        }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    isWorker: boolean = false
+  ) => {
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const { name, value } = target;
+
+    if (isWorker) {
+      setWorkerDetails((prev) => (prev ? { ...prev, [name]: value } : prev));
+    } else {
       setUserProfile((prev) => ({
         ...prev,
-        profileImage: file,
+        [name]: value,
       }));
     }
   };
 
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUserProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const workingDaysOptions = [
+    "All Days",
+    "Monday to Saturday",
+    "Monday to Friday",
+    "Saturday and Sunday",
+  ];
+
+  const timeSlots = [
+    "24 Hours",
+    "9 AM to 6 PM",
+    "10 AM to 5 PM",
+    "9 AM to 9 PM",
+  ];
+
+  const navigateToDetailsPage = () => {
+    navigate("/worker-details"); // Replace with the actual route
   };
 
   const handleUpdate = async () => {
@@ -139,7 +210,7 @@ function Profile() {
           toast.success("Your profile updated successfully");
           localStorage.setItem("user", JSON.stringify(result));
           setProfileUpdateResponse(result);
-          navigate("/");
+          // navigate("/");
         } else {
           toast.info(result.response || "Something went wrong!");
         }
@@ -159,13 +230,161 @@ function Profile() {
     }
   };
 
+  const handleWorkerUpdate = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!workerDetails) {
+      toast.warning("No worker details available for update!");
+      return;
+    }
+
+    const reqBody = new FormData();
+    reqBody.append("name", workerDetails.name);
+    reqBody.append("phoneNumber", workerDetails.phoneNumber.toString());
+    reqBody.append("whatsappNumber", workerDetails.whatsappNumber.toString());
+    reqBody.append("categories", JSON.stringify(workerDetails.categories));
+    reqBody.append("experience", workerDetails.experience.toString());
+    reqBody.append("workingDays", workerDetails.workingDays);
+    reqBody.append("availableTime", workerDetails.availableTime);
+    reqBody.append("address", workerDetails.address);
+    reqBody.append("paymentMode", workerDetails.paymentMode);
+    reqBody.append("state", workerDetails.state);
+    reqBody.append("city", workerDetails.city);
+    reqBody.append("place", workerDetails.place);
+    reqBody.append("workerHours", workerDetails.workerHours); // Added
+    reqBody.append(
+      "profileImage",
+      workerDetails.profileImage instanceof File
+        ? workerDetails.profileImage
+        : workerImagePreview
+    );
+    reqBody.append("amount", workerDetails.amount.toString());
+
+    if (token) {
+      setLoading(true);
+      try {
+        const result = await updateWorkerAPI(reqBody, token);
+        console.log(updateWorkerAPI);
+
+        if (result) {
+          toast.success("Worker details updated successfully");
+          setWorkerDetails(result);
+        } else {
+          toast.info(result || "Something went wrong!");
+        }
+      } catch (err: any) {
+        console.error(err);
+        toast.error("An error occurred while updating worker details.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleDropdownChange = (
+    e: SelectChangeEvent<string>,
+    name: string,
+    isWorker: boolean = false
+  ) => {
+    const value = e.target.value as string;
+    if (isWorker) {
+      setWorkerDetails((prev) => (prev ? { ...prev, [name]: value } : prev));
+    } else {
+      setUserProfile((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleSlotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewSlot((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const slotsData = await getSlotsByWorkerAPI(token);
+          setNewSlots(slotsData);
+        } catch (err) {
+          console.error(err);
+          // toast.error("Failed to load slots.");
+        }
+      }
+    };
+
+    fetchSlots();
+  }, []);
+
+  const handleSlotSubmit = async () => {
+    const token = localStorage.getItem("token");
+
+    // Check if both dates are provided
+    if (!newSlot.startDate || !newSlot.endDate) {
+      toast.warning("Please fill out both start date and end date.");
+      return;
+    }
+
+    // Validate that endDate is later than startDate
+    if (new Date(newSlot.startDate) > new Date(newSlot.endDate)) {
+      toast.warning("End Date must be later than Start Date.");
+      return;
+    }
+
+    // Check if token is available
+    if (!token) {
+      toast.error("No token found, please log in again.");
+      return;
+    }
+
+    try {
+      await createSlotAPI(newSlot, token);
+      toast.success("Slot created successfully!");
+
+      const slotsData = await getSlotsByWorkerAPI(token);
+      console.log(slotsData);
+
+      setNewSlots(slotsData);
+
+      // Reset form fields
+      setNewSlot({ startDate: "", endDate: "" });
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while creating the slot.");
+    }
+  };
+  const today = new Date().toISOString().split("T")[0];
+
+  
+  const formatDate = (dateString: string | number | Date) => {
+    const options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(new Date(dateString));
+  };
+  
+
   const handleClick = () => {
     navigate("/register");
   };
 
-  const handleClickUpdate = () => {
-    navigate("/updateWorker");
+  // Paginate the slots
+  const paginatedSlots = newSlots.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (
+    _event: any,
+    newPage: React.SetStateAction<number>
+  ) => {
+    setPage(newPage);
   };
+
 
   return (
     <>
@@ -176,11 +395,12 @@ function Profile() {
       <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
         {/* Left side profile update */}
         <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
+        
           <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
             <div className="flex justify-start mb-6">
               <label className="relative cursor-pointer">
                 <input
-                  onChange={handleImageChange}
+                  onChange={(e) => handleImageChange(e)}
                   className="hidden"
                   type="file"
                 />
@@ -203,188 +423,279 @@ function Profile() {
               name="username"
               value={userProfile.username}
               onChange={handleFieldChange}
-              type="text"
-              className="w-full"
+              fullWidth
               label="Username"
               variant="outlined"
-              InputLabelProps={{ shrink: true }}
             />
             <TextField
               name="email"
               value={userProfile.email}
-              type="text"
-              className="w-full"
+              onChange={handleFieldChange}
+              fullWidth
               label="Email"
               variant="outlined"
-              InputLabelProps={{ shrink: true }}
-              InputProps={{ readOnly: true }}
-              sx={{ backgroundColor: "#f5f5f5" }}
+              disabled
             />
             <TextField
               name="oldPassword"
+              type="password"
               value={userProfile.oldPassword}
               onChange={handleFieldChange}
-              type="password"
-              className="w-full"
+              fullWidth
               label="Old Password"
               variant="outlined"
-              InputLabelProps={{ shrink: true }}
             />
             <TextField
               name="newPassword"
+              type="password"
               value={userProfile.newPassword}
               onChange={handleFieldChange}
-              type="password"
-              className="w-full"
+              fullWidth
               label="New Password"
               variant="outlined"
-              InputLabelProps={{ shrink: true }}
             />
-            <Button
-              onClick={handleUpdate}
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="large"
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : "Update"}
-            </Button>
+            <div className="flex justify-center">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUpdate}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : "Update Profile"}
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* centre side */}
+        {/* Right side worker profile */}
 
         <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
-          <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-5">
-            <img
-              src="/src/assets/user.gif"
-              alt="Update Profile GIF"
-              className="w-full h-auto max-w-xs mx-auto"
-            />
-            <h2 className="text-5xl font-semibold text-gray-800 mb-6">
-              Update Your Profile Now!
-            </h2>
-            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-              Customize your profile to reflect your true self. Update your
-              details and make sure everything is accurate your journey starts
-              here!
-            </p>
-          </div>
-        </div>
-
-        {/* Right side worker details */}
-        <div className="flex-grow flex justify-start items-start py-12 px-10 lg:w-1/2">
-          <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4 flex flex-col justify-between">
-            {workerDetails ? (
-              <>
-                <div>
-                  <div className="flex flex-col items-center">
-                    <img
-                      className="w-32 h-32 rounded-full border-4 border-gray-200 shadow-lg"
-                      src={workerDetails.registerImage}
-                      alt={workerDetails.name}
+          {workerDetails ? (
+            <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
+              <div className="flex justify-start mb-6">
+                <label className="relative cursor-pointer">
+                  <input
+                    onChange={(e) => handleImageChange(e, true)}
+                    className="hidden"
+                    type="file"
+                  />
+                  <div
+                    style={{
+                      backgroundImage: workerImagePreview
+                        ? `url(${workerImagePreview})`
+                        : `url(${SERVER_URL}/uploads/${workerDetails.registerImage})`,
+                    }}
+                    className="w-32 h-32 rounded-full bg-cover bg-center flex justify-center items-center border-2 border-gray-300"
+                  >
+                    <AddAPhotoIcon
+                      className="text-white absolute bottom-2 right-2"
+                      fontSize="large"
                     />
-                    <h2 className="mt-4 text-2xl font-semibold text-gray-800">
-                      {workerDetails.name}
-                    </h2>
-                    <p className="text-gray-500">{workerDetails.phoneNumber}</p>
                   </div>
-                  <div className=" border-gray-200 mt-4 pt-4 space-y-4">
-                    <div className="flex items-start">
-                      <h3 className="w-1/3 text-lg font-semibold text-gray-800">
-                        Categories
-                      </h3>
-                      <p className="w-2/3 text-gray-600">
-                        {workerDetails.categories.join(", ")}
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <h3 className="w-1/3 text-lg font-semibold text-gray-800">
-                        Experience
-                      </h3>
-                      <p className="w-2/3 text-gray-600">
-                        {workerDetails.experience} years
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <h3 className="w-1/3 text-lg font-semibold text-gray-800">
-                        Working Days
-                      </h3>
-                      <p className="w-2/3 text-gray-600">
-                        {workerDetails.workingDays}
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <h3 className="w-1/3 text-lg font-semibold text-gray-800">
-                        Available Time
-                      </h3>
-                      <p className="w-2/3 text-gray-600">
-                        {workerDetails.availableTime}
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <h3 className="w-1/3 text-lg font-semibold text-gray-800">
-                        Address
-                      </h3>
-                      <p className="w-2/3 text-gray-600">
-                        {workerDetails.address}
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <h3 className="w-1/3 text-lg font-semibold text-gray-800">
-                        Payment Mode
-                      </h3>
-                      <p className="w-2/3 text-gray-600">
-                        {workerDetails.paymentMode}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+                </label>
+              </div>
+              <TextField
+                name="name"
+                value={workerDetails.name}
+                onChange={(e) => handleFieldChange(e, true)}
+                fullWidth
+                label="Name"
+                variant="outlined"
+              />
+              <TextField
+                name="phoneNumber"
+                value={workerDetails.phoneNumber}
+                onChange={(e) => handleFieldChange(e, true)}
+                fullWidth
+                label="Phone Number"
+                variant="outlined"
+              />
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="workingDays-label">Working Days</InputLabel>
+                <Select
+                  labelId="workingDays-label"
+                  name="workingDays"
+                  value={workerDetails?.workingDays || ""}
+                  onChange={(e) => handleDropdownChange(e, "workingDays", true)}
+                  label="Working Days"
+                >
+                  {workingDaysOptions.map((day, index) => (
+                    <MenuItem key={index} value={day}>
+                      {day}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="availableTime-label">Available Time</InputLabel>
+                <Select
+                  labelId="availableTime-label"
+                  name="availableTime"
+                  value={workerDetails?.availableTime || ""}
+                  onChange={(e) =>
+                    handleDropdownChange(e, "availableTime", true)
+                  }
+                  label="Available Time"
+                >
+                  {timeSlots.map((slot, index) => (
+                    <MenuItem key={index} value={slot}>
+                      {slot}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <div className="flex justify-center space-x-4">
                 <Button
-                  onClick={handleClickUpdate}
-                  fullWidth
                   variant="contained"
                   color="primary"
-                  size="large"
-                  className="mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full transform transition-transform hover:scale-105 shadow-lg"
+                  onClick={handleWorkerUpdate}
+                  disabled={loading}
                 >
-                  Update Worker Details
+                  {loading ? <CircularProgress size={24} /> : "Update Worker"}
                 </Button>
-              </>
-            ) : (
-              <div className="text-center">
-                <div className=" max-w-lg bg-white p-6 space-y-4 flex flex-col justify-between">
-                  <img
-                    src="/src/assets/Images/EmptyWorker.gif"
-                    alt="Register Worker GIF"
-                    className="w-full h-auto max-w-xs mx-auto"
-                  />
-                  <button
-                    onClick={handleClick}
-                    className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
-                  >
-                    Register a Worker
-                  </button>
-                  <br />
-                  <h2 className="text-4xl font-semibold text-gray-800 mb-6">
-                    Join Our Team Now!
-                  </h2>
-                  <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                    Ready to make an impact? Register now to become a part of
-                    our growing team. Update your profile to reflect your skills
-                    and expertise. Your journey starts here!
-                  </p>
-                </div>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={navigateToDetailsPage}
+                >
+                  Update More
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="text-center">
+              <div className=" max-w-lg bg-white p-6 space-y-4 flex flex-col justify-between">
+                <img
+                  src="/src/assets/Images/EmptyWorker.gif"
+                  alt="Register Worker GIF"
+                  className="w-full h-auto max-w-xs mx-auto"
+                />
+                <button
+                  onClick={handleClick}
+                  className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+                >
+                  Register a Worker
+                </button>
+                <br />
+                <h2 className="text-4xl font-semibold text-gray-800 mb-6">
+                  Join Our Team Now!
+                </h2>
+                <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                  Ready to make an impact? Register now to become a part of our
+                  growing team. Update your profile to reflect your skills and
+                  expertise. Your journey starts here!
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* slot side worker profile */}
+
+        <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
+          {workerDetails ? (
+            <Card>
+              <CardContent>
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">Create Slots</h2>
+              <TextField
+                  label="Start Date"
+                  name="startDate"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={newSlot.startDate}
+                  onChange={handleSlotChange}
+                  fullWidth
+                  margin="normal"
+                  inputProps={{ min: new Date().toISOString().split("T")[0] }} // Disable previous dates
+                />
+                <TextField
+                  label="End Date"
+                  name="endDate"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={newSlot.endDate}
+                  onChange={handleSlotChange}
+                  fullWidth
+                  margin="normal"
+                  inputProps={{ min: new Date().toISOString().split("T")[0] }} // Disable previous dates
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSlotSubmit}
+                  className="mt-4"
+                >
+                  Create Slot
+                </Button>
+                <h3 className="text-lg font-semibold mt-8 mb-2">My Slots</h3>
+                {newSlots.length > 0 ? (
+  <div className="overflow-x-auto p-4">
+    <table className="min-w-full bg-white shadow-md rounded-lg border border-gray-200">
+      <thead className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
+        <tr>
+          <th className="py-3 px-6 text-left text-lg font-semibold">Start Date</th>
+          <th className="py-3 px-6 text-left text-lg font-semibold">End Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {paginatedSlots.length > 0 ? (
+          paginatedSlots
+            .filter(
+              (slot, index, self) =>
+                index ===
+                self.findIndex(
+                  (s) =>
+                    s.startDate === slot.startDate &&
+                    s.endDate === slot.endDate
+                )
+            )
+            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+            .map((slot, index) => (
+              <tr
+                key={index}
+                className="hover:bg-gray-100 transition-colors duration-300 border-b border-gray-200"
+              >
+                <td className="py-3 px-6">{formatDate(slot.startDate)}</td>
+                <td className="py-3 px-6">{formatDate(slot.endDate)}</td>
+              </tr>
+            ))
+        ) : (
+          <tr>
+            <td colSpan={2} className="text-center text-gray-600 py-6">
+              No slots available.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+    <TablePagination
+      rowsPerPageOptions={[]} // Remove rows per page options dropdown
+      component="div"
+      count={newSlots.length}
+      rowsPerPage={rowsPerPage}
+      page={page}
+      onPageChange={handleChangePage}
+    />
+  </div>
+) : (
+  <p className="text-center text-gray-600 py-6">No slots available.</p>
+)}
+
+              </CardContent>
+            </Card>
+          ) : (
+            <div></div>
+          )}
         </div>
       </div>
+
       <Footer />
     </>
   );
 }
 
 export default Profile;
+function sort(arg0: (a: any, b: any) => number) {
+  throw new Error("Function not implemented.");
+}
+

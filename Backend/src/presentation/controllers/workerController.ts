@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { registerWorker, findWorkerByUserId, unblockWorkerService, blockWorkerService, getLoginedUserWorksService, findWorkerById, updateWorkerById, getAllWorkersService, getWorkerByIdService } from '../../application/workerService';
 import cloudinary, { uploadToCloudinary } from '../../cloudinaryConfig';
+import mongoose from 'mongoose';
 
 interface CustomRequest extends Request {
   userId?: string;
@@ -93,7 +94,7 @@ export const getLoginedUserWorksController = async (req: CustomRequest, res: Res
 export const updateWorkerController = async (req: CustomRequest, res: any): Promise<void> => {
   try {
     const userId = req.userId;
-    const workerData = req.body;
+    let { categories, ...workerData } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     if (!userId) {
@@ -108,7 +109,6 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
     // Handle register image upload
     let registerImageUrl = existingWorker.registerImage;
     if (files.registerImage?.[0]) {
-      // Remove old register image if it exists
       if (registerImageUrl) {
         await deleteFromCloudinary(registerImageUrl);
       }
@@ -130,9 +130,35 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
       workImageUrls.push(...existingWorker.workImages);
     }
 
+    // Handle and parse categories if provided
+    if (categories) {
+      // Ensure categories is an array
+      if (typeof categories === 'string') {
+        try {
+          categories = JSON.parse(categories);
+        } catch (err) {
+          return res.status(400).json({ message: 'Invalid categories format' });
+        }
+      }
+
+      // Verify that categories is an array
+      if (!Array.isArray(categories)) {
+        return res.status(400).json({ message: 'Categories must be an array' });
+      }
+
+      // Convert each category to a valid ObjectId
+      categories = categories.map((category: string) => {
+        return new mongoose.Types.ObjectId(category); // Convert string to ObjectId
+      });
+    } else {
+      // Default to existing categories if none provided
+      categories = existingWorker.categories;
+    }
+
     // Update worker data
     const updatedWorker = await updateWorkerById(userId, {
       ...workerData,
+      categories, // Update the categories field
       registerImage: registerImageUrl,
       workImages: workImageUrls,
       status: "pending",
@@ -144,6 +170,7 @@ export const updateWorkerController = async (req: CustomRequest, res: any): Prom
     res.status(500).json({ message: err.message });
   }
 };
+
 
 const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
   // Extract the public ID from the image URL

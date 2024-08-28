@@ -22,12 +22,13 @@ import UserEditableWorkCard from "./pages/UserEditableWorkCard";
 import Workers from "./pages/Workers";
 import Worker from "./pages/Worker";
 import AdCategory from "./pages/Admin/AdCategory";
+import Slots from "./pages/Slots";
 
 function App() {
   return (
     <>
       <ToastContainer
-        position="top-right"
+        position="top-center"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -58,6 +59,9 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<WorkerRegister />} />
           <Route path="/updateWorker" element={<UserEditableWorkCard />} />
+          <Route path="/create-slots" element={<Slots />} />
+
+
         </Route>
 
         <Route path="/admin" element={<AdminAuth />} />
