@@ -11,6 +11,7 @@ import {
   SelectChangeEvent,
   CardContent,
   Card,
+  TablePagination,
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import {
@@ -81,6 +82,11 @@ function Profile() {
   const [workerImagePreview, setWorkerImagePreview] = useState<string>("");
   const [newSlot, setNewSlot] = useState<Slot>({ startDate: "", endDate: "" });
   const [newSlots, setNewSlots] = useState<Slot[]>([]);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 2; // Fixed number of rows per page
+
+  
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -308,22 +314,30 @@ function Profile() {
           setNewSlots(slotsData);
         } catch (err) {
           console.error(err);
-          toast.error("Failed to load slots.");
+          // toast.error("Failed to load slots.");
         }
       }
     };
-    
+
     fetchSlots();
   }, []);
 
   const handleSlotSubmit = async () => {
     const token = localStorage.getItem("token");
 
+    // Check if both dates are provided
     if (!newSlot.startDate || !newSlot.endDate) {
       toast.warning("Please fill out both start date and end date.");
       return;
     }
 
+    // Validate that endDate is later than startDate
+    if (new Date(newSlot.startDate) > new Date(newSlot.endDate)) {
+      toast.warning("End Date must be later than Start Date.");
+      return;
+    }
+
+    // Check if token is available
     if (!token) {
       toast.error("No token found, please log in again.");
       return;
@@ -335,10 +349,8 @@ function Profile() {
 
       const slotsData = await getSlotsByWorkerAPI(token);
       console.log(slotsData);
-  
-      setNewSlots(slotsData);
-      
 
+      setNewSlots(slotsData);
 
       // Reset form fields
       setNewSlot({ startDate: "", endDate: "" });
@@ -347,10 +359,32 @@ function Profile() {
       toast.error("An error occurred while creating the slot.");
     }
   };
+  const today = new Date().toISOString().split("T")[0];
+
+  
+  const formatDate = (dateString: string | number | Date) => {
+    const options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(new Date(dateString));
+  };
+  
 
   const handleClick = () => {
     navigate("/register");
   };
+
+  // Paginate the slots
+  const paginatedSlots = newSlots.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (
+    _event: any,
+    newPage: React.SetStateAction<number>
+  ) => {
+    setPage(newPage);
+  };
+
 
   return (
     <>
@@ -361,6 +395,7 @@ function Profile() {
       <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
         {/* Left side profile update */}
         <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
+        
           <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
             <div className="flex justify-start mb-6">
               <label className="relative cursor-pointer">
@@ -555,12 +590,14 @@ function Profile() {
           )}
         </div>
 
+        {/* slot side worker profile */}
+
         <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
           {workerDetails ? (
             <Card>
               <CardContent>
-                <h2 className="text-xl font-semibold mb-4">Create Slot</h2>
-                <TextField
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">Create Slots</h2>
+              <TextField
                   label="Start Date"
                   name="startDate"
                   type="date"
@@ -569,6 +606,7 @@ function Profile() {
                   onChange={handleSlotChange}
                   fullWidth
                   margin="normal"
+                  inputProps={{ min: new Date().toISOString().split("T")[0] }} // Disable previous dates
                 />
                 <TextField
                   label="End Date"
@@ -579,6 +617,7 @@ function Profile() {
                   onChange={handleSlotChange}
                   fullWidth
                   margin="normal"
+                  inputProps={{ min: new Date().toISOString().split("T")[0] }} // Disable previous dates
                 />
                 <Button
                   variant="contained"
@@ -588,39 +627,59 @@ function Profile() {
                 >
                   Create Slot
                 </Button>
-                <h3 className="text-lg font-semibold mt-8 mb-4">My Slots</h3>
-             {newSlots.length > 0 ? (
-  <div className="overflow-x-auto">
-    <table className="min-w-full bg-gradient-to-r from-blue-50 to-blue-100 shadow-lg rounded-lg">
-      <thead>
-        <tr className="bg-blue-500 text-white">
-          <th className="py-3 px-6">Start Date</th>
-          <th className="py-3 px-6">End Date</th>
+                <h3 className="text-lg font-semibold mt-8 mb-2">My Slots</h3>
+                {newSlots.length > 0 ? (
+  <div className="overflow-x-auto p-4">
+    <table className="min-w-full bg-white shadow-md rounded-lg border border-gray-200">
+      <thead className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
+        <tr>
+          <th className="py-3 px-6 text-left text-lg font-semibold">Start Date</th>
+          <th className="py-3 px-6 text-left text-lg font-semibold">End Date</th>
         </tr>
       </thead>
       <tbody>
-  {newSlots
-    .filter((slot, index, self) => 
-      index === self.findIndex((s) => s.startDate === slot.startDate && s.endDate === slot.endDate)
-    )
-    .map((slot, index) => (
-      <tr key={index}>
-        <td className="py-3 px-6">
-          {new Date(slot.startDate).toLocaleDateString()}
-        </td>
-        <td className="py-3 px-6">
-          {new Date(slot.endDate).toLocaleDateString()}
-        </td>
-      </tr>
-    ))}
-</tbody>
-
+        {paginatedSlots.length > 0 ? (
+          paginatedSlots
+            .filter(
+              (slot, index, self) =>
+                index ===
+                self.findIndex(
+                  (s) =>
+                    s.startDate === slot.startDate &&
+                    s.endDate === slot.endDate
+                )
+            )
+            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+            .map((slot, index) => (
+              <tr
+                key={index}
+                className="hover:bg-gray-100 transition-colors duration-300 border-b border-gray-200"
+              >
+                <td className="py-3 px-6">{formatDate(slot.startDate)}</td>
+                <td className="py-3 px-6">{formatDate(slot.endDate)}</td>
+              </tr>
+            ))
+        ) : (
+          <tr>
+            <td colSpan={2} className="text-center text-gray-600 py-6">
+              No slots available.
+            </td>
+          </tr>
+        )}
+      </tbody>
     </table>
+    <TablePagination
+      rowsPerPageOptions={[]} // Remove rows per page options dropdown
+      component="div"
+      count={newSlots.length}
+      rowsPerPage={rowsPerPage}
+      page={page}
+      onPageChange={handleChangePage}
+    />
   </div>
 ) : (
-  <p>No slots available.</p>
+  <p className="text-center text-gray-600 py-6">No slots available.</p>
 )}
-
 
               </CardContent>
             </Card>
@@ -636,3 +695,7 @@ function Profile() {
 }
 
 export default Profile;
+function sort(arg0: (a: any, b: any) => number) {
+  throw new Error("Function not implemented.");
+}
+
