@@ -4,6 +4,8 @@ export interface ISlot extends Document {
   workerId: mongoose.Schema.Types.ObjectId;
   date: Date;
   isAvailable: boolean;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 const slotSchema = new Schema<ISlot>({
@@ -20,6 +22,12 @@ const slotSchema = new Schema<ISlot>({
     type: Boolean,
     required: true,
     default: true,
+  },
+  startDate: {
+    type: Date,
+  },
+  endDate: {
+    type: Date,
   },
 }, { timestamps: true });
 

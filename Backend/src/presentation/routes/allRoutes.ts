@@ -41,7 +41,7 @@ import {
   updateWorkerController,
 } from "../controllers/workerController";
 import checkUserStatusMiddleware from "../MiddleWare/checkUserStatusMiddleware";
-import { createSlotController} from "../controllers/slotController";
+import { createSlotController, getSlotsByWorkerController,} from "../controllers/slotController";
 
 const router = express.Router();
 
@@ -90,6 +90,10 @@ router.put(
 
 
   router.post('/create-slot',workerRoleMiddleware,createSlotController);
+  router.get('/slots', workerRoleMiddleware, getSlotsByWorkerController);
+
+
+  
 
 
 

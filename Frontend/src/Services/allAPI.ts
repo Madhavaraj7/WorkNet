@@ -342,3 +342,22 @@ export const createSlotAPI = async (reqBody: any, token: string) => {
     throw new Error("Failed to create slot");
   }
 };
+
+
+
+// Get Slots by Worker API
+export const getSlotsByWorkerAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/slots`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    throw new Error("Failed to fetch slots by worker");
+  }
+};

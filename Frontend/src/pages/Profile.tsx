@@ -1,11 +1,24 @@
 import React, { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
-import { TextField, CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import {
+  TextField,
+  CircularProgress,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  CardContent,
+  Card,
+} from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import {
   updateUserProfileAPI,
   getLoginedUserWorksAPI,
   updateWorkerAPI,
+  createSlotAPI,
+  getSlotsByWorkerAPI,
 } from "../Services/allAPI";
 import { SERVER_URL } from "../Services/serverURL";
 import { toast } from "react-toastify";
@@ -40,7 +53,12 @@ interface WorkerDetails {
   city: string;
   place: string;
   workImages: string[];
-  workerHours: string;  // Added
+  workerHours: string; // Added
+  slots?: Array<{ startDate: string; endDate: string }>; // Added
+}
+interface Slot {
+  startDate: string;
+  endDate: string;
 }
 
 function Profile() {
@@ -61,6 +79,8 @@ function Profile() {
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [workerImagePreview, setWorkerImagePreview] = useState<string>("");
+  const [newSlot, setNewSlot] = useState<Slot>({ startDate: "", endDate: "" });
+  const [newSlots, setNewSlots] = useState<Slot[]>([]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -117,11 +137,9 @@ function Profile() {
   ) => {
     const target = e.target as HTMLInputElement | HTMLTextAreaElement;
     const { name, value } = target;
-    
+
     if (isWorker) {
-      setWorkerDetails((prev) =>
-        prev ? { ...prev, [name]: value } : prev
-      );
+      setWorkerDetails((prev) => (prev ? { ...prev, [name]: value } : prev));
     } else {
       setUserProfile((prev) => ({
         ...prev,
@@ -136,7 +154,7 @@ function Profile() {
     "Monday to Friday",
     "Saturday and Sunday",
   ];
-  
+
   const timeSlots = [
     "24 Hours",
     "9 AM to 6 PM",
@@ -145,9 +163,9 @@ function Profile() {
   ];
 
   const navigateToDetailsPage = () => {
-    navigate('/worker-details'); // Replace with the actual route
+    navigate("/worker-details"); // Replace with the actual route
   };
-  
+
   const handleUpdate = async () => {
     const { username, profileImage, oldPassword, newPassword } = userProfile;
     const token = localStorage.getItem("token");
@@ -227,7 +245,7 @@ function Profile() {
     reqBody.append("state", workerDetails.state);
     reqBody.append("city", workerDetails.city);
     reqBody.append("place", workerDetails.place);
-    reqBody.append("workerHours", workerDetails.workerHours);  // Added
+    reqBody.append("workerHours", workerDetails.workerHours); // Added
     reqBody.append(
       "profileImage",
       workerDetails.profileImage instanceof File
@@ -264,9 +282,7 @@ function Profile() {
   ) => {
     const value = e.target.value as string;
     if (isWorker) {
-      setWorkerDetails((prev) =>
-        prev ? { ...prev, [name]: value } : prev
-      );
+      setWorkerDetails((prev) => (prev ? { ...prev, [name]: value } : prev));
     } else {
       setUserProfile((prev) => ({
         ...prev,
@@ -275,6 +291,66 @@ function Profile() {
     }
   };
 
+  const handleSlotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewSlot((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const slotsData = await getSlotsByWorkerAPI(token);
+          setNewSlots(slotsData);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to load slots.");
+        }
+      }
+    };
+    
+    fetchSlots();
+  }, []);
+
+  const handleSlotSubmit = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!newSlot.startDate || !newSlot.endDate) {
+      toast.warning("Please fill out both start date and end date.");
+      return;
+    }
+
+    if (!token) {
+      toast.error("No token found, please log in again.");
+      return;
+    }
+
+    try {
+      await createSlotAPI(newSlot, token);
+      toast.success("Slot created successfully!");
+
+      const slotsData = await getSlotsByWorkerAPI(token);
+      console.log(slotsData);
+  
+      setNewSlots(slotsData);
+      
+
+
+      // Reset form fields
+      setNewSlot({ startDate: "", endDate: "" });
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while creating the slot.");
+    }
+  };
+
+  const handleClick = () => {
+    navigate("/register");
+  };
 
   return (
     <>
@@ -357,103 +433,203 @@ function Profile() {
         </div>
 
         {/* Right side worker profile */}
-        
-    <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
-      {workerDetails ? (
-        <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
-          <div className="flex justify-start mb-6">
-            <label className="relative cursor-pointer">
-              <input
-                onChange={(e) => handleImageChange(e, true)}
-                className="hidden"
-                type="file"
-              />
-              <div
-                style={{
-                  backgroundImage: workerImagePreview
-                    ? `url(${workerImagePreview})`
-                    : `url(${SERVER_URL}/uploads/${workerDetails.registerImage})`,
-                }}
-                className="w-32 h-32 rounded-full bg-cover bg-center flex justify-center items-center border-2 border-gray-300"
-              >
-                <AddAPhotoIcon
-                  className="text-white absolute bottom-2 right-2"
-                  fontSize="large"
-                />
+
+        <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
+          {workerDetails ? (
+            <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
+              <div className="flex justify-start mb-6">
+                <label className="relative cursor-pointer">
+                  <input
+                    onChange={(e) => handleImageChange(e, true)}
+                    className="hidden"
+                    type="file"
+                  />
+                  <div
+                    style={{
+                      backgroundImage: workerImagePreview
+                        ? `url(${workerImagePreview})`
+                        : `url(${SERVER_URL}/uploads/${workerDetails.registerImage})`,
+                    }}
+                    className="w-32 h-32 rounded-full bg-cover bg-center flex justify-center items-center border-2 border-gray-300"
+                  >
+                    <AddAPhotoIcon
+                      className="text-white absolute bottom-2 right-2"
+                      fontSize="large"
+                    />
+                  </div>
+                </label>
               </div>
-            </label>
-          </div>
-          <TextField
-            name="name"
-            value={workerDetails.name}
-            onChange={(e) => handleFieldChange(e, true)}
-            fullWidth
-            label="Name"
-            variant="outlined"
-          />
-          <TextField
-            name="phoneNumber"
-            value={workerDetails.phoneNumber}
-            onChange={(e) => handleFieldChange(e, true)}
-            fullWidth
-            label="Phone Number"
-            variant="outlined"
-          />
-          <FormControl fullWidth variant="outlined">
-            <InputLabel id="workingDays-label">Working Days</InputLabel>
-            <Select
-              labelId="workingDays-label"
-              name="workingDays"
-              value={workerDetails?.workingDays || ""}
-              onChange={(e) => handleDropdownChange(e, "workingDays", true)}
-              label="Working Days"
-            >
-              {workingDaysOptions.map((day, index) => (
-                <MenuItem key={index} value={day}>
-                  {day}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth variant="outlined">
-            <InputLabel id="availableTime-label">Available Time</InputLabel>
-            <Select
-              labelId="availableTime-label"
-              name="availableTime"
-              value={workerDetails?.availableTime || ""}
-              onChange={(e) => handleDropdownChange(e, "availableTime", true)}
-              label="Available Time"
-            >
-              {timeSlots.map((slot, index) => (
-                <MenuItem key={index} value={slot}>
-                  {slot}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <div className="flex justify-center space-x-4">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleWorkerUpdate}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : "Update Worker"}
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={navigateToDetailsPage}
-            >
-              Update More
-            </Button>
-          </div>
+              <TextField
+                name="name"
+                value={workerDetails.name}
+                onChange={(e) => handleFieldChange(e, true)}
+                fullWidth
+                label="Name"
+                variant="outlined"
+              />
+              <TextField
+                name="phoneNumber"
+                value={workerDetails.phoneNumber}
+                onChange={(e) => handleFieldChange(e, true)}
+                fullWidth
+                label="Phone Number"
+                variant="outlined"
+              />
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="workingDays-label">Working Days</InputLabel>
+                <Select
+                  labelId="workingDays-label"
+                  name="workingDays"
+                  value={workerDetails?.workingDays || ""}
+                  onChange={(e) => handleDropdownChange(e, "workingDays", true)}
+                  label="Working Days"
+                >
+                  {workingDaysOptions.map((day, index) => (
+                    <MenuItem key={index} value={day}>
+                      {day}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="availableTime-label">Available Time</InputLabel>
+                <Select
+                  labelId="availableTime-label"
+                  name="availableTime"
+                  value={workerDetails?.availableTime || ""}
+                  onChange={(e) =>
+                    handleDropdownChange(e, "availableTime", true)
+                  }
+                  label="Available Time"
+                >
+                  {timeSlots.map((slot, index) => (
+                    <MenuItem key={index} value={slot}>
+                      {slot}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <div className="flex justify-center space-x-4">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleWorkerUpdate}
+                  disabled={loading}
+                >
+                  {loading ? <CircularProgress size={24} /> : "Update Worker"}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={navigateToDetailsPage}
+                >
+                  Update More
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center">
+              <div className=" max-w-lg bg-white p-6 space-y-4 flex flex-col justify-between">
+                <img
+                  src="/src/assets/Images/EmptyWorker.gif"
+                  alt="Register Worker GIF"
+                  className="w-full h-auto max-w-xs mx-auto"
+                />
+                <button
+                  onClick={handleClick}
+                  className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+                >
+                  Register a Worker
+                </button>
+                <br />
+                <h2 className="text-4xl font-semibold text-gray-800 mb-6">
+                  Join Our Team Now!
+                </h2>
+                <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                  Ready to make an impact? Register now to become a part of our
+                  growing team. Update your profile to reflect your skills and
+                  expertise. Your journey starts here!
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      ) : (
-        <div>Loading...</div>
-      )}
-    </div>
+
+        <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
+          {workerDetails ? (
+            <Card>
+              <CardContent>
+                <h2 className="text-xl font-semibold mb-4">Create Slot</h2>
+                <TextField
+                  label="Start Date"
+                  name="startDate"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={newSlot.startDate}
+                  onChange={handleSlotChange}
+                  fullWidth
+                  margin="normal"
+                />
+                <TextField
+                  label="End Date"
+                  name="endDate"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={newSlot.endDate}
+                  onChange={handleSlotChange}
+                  fullWidth
+                  margin="normal"
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSlotSubmit}
+                  className="mt-4"
+                >
+                  Create Slot
+                </Button>
+                <h3 className="text-lg font-semibold mt-8 mb-4">My Slots</h3>
+             {newSlots.length > 0 ? (
+  <div className="overflow-x-auto">
+    <table className="min-w-full bg-gradient-to-r from-blue-50 to-blue-100 shadow-lg rounded-lg">
+      <thead>
+        <tr className="bg-blue-500 text-white">
+          <th className="py-3 px-6">Start Date</th>
+          <th className="py-3 px-6">End Date</th>
+        </tr>
+      </thead>
+      <tbody>
+  {newSlots
+    .filter((slot, index, self) => 
+      index === self.findIndex((s) => s.startDate === slot.startDate && s.endDate === slot.endDate)
+    )
+    .map((slot, index) => (
+      <tr key={index}>
+        <td className="py-3 px-6">
+          {new Date(slot.startDate).toLocaleDateString()}
+        </td>
+        <td className="py-3 px-6">
+          {new Date(slot.endDate).toLocaleDateString()}
+        </td>
+      </tr>
+    ))}
+</tbody>
+
+    </table>
+  </div>
+) : (
+  <p>No slots available.</p>
+)}
+
+
+              </CardContent>
+            </Card>
+          ) : (
+            <div></div>
+          )}
+        </div>
       </div>
+
       <Footer />
     </>
   );

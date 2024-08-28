@@ -7,35 +7,35 @@ import Logout from '@mui/icons-material/Logout';
 import { tokenAuthenticationContext } from '../ContextAPI/TokenAuth';
 import { toast } from "react-toastify";
 
+
+
 const Header: React.FC = () => {
   const authContext = useContext(tokenAuthenticationContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { setUser, user }: any = authContext;
+  const { setUser,user }:any = authContext;
+
 
   if (!authContext) {
     throw new Error('useContext must be used within a TokenAuth provider');
   }
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      const user = JSON.parse(userData);
       setIsAuthorized(true);
-      setUser(user);
-      setUserRole(user.role); 
+      setUser(JSON.parse(userData));
     } else {
       setIsAuthorized(false);
       setUser(null);
-      setUserRole(null);
     }
-  }, [setUser]);
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -57,21 +57,22 @@ const Header: React.FC = () => {
     navigate('/profile');
     handleMenuClose();
   };
-
   const handleLogoutClick = () => {
     toast.success('Logout Successfully');
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    // localStorage.removeItem('worker');
+    localStorage.removeItem('worker');
 
     setIsAuthorized(false);
-    authContext.setIsAuthorized(false);
+    authContext.setIsAuthorized(false)
     setUser(null); // Ensure the user state is cleared
     handleMenuClose();
     navigate('/'); // Redirect to the home page or login page
   };
 
-  const profileImageUrl = user?.profileImage;
+  const profileImageUrl = user?.profileImage  
+  console.log(profileImageUrl);
+  
 
   return (
     <header className="bg-gray-900 text-white py-4 fixed top-0 left-0 w-full z-50 shadow-lg">
@@ -116,29 +117,16 @@ const Header: React.FC = () => {
                   </Paper>
                 </ClickAwayListener>
               </Popper>
-              {userRole === 'worker' ? (
-                <Link to="/create-slots">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className="bg-teal-500 hover:bg-teal-600 flex items-center space-x-2"
-                  >
-                    <PersonAddIcon />
-                    <span>Create Slots</span>
-                  </Button>
-                </Link>
-              ) : (
-                <Link to="/register">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className="bg-teal-500 hover:bg-teal-600 flex items-center space-x-2"
-                  >
-                    <PersonAddIcon />
-                    <span>Register</span>
-                  </Button>
-                </Link>
-              )}
+              <Link to="/register">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="bg-teal-500 hover:bg-teal-600 flex items-center space-x-2"
+                >
+                  <PersonAddIcon />
+                  <span>Register</span>
+                </Button>
+              </Link>
             </div>
           ) : (
             <>
