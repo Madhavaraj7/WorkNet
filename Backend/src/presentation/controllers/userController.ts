@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp, updateUserProfile, forgotPassword, resetPassword, fetchAllCategories } from "../../application/userService";
+import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp, updateUserProfile, forgotPassword, resetPassword, fetchAllCategories, getSlotsByWorkerIdService } from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail, findUserById } from "../../infrastructure/userRepository";
@@ -255,3 +255,14 @@ export const getCategoriesController = async (req: Request, res: Response) => {
       res.status(500).json({ error: 'Failed to fetch categories' });
     }
   };
+
+
+  export const getSlotsByWorkerIdController = async (req: Request, res: Response) => {
+    try {
+        const { wId } = req.params;
+        const slots = await getSlotsByWorkerIdService(wId);
+        return res.status(200).json(slots);
+    } catch (error) {
+        return res.status(500).json({ message: 'Error retrieving slots', error });
+    }
+};

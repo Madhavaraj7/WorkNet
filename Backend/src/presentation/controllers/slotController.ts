@@ -6,20 +6,26 @@ interface CustomRequest extends Request {
     userId?: string; // Added the userId field to the request interface
 }
 
+
+interface CustomRequest extends Request {
+  workerId?: string;  // Use workerId instead of userId
+}
+
 export const createSlotController = async (req: CustomRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.body;
     console.log({ startDate, endDate });
 
-    if (!req.userId || !startDate || !endDate) {
+    if (!req.workerId || !startDate || !endDate) {
       return res.status(400).json({ message: 'Invalid input data' });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(req.userId)) {
-      return res.status(400).json({ message: 'Invalid userId format' });
+    if (!mongoose.Types.ObjectId.isValid(req.workerId)) {
+      return res.status(400).json({ message: 'Invalid workerId format' });
     }
 
-    const slots = await createWorkerSlots(req.userId, new Date(startDate), new Date(endDate));
+    // Use workerId instead of userId
+    const slots = await createWorkerSlots(req.workerId, new Date(startDate), new Date(endDate));
     res.status(201).json(slots);
   } catch (error: any) {
     console.error('Error creating slots:', error);
@@ -27,9 +33,10 @@ export const createSlotController = async (req: CustomRequest, res: Response) =>
   }
 };
 
+
 export const getSlotsByWorkerController = async (req: CustomRequest, res: Response) => {
   try {
-    const workerId = req.userId;
+    const workerId = req.workerId;  // Change to workerId
 
     if (!workerId || !mongoose.Types.ObjectId.isValid(workerId)) {
       return res.status(400).json({ message: 'Invalid workerId format' });

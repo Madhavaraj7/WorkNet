@@ -10,6 +10,7 @@ import { updateUserProfile as updateUserProfileRepo } from "../infrastructure/us
 import { sendEmail } from "../utils/sendEmail";
 import { User } from "../domain/user";
 import { otpGenerator } from "../utils/otpGenerator"; // Make sure this function generates OTPs
+import { Slot } from "../domain/slot";
 
 
 
@@ -188,4 +189,15 @@ export const resetPassword = async (email: string, otp: string, newPassword: str
 
 export const fetchAllCategories = async () => {
   return getAllCategories();
+};
+
+
+
+export const getSlotsByWorkerIdService = async (workerId: string) => {
+  try {
+      const slots = await Slot.find({ workerId, isAvailable: true }).exec();
+      return slots;
+  } catch (error) {
+      throw new Error('Error retrieving available slots');
+  }
 };

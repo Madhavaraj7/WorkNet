@@ -20,17 +20,23 @@ interface TokenAuthProps {
 const TokenAuth: React.FC<TokenAuthProps> = ({ children }) => {
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [user, setUser] = useState<User | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true); 
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setIsAuthorized(true);
       setUser(JSON.parse(storedUser));
+      setIsAuthorized(true);
     } else {
       setIsAuthorized(false);
       setUser(undefined);
     }
+    setLoading(false); 
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; 
+  }
 
   return (
     <tokenAuthenticationContext.Provider value={{ isAuthorized, user, setIsAuthorized, setUser }}>

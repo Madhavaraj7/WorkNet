@@ -1,10 +1,11 @@
+import mongoose, { Document, Schema } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { findUserById } from '../../infrastructure/userRepository'; // Import the repository function
-import mongoose from 'mongoose';
+import { findUserById } from '../../infrastructure/userRepository';
+import { Worker } from '../../domain/worker'; // Import the Worker model
 
 interface CustomRequest extends Request {
-  userId?: string;
+  workerId?: string;
 }
 
 const workerRoleMiddleware = async (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -24,10 +25,8 @@ const workerRoleMiddleware = async (req: CustomRequest, res: Response, next: Nex
       return res.status(400).json({ error: 'Invalid userId format' });
     }
 
-    req.userId = decoded.userId;
-
     // Find the user by ID
-    const user = await findUserById(req.userId);
+    const user = await findUserById(decoded.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -36,6 +35,15 @@ const workerRoleMiddleware = async (req: CustomRequest, res: Response, next: Nex
     if (user.role !== 'worker') {
       return res.status(403).json({ error: 'Unauthorized: Access restricted to workers only' });
     }
+
+    // Find the worker associated with the userId
+    const worker = await Worker.findOne({ userId: decoded.userId });
+    if (!worker) {
+      return res.status(404).json({ error: 'Worker profile not found' });
+    }
+
+    // Set workerId in the request object
+    req.workerId = worker._id as unknown as string;
 
     // Proceed to the next middleware or route handler
     next();

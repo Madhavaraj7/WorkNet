@@ -361,3 +361,23 @@ export const getSlotsByWorkerAPI = async (token: string) => {
     throw new Error("Failed to fetch slots by worker");
   }
 };
+
+
+
+// Get Slots by Worker ID API
+export const getSlotsByWorkerIdAPI = async (workerId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/worker/${workerId}/slots`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getSlotsByWorkerIdAPI:", error); // Log detailed error for debugging
+    throw new Error("Failed to fetch slots by worker");
+  }
+};
