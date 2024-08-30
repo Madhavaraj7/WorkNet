@@ -10,6 +10,7 @@ import {
   forgotPasswordHandler,
   resetPasswordHandler,
   getCategoriesController,
+  getSlotsByWorkerIdController,
 } from "../controllers/userController";
 
 import {
@@ -34,6 +35,7 @@ import { uploadMiddleware } from "../MiddleWare/multerConfig";
 import {
   blockWorkerController,
   getLoginedUserWorksController,
+  getWorkerAppointmentsController,
   getWorkerController,
   getWorkersController,
   registerWorkerController,
@@ -41,7 +43,13 @@ import {
   updateWorkerController,
 } from "../controllers/workerController";
 import checkUserStatusMiddleware from "../MiddleWare/checkUserStatusMiddleware";
-import { createSlotController, getSlotsByWorkerController,} from "../controllers/slotController";
+import {
+  createSlotController,
+  getSlotsByWorkerController,
+} from "../controllers/slotController";
+import { createBooking } from "../controllers/bookingController";
+import { confirmPayment } from "../controllers/paymentController";
+import { handleStripeWebhook } from "../controllers/stripeWebhookController";
 
 const router = express.Router();
 
@@ -64,11 +72,13 @@ router.put(
 );
 router.post("/forgotPassword", forgotPasswordHandler);
 router.post("/resetPassword", resetPasswordHandler);
-router.get('/getWorkers',  
-  getWorkersController);
-router.get('/worker/:wId', getWorkerController);
-router.get("/categories",  getCategoriesController);
+router.get("/getWorkers", getWorkersController);
+router.get("/worker/:wId", getWorkerController);
+router.get("/categories", getCategoriesController);
 
+router.get('/worker/:wId/slots', jwtMiddleware, checkUserStatusMiddleware, getSlotsByWorkerIdController);
+router.post('/bookings',jwtMiddleware, createBooking);
+router.post('/payments/confirm', jwtMiddleware,confirmPayment);
 
 
 
@@ -80,23 +90,23 @@ router.post(
   checkUserStatusMiddleware,
   registerWorkerController
 );
-router.get("/getUserWorkDetails", jwtMiddleware,  checkUserStatusMiddleware,
-  getLoginedUserWorksController);
+router.get(
+  "/getUserWorkDetails",
+  jwtMiddleware,
+  checkUserStatusMiddleware,
+  getLoginedUserWorksController
+);
 //update worker profile pending
 router.put(
   "/updateWorker",
   jwtMiddleware,
-  uploadMiddleware, updateWorkerController)
+  uploadMiddleware,
+  updateWorkerController
+);
 
-
-  router.post('/create-slot',workerRoleMiddleware,createSlotController);
-  router.get('/slots', workerRoleMiddleware, getSlotsByWorkerController);
-
-
-  
-
-
-
+router.post("/create-slot", workerRoleMiddleware, createSlotController);
+router.get("/slots", workerRoleMiddleware, getSlotsByWorkerController);
+router.get("/appointments", workerRoleMiddleware,  getWorkerAppointmentsController);
 
 
 // admin Routes
@@ -118,13 +128,10 @@ router.put(
 );
 router.put("/blockWorker/:id", AdminjwtMiddleware, blockWorkerController);
 router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
-router.delete('/deleteWorker/:id', AdminjwtMiddleware, deleteWorkerController); 
+router.delete("/deleteWorker/:id", AdminjwtMiddleware, deleteWorkerController);
 
-
-router.get('/Adcategories', AdminjwtMiddleware, getCategoriesController);
-router.post("/categories",AdminjwtMiddleware, addCategoryController);
-router.put("/editCategory/:id",  editCategoryController);
-
-
+router.get("/Adcategories", AdminjwtMiddleware, getCategoriesController);
+router.post("/categories", AdminjwtMiddleware, addCategoryController);
+router.put("/editCategory/:id", editCategoryController);
 
 export default router;

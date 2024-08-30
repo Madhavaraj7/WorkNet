@@ -6,7 +6,12 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
+  IconButton,
   Rating,
   Skeleton,
   Stack,
@@ -16,11 +21,14 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { getAWorkerAPI } from "../Services/allAPI";
+import { getAWorkerAPI, getSlotsByWorkerIdAPI } from "../Services/allAPI";
 import { SERVER_URL } from "../Services/serverURL";
 import LeftArrow from "../assets/Images/LeftArrow.png";
 import RightArrow from "../assets/Images/RightArrow.png";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { KeyboardBackspace } from "@mui/icons-material";
+import { loadStripe } from "@stripe/stripe-js";
+import { toast } from "react-toastify";
 
 // Photos Component
 function Photos({ workImages }: { workImages: string[] }) {
@@ -159,15 +167,26 @@ function Reviews() {
   );
 }
 
+const stripePromise = loadStripe(
+  "pk_test_51MWBZUSFYLZi23L4T1FEBPHNGRC5u1uSzsXntd6iwtKOQcTBRJMoARdSSAAqQswE55vrKvH5eWMrBCuO4ad0ZaLV00jgftxjNw"
+);
+
 function Worker() {
   const { wId } = useParams<{ wId: string }>();
   const [workerDetails, setWorkerDetails] = useState<any>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<any>(null);
+
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+
+  const token = localStorage.getItem("token") || ""; // Retrieve token from local storage or your preferred method
 
   const getAWorker = async () => {
     try {
       const result = await getAWorkerAPI(wId);
-      console.log("hello",result);
-      
+      console.log("hello", result);
+
       if (result) {
         setWorkerDetails(result);
       } else {
@@ -177,6 +196,124 @@ function Worker() {
       console.error(err);
     }
   };
+  const handleOpenModal = async () => {
+    if (wId) {
+      // Ensure wId is defined
+      try {
+        const slots = await getSlotsByWorkerIdAPI(wId, token); // Fetch available slots with token
+        setAvailableSlots(slots);
+        setOpenModal(true);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      console.error("Worker ID is undefined");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedSlot(null); // Clear selected slot when closing the modal
+  };
+
+  const handleSlotSelect = (slot: any) => {
+    setSelectedSlot(slot);
+    setOpenModal(false);
+    setOpenPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setOpenPaymentModal(false);
+  };
+
+  const formatDate = (dateString: string | number | Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    };
+    return new Intl.DateTimeFormat("en-GB", options).format(
+      new Date(dateString)
+    );
+  };
+  const navigate = useNavigate();
+
+  const handleConfirmBooking = async () => {
+    if (!selectedSlot || !workerDetails) {
+        toast.error("Please select a slot and worker details.");
+        return;
+    }
+
+    const userString = localStorage.getItem("user");
+    const user = userString ? JSON.parse(userString) : null;
+
+    console.log("User data:", user);
+
+    if (!user || !user.email || !user.username) {
+        console.error("User email or username is missing from local storage");
+        alert("User email or username is missing. Please log in again.");
+        return;
+    }
+
+    console.log("Selected Slot ID:", selectedSlot._id);
+
+    try {
+        const response = await fetch(`${SERVER_URL}/bookings`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                workerId: wId,
+                slotId: selectedSlot._id,
+                amount: workerDetails.amount,
+                customerEmail: user.email,
+                customerName: user.username,
+                customerAddress: workerDetails.address,
+            }),
+        });
+
+        const responseBody = await response.text();
+
+        console.log("Response Status:", response.status);
+        console.log("Response Body:", responseBody);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${responseBody}`);
+        }
+
+        const sessionData = JSON.parse(responseBody);
+         
+        console.log("Session Data:", sessionData);
+        localStorage.setItem('sessionData', JSON.stringify(sessionData));
+
+
+        if (!sessionData.sessionId) {
+            throw new Error("Session ID is missing from response");
+        }
+
+        const stripe = await stripePromise;
+        if (!stripe) {
+            throw new Error("Stripe.js failed to load");
+        }
+
+        const { error } = await stripe.redirectToCheckout({
+            sessionId: sessionData.sessionId,
+        });
+
+        if (error) {
+            console.error("Stripe Checkout error:", error);
+            toast.error("An error occurred during payment processing.");
+        }
+    } catch (error: any) {
+        console.error("Error creating checkout session:", error.message);
+        toast.error("An error occurred while creating the booking. Please try again.");
+    }
+};
+
+
+
 
   useEffect(() => {
     getAWorker();
@@ -269,9 +406,9 @@ function Worker() {
                     variant="contained"
                     color="primary"
                     className="mt-4"
-                    onClick={() => alert("Added to slots")}
+                    onClick={handleOpenModal}
                   >
-                    Add to Slot
+                    Add to Booking
                   </Button>
                 </Box>
               </Box>
@@ -331,6 +468,152 @@ function Worker() {
             <Reviews />
           </Box>
         )}
+        {/* Modal for Available Slots */}
+        {/* Modal for Available Slots */}
+        <Dialog
+          open={openModal}
+          onClose={handleCloseModal}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            style: {
+              borderRadius: "16px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            },
+          }}
+        >
+          <DialogTitle className="bg-yellow-500 text-white text-lg font-semibold rounded-t-lg">
+            Available Slots
+          </DialogTitle>
+          <br />
+          <DialogContent className="bg-gray-50 p-6">
+            {availableSlots.length > 0 ? (
+              <Stack spacing={2}>
+                {availableSlots.map((slot, index) => (
+                  <Box
+                    key={index}
+                    className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-yellow-100 transition ease-in-out duration-200"
+                    onClick={() => handleSlotSelect(slot)}
+                  >
+                    <Typography
+                      variant="h6"
+                      className="font-bold text-yellow-800"
+                    >
+                      Date: {formatDate(slot.date)}
+                    </Typography>
+                    <Typography variant="body1" className="text-gray-700">
+                      Time: {workerDetails.availableTime}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body1" className="text-center text-gray-600">
+                No slots available
+              </Typography>
+            )}
+          </DialogContent>
+          <DialogActions className="bg-gray-100 p-4 rounded-b-lg">
+            <Button
+              onClick={handleCloseModal}
+              color="primary"
+              variant="outlined"
+              className="text-yellow-600 border-yellow-600 hover:bg-yellow-600 hover:text-white"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Payment Details Modal */}
+        <Dialog
+          open={openPaymentModal}
+          onClose={handleClosePaymentModal}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            style: {
+              borderRadius: "16px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            },
+          }}
+        >
+          <DialogTitle className="bg-teal-500 text-white text-lg font-semibold rounded-t-lg">
+            <Box className="flex items-center">
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={() => {
+                  handleClosePaymentModal();
+                  handleOpenModal(); // Open the slots modal when going back
+                }}
+                aria-label="back"
+                className="mr-2"
+              >
+                <KeyboardBackspace />
+              </IconButton>
+              Booking Details
+            </Box>
+          </DialogTitle>
+          <br />
+          <DialogContent className="bg-gray-50 p-6">
+            {selectedSlot && workerDetails ? (
+              <Box>
+                <Typography
+                  variant="h6"
+                  className="font-bold text-gray-800 mb-4"
+                >
+                  Selected Slot
+                </Typography>
+                <Box className="mb-4 p-4 border border-gray-300 rounded-lg bg-white shadow-md">
+                  <Typography variant="body1" className="text-gray-700">
+                    <strong>Date:</strong> {formatDate(selectedSlot.date)}
+                  </Typography>
+                  <Typography variant="body1" className="text-gray-700">
+                    <strong>Time:</strong> {workerDetails.availableTime}
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h6"
+                  className="font-bold text-gray-800 mb-4"
+                >
+                  Payment Details
+                </Typography>
+                <Box className="p-4 border border-gray-300 rounded-lg bg-white shadow-md">
+                  <Typography variant="body1" className="text-gray-700">
+                    <strong>Amount:</strong> ${workerDetails.amount}
+                  </Typography>
+                  <Typography variant="body1" className="text-gray-700">
+                    <strong>Payment Mode:</strong> {workerDetails.paymentMode}
+                  </Typography>
+                </Box>
+                <br />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="mt-4 bg-teal-600 hover:bg-teal-700 text-white"
+                  onClick={handleConfirmBooking} // Use the function here
+                >
+                  Confirm Booking
+                </Button>
+              </Box>
+            ) : (
+              <Typography variant="body1" className="text-center text-gray-600">
+                No slot selected
+              </Typography>
+            )}
+          </DialogContent>
+          <DialogActions className="bg-gray-100 p-4 rounded-b-lg">
+            <Button
+              onClick={handleClosePaymentModal}
+              color="secondary"
+              variant="outlined"
+              className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
       <Footer />
     </>

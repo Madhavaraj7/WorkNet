@@ -23,6 +23,7 @@ import Workers from "./pages/Workers";
 import Worker from "./pages/Worker";
 import AdCategory from "./pages/Admin/AdCategory";
 import Slots from "./pages/Slots";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 function App() {
   return (
@@ -60,6 +61,8 @@ function App() {
           <Route path="/register" element={<WorkerRegister />} />
           <Route path="/updateWorker" element={<UserEditableWorkCard />} />
           <Route path="/create-slots" element={<Slots />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+
 
 
         </Route>

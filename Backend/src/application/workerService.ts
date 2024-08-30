@@ -6,6 +6,8 @@ import { UserModel } from '../infrastructure/userRepository'; // Adjust the impo
 
 
 import mongoose from 'mongoose';
+import { Booking } from '../domain/booking';
+import { Slot } from '../domain/slot';
 
 // register a worker
 // Assuming you need to handle both names and IDs
@@ -166,5 +168,36 @@ export const getWorkerByIdService = async (userId: string): Promise<any> => {
     return worker;
   } catch (err: any) {
     throw new Error('Error fetching worker by ID: ' + err.message);
+  }
+};
+
+
+
+export const getWorkerAppointmentsService = async (workerId: string): Promise<any> => {
+  try {
+    const appointments = await Booking.find({ workerId })
+      .populate({
+        path: 'userId',
+        select: 'username', 
+        model: UserModel
+      })
+      .populate({
+        path: 'slotId',
+        select: 'date', 
+        model: Slot
+      })
+      .exec();
+
+    const results = appointments.map(appointment => ({
+      appointmentId: appointment._id,
+      userName: (appointment.userId as any).username, 
+      slotDate: (appointment.slotId as any).date, 
+      amount: appointment.amount,
+      status: appointment.status, 
+    }));
+
+    return results;
+  } catch (err: any) {
+    throw new Error('Error fetching appointments: ' + err.message);
   }
 };
