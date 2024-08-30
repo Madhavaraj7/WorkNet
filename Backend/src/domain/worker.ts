@@ -24,8 +24,8 @@ interface IWorker extends Document {
   averageReview?: string;
   status: string;
   isBlocked?: boolean;
-  amount: number;  // New field
-  kycDetails: IKycDocument[];  // New field
+  amount: number;  
+  kycDetails: IKycDocument[];  
 }
 
 const workerSchema = new Schema<IWorker>({

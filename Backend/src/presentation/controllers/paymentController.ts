@@ -3,12 +3,12 @@ import { stripe } from '../../Config/stripe';
 import { updateBookingStatus } from '../../application/bookingService'; 
 import { Slot } from '../../domain/slot'; 
 import { ParsedQs } from 'qs'; // Ensure this is imported for query parsing
+import { Worker } from '../../domain/worker'; // Import the Worker model
+
 
 export const confirmPayment = async (req: Request, res: Response) => {
     try {
         const sessionId = req.query.session_id as string;
-        console.log(sessionId);
-        
 
         if (!sessionId) {
             return res.status(400).json({ error: 'Session ID is required' });
@@ -27,16 +27,29 @@ export const confirmPayment = async (req: Request, res: Response) => {
 
             if (booking) {
                 await Slot.findByIdAndUpdate(booking.slotId, { isAvailable: false }).exec();
-                console.log(`Booking ${bookingId} confirmed and slot ${booking.slotId} marked as unavailable.`);
-            }
+                
+                // Fetch the worker associated with this booking
+                const worker = await Worker.findById(booking.workerId).exec();
 
-            res.status(200).json({ success: true });
+                if (!worker) {
+                    return res.status(404).json({ error: 'Worker not found' });
+                }
+
+                console.log(`Booking ${bookingId} confirmed and slot ${booking.slotId} marked as unavailable.`);
+                return res.status(200).json({
+                    success: true,
+                    worker: {
+                        phoneNumber: worker.phoneNumber,
+                        whatsappNumber: worker.whatsappNumber,
+                    },
+                });
+            }
         } else {
             console.log(`Payment status for session ${sessionId}: ${session.payment_status}`);
-            res.status(400).json({ error: 'Payment failed or is pending' });
+            return res.status(400).json({ error: 'Payment failed or is pending' });
         }
     } catch (error: any) {
         console.error("Error confirming payment:", error);
-        res.status(400).json({ error: error.message });
+        return res.status(400).json({ error: error.message });
     }
 };

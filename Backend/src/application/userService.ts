@@ -11,6 +11,7 @@ import { sendEmail } from "../utils/sendEmail";
 import { User } from "../domain/user";
 import { otpGenerator } from "../utils/otpGenerator"; // Make sure this function generates OTPs
 import { Slot } from "../domain/slot";
+import { Booking } from "../domain/booking";
 
 
 
@@ -201,3 +202,5 @@ export const getSlotsByWorkerIdService = async (workerId: string) => {
       throw new Error('Error retrieving available slots');
   }
 };
+
+

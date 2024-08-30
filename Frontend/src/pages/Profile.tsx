@@ -20,6 +20,7 @@ import {
   updateWorkerAPI,
   createSlotAPI,
   getSlotsByWorkerAPI,
+  getWorkerAppointmentsAPI,
 } from "../Services/allAPI";
 import { SERVER_URL } from "../Services/serverURL";
 import { toast } from "react-toastify";
@@ -62,6 +63,14 @@ interface Slot {
   endDate: string;
 }
 
+export interface Appointment {
+  appointmentId: string;
+  userName: string;
+  slotDate: string;
+  amount: number;
+  status: string;
+}
+
 function Profile() {
   const navigate = useNavigate();
   const { setProfileUpdateResponse } = useContext(
@@ -82,11 +91,13 @@ function Profile() {
   const [workerImagePreview, setWorkerImagePreview] = useState<string>("");
   const [newSlot, setNewSlot] = useState<Slot>({ startDate: "", endDate: "" });
   const [newSlots, setNewSlots] = useState<Slot[]>([]);
-  const [error, setError] = useState("");
-  const [page, setPage] = useState(0);
-  const rowsPerPage = 2; // Fixed number of rows per page
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const rowsPerPages = 5;
+  const [currentPage, setCurrentPage] = useState(1);
 
-  
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(0); // Current page index
+  const rowsPerPage = 1; // Number of rows per page
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -361,22 +372,37 @@ function Profile() {
   };
   const today = new Date().toISOString().split("T")[0];
 
-  
   const formatDate = (dateString: string | number | Date) => {
-    const options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
-    return new Intl.DateTimeFormat("en-GB", options).format(new Date(dateString));
+    const options: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    };
+    return new Intl.DateTimeFormat("en-GB", options).format(
+      new Date(dateString)
+    );
   };
-  
 
   const handleClick = () => {
     navigate("/register");
   };
 
   // Paginate the slots
-  const paginatedSlots = newSlots.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const filteredSlots = newSlots
+    .filter(
+      (slot, index, self) =>
+        index ===
+        self.findIndex(
+          (s) => s.startDate === slot.startDate && s.endDate === slot.endDate
+        )
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    );
+
+  // Calculate the current page data
+  const paginatedSlots = filteredSlots.slice(page, page + 1);
 
   const handleChangePage = (
     _event: any,
@@ -385,6 +411,47 @@ function Profile() {
     setPage(newPage);
   };
 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const data = await getWorkerAppointmentsAPI(token);
+          console.log(data);
+
+          setAppointments(data);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setError("No token found");
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const totalPages = Math.ceil(appointments.length / rowsPerPages);
+  const startIndex = (currentPage - 1) * rowsPerPages;
+  const currentAppointments = appointments.slice(
+    startIndex,
+    startIndex + rowsPerPages
+  );
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <>
@@ -395,7 +462,6 @@ function Profile() {
       <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
         {/* Left side profile update */}
         <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
-        
           <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
             <div className="flex justify-start mb-6">
               <label className="relative cursor-pointer">
@@ -596,8 +662,10 @@ function Profile() {
           {workerDetails ? (
             <Card>
               <CardContent>
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">Create Slots</h2>
-              <TextField
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">
+                  Create Slots
+                </h2>
+                <TextField
                   label="Start Date"
                   name="startDate"
                   type="date"
@@ -627,60 +695,52 @@ function Profile() {
                 >
                   Create Slot
                 </Button>
+
                 <h3 className="text-lg font-semibold mt-8 mb-2">My Slots</h3>
                 {newSlots.length > 0 ? (
-  <div className="overflow-x-auto p-4">
-    <table className="min-w-full bg-white shadow-md rounded-lg border border-gray-200">
-      <thead className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
-        <tr>
-          <th className="py-3 px-6 text-left text-lg font-semibold">Start Date</th>
-          <th className="py-3 px-6 text-left text-lg font-semibold">End Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        {paginatedSlots.length > 0 ? (
-          paginatedSlots
-            .filter(
-              (slot, index, self) =>
-                index ===
-                self.findIndex(
-                  (s) =>
-                    s.startDate === slot.startDate &&
-                    s.endDate === slot.endDate
-                )
-            )
-            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-            .map((slot, index) => (
-              <tr
+        <>
+          {paginatedSlots.length > 0 ? (
+            paginatedSlots.map((slot, index) => (
+              <div
                 key={index}
-                className="hover:bg-gray-100 transition-colors duration-300 border-b border-gray-200"
+                className="bg-gradient-to-r from-blue-50 via-green-50 to-yellow-50 shadow-md rounded-lg border border-gray-300 p-6 mb-4"
               >
-                <td className="py-3 px-6">{formatDate(slot.startDate)}</td>
-                <td className="py-3 px-6">{formatDate(slot.endDate)}</td>
-              </tr>
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex-1 mr-4">
+                    <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-500 pb-2 mb-2">
+                      Start Date
+                    </h3>
+                    <p className="text-gray-700 text-lg">{formatDate(slot.startDate)}</p>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-green-800 border-b-2 border-green-500 pb-2 mb-2">
+                      End Date
+                    </h3>
+                    <p className="text-gray-700 text-lg">{formatDate(slot.endDate)}</p>
+                  </div>
+                </div>
+              </div>
             ))
-        ) : (
-          <tr>
-            <td colSpan={2} className="text-center text-gray-600 py-6">
+          ) : (
+            <div className="text-center text-gray-600 py-6">
               No slots available.
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-    <TablePagination
-      rowsPerPageOptions={[]} // Remove rows per page options dropdown
-      component="div"
-      count={newSlots.length}
-      rowsPerPage={rowsPerPage}
-      page={page}
-      onPageChange={handleChangePage}
-    />
-  </div>
-) : (
-  <p className="text-center text-gray-600 py-6">No slots available.</p>
-)}
-
+            </div>
+          )}
+          <div className="flex justify-center mt-6">
+            <TablePagination
+              rowsPerPageOptions={[]} // Remove rows per page options dropdown
+              component="div"
+              count={filteredSlots.length} // Total number of slots
+              rowsPerPage={rowsPerPage} // Show only one slot per page
+              page={page} // Current page
+              onPageChange={handleChangePage} // Handle page change
+              className="bg-white rounded-lg border border-gray-300 shadow-sm"
+            />
+          </div>
+        </>
+      ) : (
+        <p className="text-center text-gray-600 py-6">No slots available.</p>
+      )}
               </CardContent>
             </Card>
           ) : (
@@ -688,7 +748,91 @@ function Profile() {
           )}
         </div>
       </div>
+      {workerDetails && (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-lg max-w-7xl mx-auto mt-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+            My Appointments
+          </h2>
+          {/* Heading */}
 
+          <div className="max-h-[calc(5*4rem)] overflow-y-auto">
+            {/* Table */}
+            <table className="w-full divide-y divide-gray-200">
+              <thead className="bg-blue-600 text-white rounded-t-lg">
+                <tr>
+                  <th className="py-3 px-5 text-left text-sm font-semibold">
+                    User Name
+                  </th>
+                  <th className="py-3 px-5 text-left text-sm font-semibold">
+                    Slot Date
+                  </th>
+                  <th className="py-3 px-5 text-left text-sm font-semibold">
+                    Amount
+                  </th>
+                  <th className="py-3 px-5 text-left text-sm font-semibold">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {appointments.length > 0 ? (
+                  appointments.map((appointment) => (
+                    <tr
+                      key={appointment.appointmentId}
+                      className="hover:bg-gray-100 transition-colors duration-300"
+                    >
+                      <td className="py-3 px-5 text-gray-800 border-b text-sm">
+                        {appointment.userName}
+                      </td>
+                      <td className="py-3 px-5 text-gray-800 border-b text-sm">
+                        {new Date(appointment.slotDate).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 px-5 text-gray-800 border-b text-sm">
+                        {appointment.amount}
+                      </td>
+                      <td className="py-3 px-5 text-gray-800 border-b text-sm">
+                        {appointment.status}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4} // Ensure this is a number, not a string
+                      className="py-3 px-5 text-center text-gray-500 text-sm"
+                    >
+                      No appointments available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Component */}
+          <div className="py-4 px-5 flex justify-between items-center bg-gray-50 border-t border-gray-200 rounded-b-lg">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 disabled:opacity-50 transition"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 disabled:opacity-50 transition"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      <br />
       <Footer />
     </>
   );
@@ -698,4 +842,3 @@ export default Profile;
 function sort(arg0: (a: any, b: any) => number) {
   throw new Error("Function not implemented.");
 }
-

@@ -35,6 +35,7 @@ import { uploadMiddleware } from "../MiddleWare/multerConfig";
 import {
   blockWorkerController,
   getLoginedUserWorksController,
+  getWorkerAppointmentsController,
   getWorkerController,
   getWorkersController,
   registerWorkerController,
@@ -75,14 +76,9 @@ router.get("/getWorkers", getWorkersController);
 router.get("/worker/:wId", getWorkerController);
 router.get("/categories", getCategoriesController);
 
-// Add this route to your user routes
 router.get('/worker/:wId/slots', jwtMiddleware, checkUserStatusMiddleware, getSlotsByWorkerIdController);
-// router.post('/book', jwtMiddleware, checkUserStatusMiddleware, createBooking);
-// Route to create a booking and initiate payment
 router.post('/bookings',jwtMiddleware, createBooking);
-
 router.post('/payments/confirm', jwtMiddleware,confirmPayment);
-// router.post('/payments/confirm', express.raw({ type: 'application/json' }), handleStripeWebhook);
 
 
 
@@ -110,6 +106,8 @@ router.put(
 
 router.post("/create-slot", workerRoleMiddleware, createSlotController);
 router.get("/slots", workerRoleMiddleware, getSlotsByWorkerController);
+router.get("/appointments", workerRoleMiddleware,  getWorkerAppointmentsController);
+
 
 // admin Routes
 router.post("/adminLogin", adminlogin);

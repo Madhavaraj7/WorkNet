@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
+import { ClipLoader } from 'react-spinners';
 
 interface User {
   profileImage?: string;
@@ -20,7 +21,7 @@ interface TokenAuthProps {
 const TokenAuth: React.FC<TokenAuthProps> = ({ children }) => {
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [user, setUser] = useState<User | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -31,11 +32,15 @@ const TokenAuth: React.FC<TokenAuthProps> = ({ children }) => {
       setIsAuthorized(false);
       setUser(undefined);
     }
-    setLoading(false); 
+    setLoading(false);
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return (
+      <div className="spinner-container">
+        <ClipLoader size={50} color="#09f" loading={loading} />
+      </div>
+    );
   }
 
   return (
