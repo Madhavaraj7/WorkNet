@@ -44,7 +44,7 @@ const PaymentSuccess = () => {
 
         if (data.success) {
           console.log("Payment confirmed");
-          toast.success("Payment confirmed! Your booking is successful.");
+          // toast.success("Payment confirmed! Your booking is successful.");
           setWorker(data.worker);
         } else {
           throw new Error("Payment not confirmed");

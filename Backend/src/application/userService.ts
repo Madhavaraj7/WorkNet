@@ -196,7 +196,15 @@ export const fetchAllCategories = async () => {
 
 export const getSlotsByWorkerIdService = async (workerId: string) => {
   try {
-      const slots = await Slot.find({ workerId, isAvailable: true }).exec();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); 
+
+      const slots = await Slot.find({
+          workerId,
+          isAvailable: true,
+          date: { $gte: today }, 
+      }).exec();
+
       return slots;
   } catch (error) {
       throw new Error('Error retrieving available slots');

@@ -36,7 +36,7 @@ export const createSlotController = async (req: CustomRequest, res: Response) =>
 
 export const getSlotsByWorkerController = async (req: CustomRequest, res: Response) => {
   try {
-    const workerId = req.workerId;  // Change to workerId
+    const workerId = req.workerId;  
 
     if (!workerId || !mongoose.Types.ObjectId.isValid(workerId)) {
       return res.status(400).json({ message: 'Invalid workerId format' });

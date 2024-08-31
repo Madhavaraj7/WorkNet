@@ -232,24 +232,23 @@ export const deleteWorkerAPI = async (workerId: string, token: string) => {
   );
 };
 
-// Update Worker API
 export const updateWorkerAPI = async (reqBody: FormData, token: string) => {
   try {
-    // Note: Do not set Content-Type header manually
     const response = await axios.put(`${SERVER_URL}/updateWorker`, reqBody, {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        // Content-Type header is not required for FormData
+        Authorization: `Bearer ${token}`,
+        // Do not set Content-Type for FormData; browser will set it
       }
     });
 
     console.log('API response:', response.data);
-    return response.data; // Ensure the response is in the expected format
+    return response.data;
   } catch (error) {
     console.error('Error in updateWorkerAPI:', error); // Log detailed error for debugging
     throw new Error('Failed to update worker');
   }
 };
+
 
 
 
