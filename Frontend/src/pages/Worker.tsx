@@ -387,9 +387,9 @@ function Worker() {
                   {workerDetails.address}, {workerDetails.city},{" "}
                   {workerDetails.state}
                 </Typography>
-                <Typography variant="body2" className="text-gray-600 mt-1">
+                {/* <Typography variant="body2" className="text-gray-600 mt-1">
                   Phone: {workerDetails.phoneNumber}
-                </Typography>
+                </Typography> */}
                 <Typography variant="body2" className="text-gray-600">
                   Available: {workerDetails.workingDays},{" "}
                   {workerDetails.availableTime}

@@ -40,9 +40,8 @@ interface WorkerDetails {
   whatsappNumber: any;
   kycDetails: any;
   amount: any;
-  profileImage: File | string;
+  registerImage: File | string;
   _id: string;
-  registerImage: string;
   name: string;
   phoneNumber: string;
   categories: string[];
@@ -134,13 +133,13 @@ function Profile() {
         if (isWorker) {
           setWorkerImagePreview(reader.result as string);
           setWorkerDetails((prev) =>
-            prev ? { ...prev, profileImage: file } : prev
+            prev ? { ...prev, registerImage: file } : prev
           );
         } else {
           setProfileImagePreview(reader.result as string);
           setUserProfile((prev) => ({
             ...prev,
-            profileImage: file,
+            registerImage: file,
           }));
         }
       };
@@ -180,7 +179,7 @@ function Profile() {
   ];
 
   const navigateToDetailsPage = () => {
-    navigate("/worker-details"); // Replace with the actual route
+    navigate("/updateWorker");
   };
 
   const handleUpdate = async () => {
@@ -264,9 +263,9 @@ function Profile() {
     reqBody.append("place", workerDetails.place);
     reqBody.append("workerHours", workerDetails.workerHours); // Added
     reqBody.append(
-      "profileImage",
-      workerDetails.profileImage instanceof File
-        ? workerDetails.profileImage
+      "registerImage",
+      workerDetails.registerImage instanceof File
+        ? workerDetails.registerImage
         : workerImagePreview
     );
     reqBody.append("amount", workerDetails.amount.toString());
@@ -336,19 +335,16 @@ function Profile() {
   const handleSlotSubmit = async () => {
     const token = localStorage.getItem("token");
 
-    // Check if both dates are provided
     if (!newSlot.startDate || !newSlot.endDate) {
       toast.warning("Please fill out both start date and end date.");
       return;
     }
 
-    // Validate that endDate is later than startDate
     if (new Date(newSlot.startDate) > new Date(newSlot.endDate)) {
       toast.warning("End Date must be later than Start Date.");
       return;
     }
 
-    // Check if token is available
     if (!token) {
       toast.error("No token found, please log in again.");
       return;
@@ -363,7 +359,6 @@ function Profile() {
 
       setNewSlots(slotsData);
 
-      // Reset form fields
       setNewSlot({ startDate: "", endDate: "" });
     } catch (err) {
       console.error(err);
@@ -619,13 +614,13 @@ function Profile() {
                 >
                   {loading ? <CircularProgress size={24} /> : "Update Worker"}
                 </Button>
-                <Button
+                {/* <Button
                   variant="contained"
                   color="secondary"
                   onClick={navigateToDetailsPage}
                 >
                   Update More
-                </Button>
+                </Button> */}
               </div>
             </div>
           ) : (
@@ -642,6 +637,7 @@ function Profile() {
                 >
                   Register a Worker
                 </button>
+                <br />
                 <br />
                 <h2 className="text-4xl font-semibold text-gray-800 mb-6">
                   Join Our Team Now!
@@ -698,49 +694,55 @@ function Profile() {
 
                 <h3 className="text-lg font-semibold mt-8 mb-2">My Slots</h3>
                 {newSlots.length > 0 ? (
-        <>
-          {paginatedSlots.length > 0 ? (
-            paginatedSlots.map((slot, index) => (
-              <div
-                key={index}
-                className="bg-gradient-to-r from-blue-50 via-green-50 to-yellow-50 shadow-md rounded-lg border border-gray-300 p-6 mb-4"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex-1 mr-4">
-                    <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-500 pb-2 mb-2">
-                      Start Date
-                    </h3>
-                    <p className="text-gray-700 text-lg">{formatDate(slot.startDate)}</p>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-green-800 border-b-2 border-green-500 pb-2 mb-2">
-                      End Date
-                    </h3>
-                    <p className="text-gray-700 text-lg">{formatDate(slot.endDate)}</p>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-gray-600 py-6">
-              No slots available.
-            </div>
-          )}
-          <div className="flex justify-center mt-6">
-            <TablePagination
-              rowsPerPageOptions={[]} // Remove rows per page options dropdown
-              component="div"
-              count={filteredSlots.length} // Total number of slots
-              rowsPerPage={rowsPerPage} // Show only one slot per page
-              page={page} // Current page
-              onPageChange={handleChangePage} // Handle page change
-              className="bg-white rounded-lg border border-gray-300 shadow-sm"
-            />
-          </div>
-        </>
-      ) : (
-        <p className="text-center text-gray-600 py-6">No slots available.</p>
-      )}
+                  <>
+                    {paginatedSlots.length > 0 ? (
+                      paginatedSlots.map((slot, index) => (
+                        <div
+                          key={index}
+                          className="bg-gradient-to-r from-blue-50 via-green-50 to-yellow-50 shadow-md rounded-lg border border-gray-300 p-6 mb-4"
+                        >
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex-1 mr-4">
+                              <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-500 pb-2 mb-2">
+                                Start Date
+                              </h3>
+                              <p className="text-gray-700 text-lg">
+                                {formatDate(slot.startDate)}
+                              </p>
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-green-800 border-b-2 border-green-500 pb-2 mb-2">
+                                End Date
+                              </h3>
+                              <p className="text-gray-700 text-lg">
+                                {formatDate(slot.endDate)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center text-gray-600 py-6">
+                        No slots available.
+                      </div>
+                    )}
+                    <div className="flex justify-center mt-6">
+                      <TablePagination
+                        rowsPerPageOptions={[]} // Remove rows per page options dropdown
+                        component="div"
+                        count={filteredSlots.length} // Total number of slots
+                        rowsPerPage={rowsPerPage} // Show only one slot per page
+                        page={page} // Current page
+                        onPageChange={handleChangePage} // Handle page change
+                        className="bg-white rounded-lg border border-gray-300 shadow-sm"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-center text-gray-600 py-6">
+                    No slots available.
+                  </p>
+                )}
               </CardContent>
             </Card>
           ) : (

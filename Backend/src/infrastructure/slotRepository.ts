@@ -22,5 +22,11 @@ export const findSlotByWorkerAndDate = async (
 
 // Function to get slots by worker ID
 export const getSlotsByWorkerIdFromRepo = async (workerId: mongoose.Types.ObjectId): Promise<ISlot[]> => {
-  return Slot.find({ workerId }).exec();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+
+  return Slot.find({
+    workerId,
+    date: { $gte: today }, 
+  }).exec();
 };

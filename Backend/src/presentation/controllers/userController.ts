@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp, updateUserProfile, forgotPassword, resetPassword, fetchAllCategories, getSlotsByWorkerIdService } from "../../application/userService";
+import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp, updateUserProfile, forgotPassword, resetPassword, fetchAllCategories, getSlotsByWorkerIdService, getUserBookedWorkers } from "../../application/userService";
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail, findUserById } from "../../infrastructure/userRepository";
@@ -266,3 +266,21 @@ export const getCategoriesController = async (req: Request, res: Response) => {
         return res.status(500).json({ message: 'Error retrieving slots', error });
     }
 };
+
+
+export const getUserBookedWorkersController = async (req: any, res: Response) => {
+    try {
+      const userId = req.userId; 
+      const bookings = await getUserBookedWorkers(userId);
+  
+      res.status(200).json({
+        success: true,
+        data: bookings,
+      });
+    } catch (error:any) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };

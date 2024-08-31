@@ -129,7 +129,13 @@ export const updateWorkerController = async (
   try {
     const userId = req.userId;
     let { categories, ...workerData } = req.body;
+
+    console.log({categories,...workerData});
+    
+    
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    console.log(files);
+    
 
     if (!userId) {
       return res.status(401).json({ message: "User ID is required" });
