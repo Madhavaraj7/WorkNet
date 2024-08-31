@@ -289,7 +289,13 @@ function WorkerRegister() {
           }
         } catch (err: any) {
           if (err.response?.status === 409) {
-            toast.error("Worker already registered!");
+            toast.error("Worker already registered with this user ID!");
+          } else if (err.response?.status === 400) {
+            toast.error("Bad request. Please check your input.");
+          } else if (err.response?.status === 401) {
+            toast.error("Unauthorized. Please log in again.");
+          } else if (err.response?.status === 500) {
+            toast.error("Server error. Please try again later.");
           } else {
             toast.error("An unexpected error occurred!");
           }

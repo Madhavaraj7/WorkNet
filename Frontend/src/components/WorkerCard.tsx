@@ -7,6 +7,7 @@ interface Category {
   name: string;
 }
 export interface Worker {
+  phoneNumber: ReactNode;
   _id: string;
   name: string;
   registerImage: string;

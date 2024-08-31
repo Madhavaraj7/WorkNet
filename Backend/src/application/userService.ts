@@ -212,3 +212,11 @@ export const getSlotsByWorkerIdService = async (workerId: string) => {
 };
 
 
+export const getUserBookedWorkers = async (userId: string) => {
+  return Booking.find({ userId })
+    .populate({
+      path: 'workerId',
+      select: 'name phoneNumber whatsappNumber registerImage', 
+    })
+    .exec();
+};

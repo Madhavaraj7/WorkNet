@@ -11,6 +11,7 @@ import {
   resetPasswordHandler,
   getCategoriesController,
   getSlotsByWorkerIdController,
+  getUserBookedWorkersController,
 } from "../controllers/userController";
 
 import {
@@ -79,6 +80,9 @@ router.get("/categories", getCategoriesController);
 router.get('/worker/:wId/slots', jwtMiddleware, checkUserStatusMiddleware, getSlotsByWorkerIdController);
 router.post('/bookings',jwtMiddleware, createBooking);
 router.post('/payments/confirm', jwtMiddleware,confirmPayment);
+
+router.get('/user/booked-workers', jwtMiddleware, getUserBookedWorkersController);
+
 
 
 

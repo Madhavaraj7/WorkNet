@@ -170,11 +170,25 @@ export const updateWorkerStatus = async (
 
 
 // Function to delete a worker
+
 export const deleteWorker = async (workerId: string) => {
   const worker = await Worker.findById(workerId);
   if (!worker) {
     throw errorHandler(404, 'Worker not found');
   }
+
+  worker.isBlocked = true;
+  await worker.save();
+
+  const userId = worker.userId; 
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw errorHandler(404, 'User not found');
+  }
+
+  user.isBlocked = true;
+  await user.save();
+
   return await deleteWorkerById(workerId);
 };
 

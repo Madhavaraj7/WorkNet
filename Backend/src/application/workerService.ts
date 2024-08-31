@@ -3,6 +3,8 @@ import { uploadToCloudinary } from '../cloudinaryConfig';
 import { Category, ICategory } from '../domain/category';
 import { User } from '../domain/user';
 import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
+import { Worker } from '../domain/worker'; // Adjust the import path
+
 
 
 import mongoose from 'mongoose';
@@ -13,6 +15,29 @@ import { Slot } from '../domain/slot';
 // Assuming you need to handle both names and IDs
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
   try {
+
+
+    const existingWorker = await Worker.findOne({ userId: workerData.userId });
+    if (existingWorker) {
+      throw new Error('Worker already exists with this user ID');
+    }
+
+
+     // Check if the user is blocked
+     const user = await UserModel.findById(workerData.userId);
+     if (!user) {
+       throw new Error('User not found');
+     }
+     if (user.isBlocked) {
+       throw new Error('User is blocked and cannot register as a worker');
+     }
+
+
+   
+
+
+
+
     // Handle registerImage upload
     let registerImageUrl = '';
     if (files.registerImage) {

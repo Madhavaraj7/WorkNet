@@ -237,14 +237,13 @@ export const updateWorkerAPI = async (reqBody: FormData, token: string) => {
     const response = await axios.put(`${SERVER_URL}/updateWorker`, reqBody, {
       headers: {
         Authorization: `Bearer ${token}`,
-        // Do not set Content-Type for FormData; browser will set it
       }
     });
 
     console.log('API response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error in updateWorkerAPI:', error); // Log detailed error for debugging
+    console.error('Error in updateWorkerAPI:', error); 
     throw new Error('Failed to update worker');
   }
 };
@@ -397,5 +396,25 @@ export const getWorkerAppointmentsAPI = async (token: string) => {
   } catch (error) {
     console.error("Error in getWorkerAppointmentsAPI:", error);
     throw new Error("Failed to fetch worker appointments");
+  }
+};
+
+
+
+// Get Booked Workers API
+export const getUserBookedWorkersAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/user/booked-workers`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getUserBookedWorkersAPI:", error);
+    throw new Error("Failed to fetch booked workers");
   }
 };

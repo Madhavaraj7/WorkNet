@@ -614,13 +614,13 @@ function Profile() {
                 >
                   {loading ? <CircularProgress size={24} /> : "Update Worker"}
                 </Button>
-                <Button
+                {/* <Button
                   variant="contained"
                   color="secondary"
                   onClick={navigateToDetailsPage}
                 >
                   Update More
-                </Button>
+                </Button> */}
               </div>
             </div>
           ) : (
