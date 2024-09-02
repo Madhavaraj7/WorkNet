@@ -21,7 +21,7 @@ interface IWorker extends Document {
   place: string;
   workImages: string[];
   userId: mongoose.Schema.Types.ObjectId; 
-  averageReview?: string;
+  averageReview?: number;
   status: string;
   isBlocked?: boolean;
   amount: number;  
@@ -90,7 +90,8 @@ const workerSchema = new Schema<IWorker>({
     required: true,
   },
   averageReview: {
-    type: String,
+    type: Number,
+    default: 0,
   },
   status: {
     type: String,

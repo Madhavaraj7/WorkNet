@@ -51,6 +51,7 @@ import {
 import { createBooking } from "../controllers/bookingController";
 import { confirmPayment } from "../controllers/paymentController";
 import { handleStripeWebhook } from "../controllers/stripeWebhookController";
+import { getReviews, postReview } from "../controllers/reviewController";
 
 const router = express.Router();
 
@@ -82,6 +83,9 @@ router.post('/bookings',jwtMiddleware, createBooking);
 router.post('/payments/confirm', jwtMiddleware,confirmPayment);
 
 router.get('/user/booked-workers', jwtMiddleware, getUserBookedWorkersController);
+
+router.post('/reviews', jwtMiddleware,postReview);
+router.get('/reviews/:workerId', getReviews);
 
 
 

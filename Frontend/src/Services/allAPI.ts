@@ -418,3 +418,44 @@ export const getUserBookedWorkersAPI = async (token: string) => {
     throw new Error("Failed to fetch booked workers");
   }
 };
+
+
+
+
+
+
+export const postReviewAPI = async (reviewData: any, token: string) => {
+  try {
+    const response = await commonAPI(
+      "POST",
+      `${SERVER_URL}/reviews`,
+      reviewData,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in postReviewAPI:", error);
+    throw new Error("Failed to post review");
+  }
+};
+
+
+
+export const getReviewsByWorkerIdAPI = async (workerId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/reviews/${workerId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getReviewsByWorkerIdAPI:", error);
+    throw new Error("Failed to fetch reviews for worker");
+  }
+};

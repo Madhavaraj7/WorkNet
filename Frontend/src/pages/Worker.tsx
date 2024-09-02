@@ -15,13 +15,18 @@ import {
   Rating,
   Skeleton,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { getAWorkerAPI, getSlotsByWorkerIdAPI } from "../Services/allAPI";
+import {
+  getAWorkerAPI,
+  getSlotsByWorkerIdAPI,
+  postReviewAPI,
+} from "../Services/allAPI";
 import { SERVER_URL } from "../Services/serverURL";
 import LeftArrow from "../assets/Images/LeftArrow.png";
 import RightArrow from "../assets/Images/RightArrow.png";
@@ -29,6 +34,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { KeyboardBackspace } from "@mui/icons-material";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "react-toastify";
+import WorkerReviews from "../pages/Review"; // Adjust the import path
+import StarIcon from "@mui/icons-material/Star";
 
 // Photos Component
 function Photos({ workImages }: { workImages: string[] }) {
@@ -109,64 +116,6 @@ function Photos({ workImages }: { workImages: string[] }) {
   );
 }
 
-// Reviews Component
-function Reviews() {
-  const dummyReviews = [
-    {
-      name: "Alice Johnson",
-      rating: 5,
-      comment:
-        "Fantastic work! Highly recommend this worker for their professionalism and skill.",
-      date: "August 10, 2024",
-    },
-    {
-      name: "Bob Smith",
-      rating: 4,
-      comment:
-        "Great service and attention to detail. A few delays but overall satisfied.",
-      date: "August 5, 2024",
-    },
-    {
-      name: "Clara Davis",
-      rating: 4,
-      comment:
-        "Very good experience. Would love to work with this worker again in the future.",
-      date: "August 1, 2024",
-    },
-  ];
-
-  return (
-    <Box className="mt-10">
-      <Typography variant="h6" className="font-semibold text-gray-700">
-        Reviews
-      </Typography>
-      <Stack spacing={4} mt={4}>
-        {dummyReviews.map((review, index) => (
-          <Card key={index} variant="outlined" className="shadow-lg">
-            <CardContent>
-              <Typography variant="h6" className="font-bold">
-                {review.name}
-              </Typography>
-              <Rating
-                name="read-only"
-                value={review.rating}
-                readOnly
-                className="mt-2"
-              />
-              <Typography variant="body2" className="mt-2 text-gray-600">
-                {review.comment}
-              </Typography>
-              <Typography variant="caption" className="mt-1 text-gray-500">
-                {review.date}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
-    </Box>
-  );
-}
-
 const stripePromise = loadStripe(
   "pk_test_51MWBZUSFYLZi23L4T1FEBPHNGRC5u1uSzsXntd6iwtKOQcTBRJMoARdSSAAqQswE55vrKvH5eWMrBCuO4ad0ZaLV00jgftxjNw"
 );
@@ -177,10 +126,74 @@ function Worker() {
   const [openModal, setOpenModal] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
-
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
 
+  const [openReviewModal, setOpenReviewModal] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
+  
+
   const token = localStorage.getItem("token") || ""; // Retrieve token from local storage or your preferred method
+
+  const handleOpenReviewModal = () => {
+    setOpenReviewModal(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setOpenReviewModal(false);
+    setReviewText("");
+    setRating(null);
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      // Get user details from local storage
+      const userString = localStorage.getItem("user");
+      if (!userString) {
+        throw new Error("User not found in local storage.");
+      }
+
+      const user = JSON.parse(userString);
+      if (!user || typeof user !== "object") {
+        throw new Error("Invalid user data in local storage.");
+      }
+
+      const userId = user._id;
+      const userName = user.profileImage; // Ensure these fields are correctly assigned
+      const userPhoto = user.photo;
+      const workerId = wId;
+
+      // Get rating points and feedback from the model values
+      const ratingPoints = rating; // Replace with your actual model value for rating
+      const feedback = reviewText; // Replace with your actual model value for feedback
+
+      // Prepare review data
+      const reviewData = {
+        workerId,
+        userId,
+        ratingPoints,
+        feedback,
+        userName,
+        userPhoto,
+      };
+
+      // Post review data to the API
+      const response = await postReviewAPI(reviewData, token);
+
+      // Check if the response contains an error message
+      if (response && response.error) {
+        throw new Error(response.error);
+      }
+
+      // Handle successful response
+      toast.success("Review posted successfully!");
+      handleCloseReviewModal();
+    } catch (error: any) {
+      toast.error(
+        error.message || "An error occurred while posting the review."
+      );
+    }
+  };
 
   const getAWorker = async () => {
     try {
@@ -240,8 +253,8 @@ function Worker() {
 
   const handleConfirmBooking = async () => {
     if (!selectedSlot || !workerDetails) {
-        toast.error("Please select a slot and worker details.");
-        return;
+      toast.error("Please select a slot and worker details.");
+      return;
     }
 
     const userString = localStorage.getItem("user");
@@ -250,74 +263,82 @@ function Worker() {
     console.log("User data:", user);
 
     if (!user || !user.email || !user.username) {
-        console.error("User email or username is missing from local storage");
-        alert("User email or username is missing. Please log in again.");
-        return;
+      console.error("User email or username is missing from local storage");
+      alert("User email or username is missing. Please log in again.");
+      return;
     }
 
     console.log("Selected Slot ID:", selectedSlot._id);
 
     try {
-        const response = await fetch(`${SERVER_URL}/bookings`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                workerId: wId,
-                slotId: selectedSlot._id,
-                amount: workerDetails.amount,
-                customerEmail: user.email,
-                customerName: user.username,
-                customerAddress: workerDetails.address,
-            }),
-        });
+      const response = await fetch(`${SERVER_URL}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          workerId: wId,
+          slotId: selectedSlot._id,
+          amount: workerDetails.amount,
+          customerEmail: user.email,
+          customerName: user.username,
+          customerAddress: workerDetails.address,
+        }),
+      });
 
-        const responseBody = await response.text();
+      const responseBody = await response.text();
 
-        console.log("Response Status:", response.status);
-        console.log("Response Body:", responseBody);
+      console.log("Response Status:", response.status);
+      console.log("Response Body:", responseBody);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} - ${responseBody}`);
-        }
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error! status: ${response.status} - ${responseBody}`
+        );
+      }
 
-        const sessionData = JSON.parse(responseBody);
-         
-        console.log("Session Data:", sessionData);
-        localStorage.setItem('sessionData', JSON.stringify(sessionData));
+      const sessionData = JSON.parse(responseBody);
 
+      console.log("Session Data:", sessionData);
+      localStorage.setItem("sessionData", JSON.stringify(sessionData));
 
-        if (!sessionData.sessionId) {
-            throw new Error("Session ID is missing from response");
-        }
+      if (!sessionData.sessionId) {
+        throw new Error("Session ID is missing from response");
+      }
 
-        const stripe = await stripePromise;
-        if (!stripe) {
-            throw new Error("Stripe.js failed to load");
-        }
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error("Stripe.js failed to load");
+      }
 
-        const { error } = await stripe.redirectToCheckout({
-            sessionId: sessionData.sessionId,
-        });
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: sessionData.sessionId,
+      });
 
-        if (error) {
-            console.error("Stripe Checkout error:", error);
-            toast.error("An error occurred during payment processing.");
-        }
+      if (error) {
+        console.error("Stripe Checkout error:", error);
+        toast.error("An error occurred during payment processing.");
+      }
     } catch (error: any) {
-        console.error("Error creating checkout session:", error.message);
-        toast.error("An error occurred while creating the booking. Please try again.");
+      console.error("Error creating checkout session:", error.message);
+      toast.error(
+        "An error occurred while creating the booking. Please try again."
+      );
     }
-};
-
-
-
+  };
 
   useEffect(() => {
     getAWorker();
   }, [wId]);
+
+  <Rating
+    name="worker-rating"
+    value={rating}
+    onChange={(event, newValue) => setRating(newValue)}
+    size="large"
+    emptyIcon={<StarIcon fontSize="inherit" />}
+  />;
 
   return (
     <>
@@ -465,7 +486,6 @@ function Worker() {
               </Box>
             </Box>
             <Photos workImages={workerDetails.workImages || []} />
-            <Reviews />
           </Box>
         )}
         {/* Modal for Available Slots */}
@@ -581,7 +601,7 @@ function Worker() {
                 </Typography>
                 <Box className="p-4 border border-gray-300 rounded-lg bg-white shadow-md">
                   <Typography variant="body1" className="text-gray-700">
-                    <strong>Amount:</strong> ${workerDetails.amount}
+                    <strong>Advance Amount:</strong> ₹{workerDetails.amount}
                   </Typography>
                   <Typography variant="body1" className="text-gray-700">
                     <strong>Payment Mode:</strong> {workerDetails.paymentMode}
@@ -614,7 +634,145 @@ function Worker() {
             </Button>
           </DialogActions>
         </Dialog>
+        <br />
+        {/* Review Button */}
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleOpenReviewModal}
+          className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+          sx={{
+            borderRadius: 2,
+            padding: "12px 24px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          <span className="flex items-center gap-2">
+            <StarIcon /> Post a Review
+          </span>
+        </Button>
+
+        {/* Review Modal */}
+        <Dialog
+          open={openReviewModal}
+          onClose={handleCloseReviewModal}
+          aria-labelledby="review-dialog-title"
+          maxWidth="sm"
+          fullWidth
+          sx={{
+            "& .MuiPaper-root": {
+              borderRadius: "16px",
+              boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)",
+            },
+          }}
+        >
+          <DialogContent
+            sx={{
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              bgcolor: "#fafafa",
+              borderRadius: "0 0 16px 16px",
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{ fontWeight: "bold", fontSize: "1.75rem", mb: 1 }}
+            >
+              Your Feedback Matters!
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{ mb: 2, color: "#333", fontWeight: "bold" }}
+            >
+              Rate this worker
+            </Typography>
+            <Rating
+              name="worker-rating"
+              value={rating}
+              onChange={(event, newValue) => setRating(newValue)}
+              size="large"
+              icon={<StarIcon sx={{ color: "#fbc02d" }} />}
+              emptyIcon={<StarIcon sx={{ color: "#e0e0e0" }} />}
+            />
+            <Box sx={{ mt: 2, width: "100%" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 2, color: "#333", fontWeight: "bold" }}
+              >
+                Your Review
+              </Typography>
+              <TextField
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                rows={4}
+                multiline
+                fullWidth
+                variant="outlined"
+                placeholder="Write your review here..."
+                sx={{
+                  backgroundColor: "#fff",
+                  borderRadius: "8px",
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ddd",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#bdbdbd",
+                    },
+                  },
+                }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions
+            sx={{
+              bgcolor: "#f5f5f5",
+              borderTop: "1px solid #ddd",
+              padding: "16px",
+              borderBottomLeftRadius: "16px",
+              borderBottomRightRadius: "16px",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              onClick={handleCloseReviewModal}
+              color="secondary"
+              variant="outlined"
+              sx={{
+                color: "#f50057",
+                borderColor: "#f50057",
+                "&:hover": {
+                  bgcolor: "#f50057",
+                  color: "#fff",
+                },
+                textTransform: "none",
+                borderRadius: "8px",
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitReview}
+              color="primary"
+              variant="contained"
+              sx={{
+                bgcolor: "#4caf50",
+                "&:hover": {
+                  bgcolor: "#388e3c",
+                },
+                textTransform: "none",
+                borderRadius: "8px",
+              }}
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <WorkerReviews />
       </Box>
+
       <Footer />
     </>
   );
