@@ -131,9 +131,8 @@ function Worker() {
   const [openReviewModal, setOpenReviewModal] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState<number | null>(null);
-  
 
-  const token = localStorage.getItem("token") || ""; // Retrieve token from local storage or your preferred method
+  const token = localStorage.getItem("token") || "";
 
   const handleOpenReviewModal = () => {
     setOpenReviewModal(true);
@@ -147,7 +146,6 @@ function Worker() {
 
   const handleSubmitReview = async () => {
     try {
-      // Get user details from local storage
       const userString = localStorage.getItem("user");
       if (!userString) {
         throw new Error("User not found in local storage.");
@@ -210,10 +208,14 @@ function Worker() {
     }
   };
   const handleOpenModal = async () => {
+    if (!token) {
+      toast.warn("Please Login First."); 
+      return; 
+    }
+
     if (wId) {
-      // Ensure wId is defined
       try {
-        const slots = await getSlotsByWorkerIdAPI(wId, token); // Fetch available slots with token
+        const slots = await getSlotsByWorkerIdAPI(wId, token); 
         setAvailableSlots(slots);
         setOpenModal(true);
       } catch (err) {

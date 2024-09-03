@@ -18,6 +18,8 @@ import { UserModel } from '../infrastructure/userRepository'; // Adjust the impo
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendEamilForApprove";
 import { getAllReviewsWithDetails } from "../infrastructure/reviewRepository";
+import { deleteReviewById as deleteReviewInRepo } from "../infrastructure/adminRepository";
+
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -240,3 +242,17 @@ export const findCategoryByName = async (name: string) => {
 export const fetchAllReviewsWithDetails = async () => {
   return await getAllReviewsWithDetails();
 };
+
+
+
+
+// export const deleteReviewById = async (_id: string) => {
+//   try {
+//       const deletedReview = await deleteReviewInRepo(_id);
+//       console.log("dddddd",deletedReview);
+      
+//       return deletedReview;
+//   } catch (error) {
+//       throw new Error("Error deleting review.");
+//   }
+// };

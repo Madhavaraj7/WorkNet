@@ -17,6 +17,7 @@ import cloudinary from "../../cloudinaryConfig";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 import { getAllCategories } from "../../infrastructure/userRepository";
 import mongoose from "mongoose";
+import { deleteReviewById } from "../../infrastructure/adminRepository";
 
 interface CustomRequest extends Request {
   userId?: string;
@@ -175,6 +176,9 @@ export const deleteWorkerController = async (req: Request, res: Response, next: 
 
 
 
+
+
+
 // Controller to add a new category
 export const addCategoryController = async (req: Request, res: Response, next: NextFunction) => {
   const { name, description } = req.body;
@@ -253,5 +257,28 @@ export const getAllReviewsWithDetailsController = async (req: Request, res: Resp
       res.json(reviews);
   } catch (error) {
       res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+};
+
+
+
+
+
+
+export const deleteReviewController = async (req: Request, res: Response) => {
+  try {
+    const reviewId = req.params.id;
+    console.log("Review ID:", reviewId);
+
+    const result = await deleteReviewById(reviewId);
+    console.log("Result:", result);
+
+    if (result) {
+      return res.status(200).json({ message: "Review marked as deleted successfully." });
+    } else {
+      return res.status(404).json({ message: "Review not found." });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to mark review as deleted.", error });
   }
 };

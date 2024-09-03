@@ -19,6 +19,7 @@ import {
   adminlogin,
   adminupdateProfile,
   blockUserController,
+  deleteReviewController,
   deleteWorkerController,
   editCategoryController,
   getAllReviewsWithDetailsController,
@@ -140,6 +141,8 @@ router.delete("/deleteWorker/:id", AdminjwtMiddleware, deleteWorkerController);
 router.get("/Adcategories", AdminjwtMiddleware, getCategoriesController);
 router.post("/categories", AdminjwtMiddleware, addCategoryController);
 router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
-router.get('/Adreviews', getAllReviewsWithDetailsController);
+router.get('/Adreviews',AdminjwtMiddleware, getAllReviewsWithDetailsController);
+router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
+
 
 export default router;

@@ -480,3 +480,22 @@ export const getAllReviewsWithDetailsAPI = async (token: string) => {
     throw new Error("Failed to fetch reviews with details");
   }
 };
+
+
+// Delete Review API
+export const deleteReviewAPI = async (reviewId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "DELETE",
+      `${SERVER_URL}/review/${reviewId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in deleteReviewAPI:", error);
+    throw new Error("Failed to delete review");
+  }
+};

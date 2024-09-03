@@ -15,10 +15,17 @@ import {
   Stack,
   Pagination,
   CircularProgress,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
-import { getAllReviewsWithDetailsAPI } from "../../Services/allAPI";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { getAllReviewsWithDetailsAPI, deleteReviewAPI } from "../../Services/allAPI";
+import { toast } from "react-toastify";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -29,6 +36,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 interface Review {
+  _id: string; // Add _id to represent the review ID
   profileImage: string | undefined;
   username: string | undefined;
   workerId: {
@@ -52,6 +60,8 @@ const AdReviews: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [reviewsPerPage] = useState<number>(5);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const token = localStorage.getItem("adtoken");
 
@@ -71,6 +81,23 @@ const AdReviews: React.FC = () => {
       }
     } else {
       setError("Token not found");
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    if (selectedReviewId && token) {
+      try {
+        await deleteReviewAPI(selectedReviewId, token);
+        toast.success("Review deleted successfully");
+        // Remove the deleted review from the state
+        setReviews(reviews.filter((review) => review._id !== selectedReviewId));
+        setIsDeleteDialogOpen(false);
+        setSelectedReviewId(null);
+      } catch (error) {
+        toast.error("Failed to delete review");
+        console.error("Failed to delete review:", error);
+      }
     }
   };
 
@@ -155,6 +182,7 @@ const AdReviews: React.FC = () => {
                 "Rating",
                 "Feedback",
                 "Created At",
+                "Actions",
               ].map((header) => (
                 <TableCell
                   key={header}
@@ -170,8 +198,8 @@ const AdReviews: React.FC = () => {
             {filteredReviews.length > 0 ? (
               filteredReviews.map((review, index) => (
                 <TableRow
-                  key={review.userId._id}
-                  className="hover:bg-gray-100"
+                  key={review._id} // Use review._id here
+                  className="hover:bg-gray.100"
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell
@@ -217,11 +245,34 @@ const AdReviews: React.FC = () => {
                   >
                     {new Date(review.createdAt).toLocaleDateString("en-GB")}
                   </TableCell>
+                  <TableCell
+                    className="text-center"
+                    sx={{ fontSize: "16px", padding: "12px" }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => {
+                        setSelectedReviewId(review._id); 
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      sx={{
+                        backgroundColor: "#d32f2f",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "#9a0007",
+                        },
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={8} align="center">
                   No reviews found
                 </TableCell>
               </TableRow>
@@ -246,6 +297,23 @@ const AdReviews: React.FC = () => {
           boundaryCount={1}
         />
       </Stack>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Delete Review</DialogTitle>
+        <DialogContent>Are you sure you want to delete this review?</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteReview} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
