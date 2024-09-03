@@ -24,3 +24,11 @@ export const hasUserBookedWorker = async (userId: mongoose.Types.ObjectId, worke
     const booking = await Booking.findOne({ userId, workerId, status: 'Confirmed' });
     return booking !== null;
 };
+
+
+export const getAllReviewsWithDetails = async () => {
+    return await Review.find()
+        .populate('userId', 'username profileImage')  // Populate with user details (name and photo)
+        .populate('workerId', 'name')      // Populate with worker details (name)
+        .select('workerId userId ratingPoints feedback createdAt updatedAt');
+};

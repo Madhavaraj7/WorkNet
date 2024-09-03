@@ -21,6 +21,7 @@ import {
   blockUserController,
   deleteWorkerController,
   editCategoryController,
+  getAllReviewsWithDetailsController,
   getAllWorkersController,
   getUsersList,
   unblockUserController,
@@ -81,9 +82,7 @@ router.get("/categories", getCategoriesController);
 router.get('/worker/:wId/slots', jwtMiddleware, checkUserStatusMiddleware, getSlotsByWorkerIdController);
 router.post('/bookings',jwtMiddleware, createBooking);
 router.post('/payments/confirm', jwtMiddleware,confirmPayment);
-
 router.get('/user/booked-workers', jwtMiddleware, getUserBookedWorkersController);
-
 router.post('/reviews', jwtMiddleware,postReview);
 router.get('/reviews/:workerId', getReviews);
 
@@ -140,6 +139,7 @@ router.delete("/deleteWorker/:id", AdminjwtMiddleware, deleteWorkerController);
 
 router.get("/Adcategories", AdminjwtMiddleware, getCategoriesController);
 router.post("/categories", AdminjwtMiddleware, addCategoryController);
-router.put("/editCategory/:id", editCategoryController);
+router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
+router.get('/Adreviews', getAllReviewsWithDetailsController);
 
 export default router;

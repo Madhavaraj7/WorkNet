@@ -75,7 +75,7 @@ const MyBooking: React.FC = () => {
               <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
                 <thead>
                   <tr className="bg-teal-700 text-white">
-                    <th className="py-4 px-6 border-b">Image</th>
+                    <th className="py-4 px-6 border-b">Profile</th>
                     <th className="py-4 px-6 border-b">Name</th>
                     <th className="py-4 px-6 border-b">Amount</th>
                     <th className="py-4 px-6 border-b">Status</th>
@@ -109,7 +109,7 @@ const MyBooking: React.FC = () => {
                             {worker ? worker.name : "N/A"}
                           </td>
                           <td className="py-4 px-6 border-b text-gray-900 font-medium">
-                            ${booking.amount.toFixed(2)}
+                          ₹{booking.amount.toFixed(2)}
                           </td>
                           <td className="py-4 px-6 border-b text-gray-700 capitalize">
                             {booking.status}
