@@ -459,3 +459,24 @@ export const getReviewsByWorkerIdAPI = async (workerId: string, token: string) =
     throw new Error("Failed to fetch reviews for worker");
   }
 };
+
+
+
+
+// Get All Reviews with Details (Admin)
+export const getAllReviewsWithDetailsAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/Adreviews`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getAllReviewsWithDetailsAPI:", error);
+    throw new Error("Failed to fetch reviews with details");
+  }
+};

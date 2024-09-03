@@ -25,6 +25,7 @@ import AdCategory from "./pages/Admin/AdCategory";
 import Slots from "./pages/Slots";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import MyBooking from "./pages/MyBooking";
+import AdReviews from "./pages/Admin/AdReviews";
 
 function App() {
   return (
@@ -80,6 +81,8 @@ function App() {
             <Route path="/adapprove" element={<WorkerApprov />} />
             <Route path="/adworkers" element={<AdWorkers />} />
             <Route path="/adCategory" element={<AdCategory />} />
+            <Route path="/adreviews" element={<AdReviews />} />
+
 
           </Route>
         </Route>

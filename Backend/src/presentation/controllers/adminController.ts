@@ -3,6 +3,7 @@ import {
   addCategory,
   blockUser,
   deleteWorker,
+  fetchAllReviewsWithDetails,
   findCategoryByName,
   getAllUsers,
   getAllWorkers,
@@ -234,5 +235,23 @@ export const editCategoryController = async (
   } catch (error) {
     // Pass the error to the next middleware (usually an error handler)
     next(error);
+  }
+};
+
+
+
+
+
+
+
+
+export const getAllReviewsWithDetailsController = async (req: Request, res: Response) => {
+  try {
+      const reviews = await fetchAllReviewsWithDetails();
+      console.log(reviews);
+      
+      res.json(reviews);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 };

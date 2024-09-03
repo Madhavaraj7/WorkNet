@@ -17,6 +17,7 @@ import { UserModel } from '../infrastructure/userRepository'; // Adjust the impo
 
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendEamilForApprove";
+import { getAllReviewsWithDetails } from "../infrastructure/reviewRepository";
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -231,4 +232,11 @@ export const updateCategory = async (
 
 export const findCategoryByName = async (name: string) => {
   return Category.findOne({ name });
+};
+
+
+
+
+export const fetchAllReviewsWithDetails = async () => {
+  return await getAllReviewsWithDetails();
 };
