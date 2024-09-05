@@ -26,6 +26,8 @@ import {
   getAWorkerAPI,
   getSlotsByWorkerIdAPI,
   postReviewAPI,
+  bookWorkerWithWalletAPI,
+  getWalletBalanceAPI,
 } from "../Services/allAPI";
 import { SERVER_URL } from "../Services/serverURL";
 import LeftArrow from "../assets/Images/LeftArrow.png";
@@ -34,17 +36,29 @@ import { useNavigate, useParams } from "react-router-dom";
 import { KeyboardBackspace } from "@mui/icons-material";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "react-toastify";
-import WorkerReviews from "../pages/Review"; // Adjust the import path
+import WorkerReviews from "../pages/Review";
 import StarIcon from "@mui/icons-material/Star";
 
 // Photos Component
 function Photos({ workImages }: { workImages: string[] }) {
   const SlickArrowLeft = (props: any) => (
-    <img id="Arrows" src={LeftArrow} alt="Previous" {...props} />
+    <img
+      id="Arrows"
+      src={LeftArrow}
+      alt="Previous"
+      {...props}
+      className="slick-arrow slick-prev"
+    />
   );
 
   const SlickArrowRight = (props: any) => (
-    <img id="Arrows" src={RightArrow} alt="Next" {...props} />
+    <img
+      id="Arrows"
+      src={RightArrow}
+      alt="Next"
+      {...props}
+      className="slick-arrow slick-next"
+    />
   );
 
   const settings = {
@@ -86,21 +100,26 @@ function Photos({ workImages }: { workImages: string[] }) {
     ],
   };
 
-  // Filter out duplicate URLs
   const uniqueWorkImages = Array.from(new Set(workImages));
 
   return (
     <Box className="mt-5">
-      <Typography variant="h4" className="font-bold mb-4">
-        Photos
+      <Typography
+        variant="h4"
+        className="font-bold mb-4 text-center text-gray-800 tracking-wide"
+      >
+        Our Work
       </Typography>
       {uniqueWorkImages.length > 0 ? (
         <Box className="px-7 max-sm:px-0 mt-10">
           <Slider {...settings}>
             {uniqueWorkImages.map((url, index) => (
-              <Box key={index} className="p-2">
+              <Box
+                key={index}
+                className="p-2 rounded-lg overflow-hidden transition-transform transform hover:scale-105"
+              >
                 <Box
-                  className="rounded-lg h-72 w-72 bg-cover bg-center"
+                  className="rounded-lg h-72 w-72 bg-cover bg-center shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out"
                   style={{ backgroundImage: `url(${url})` }}
                 />
               </Box>
@@ -157,15 +176,13 @@ function Worker() {
       }
 
       const userId = user._id;
-      const userName = user.profileImage; // Ensure these fields are correctly assigned
+      const userName = user.profileImage;
       const userPhoto = user.photo;
       const workerId = wId;
 
-      // Get rating points and feedback from the model values
-      const ratingPoints = rating; // Replace with your actual model value for rating
-      const feedback = reviewText; // Replace with your actual model value for feedback
+      const ratingPoints = rating;
+      const feedback = reviewText;
 
-      // Prepare review data
       const reviewData = {
         workerId,
         userId,
@@ -175,15 +192,12 @@ function Worker() {
         userPhoto,
       };
 
-      // Post review data to the API
       const response = await postReviewAPI(reviewData, token);
 
-      // Check if the response contains an error message
       if (response && response.error) {
         throw new Error(response.error);
       }
 
-      // Handle successful response
       toast.success("Review posted successfully!");
       handleCloseReviewModal();
     } catch (error: any) {
@@ -207,15 +221,16 @@ function Worker() {
       console.error(err);
     }
   };
+
   const handleOpenModal = async () => {
     if (!token) {
-      toast.warn("Please Login First."); 
-      return; 
+      toast.warn("Please Login First.");
+      return;
     }
 
     if (wId) {
       try {
-        const slots = await getSlotsByWorkerIdAPI(wId, token); 
+        const slots = await getSlotsByWorkerIdAPI(wId, token);
         setAvailableSlots(slots);
         setOpenModal(true);
       } catch (err) {
@@ -228,7 +243,7 @@ function Worker() {
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    setSelectedSlot(null); // Clear selected slot when closing the modal
+    setSelectedSlot(null);
   };
 
   const handleSlotSelect = (slot: any) => {
@@ -341,6 +356,39 @@ function Worker() {
     size="large"
     emptyIcon={<StarIcon fontSize="inherit" />}
   />;
+
+  const handleWalletBooking = async () => {
+    if (!selectedSlot || !workerDetails) {
+      toast.error("Please select a slot and worker details.");
+      return;
+    }
+
+    try {
+      const userWallet = await getWalletBalanceAPI(token);
+
+      if (userWallet.walletBalance < workerDetails.amount) {
+        toast.error("Insufficient wallet balance.");
+        return;
+      }
+
+      const reqBody = {
+        workerId: wId,
+        slotId: selectedSlot._id,
+        amount: workerDetails.amount,
+      };
+
+      const response = await bookWorkerWithWalletAPI(reqBody, token);
+      console.log(response);
+
+      toast.success("Worker booked successfully using wallet.");
+      navigate("/payment-success");
+    } catch (error: any) {
+      console.error("Error booking with wallet:", error.message);
+      toast.error(
+        "An error occurred while booking with your wallet. Please try again."
+      );
+    }
+  };
 
   return (
     <>
@@ -491,7 +539,6 @@ function Worker() {
           </Box>
         )}
         {/* Modal for Available Slots */}
-        {/* Modal for Available Slots */}
         <Dialog
           open={openModal}
           onClose={handleCloseModal}
@@ -567,7 +614,7 @@ function Worker() {
                 color="inherit"
                 onClick={() => {
                   handleClosePaymentModal();
-                  handleOpenModal(); // Open the slots modal when going back
+                  handleOpenModal();
                 }}
                 aria-label="back"
                 className="mr-2"
@@ -610,14 +657,21 @@ function Worker() {
                   </Typography>
                 </Box>
                 <br />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className="mt-4 bg-teal-600 hover:bg-teal-700 text-white"
-                  onClick={handleConfirmBooking} // Use the function here
-                >
-                  Confirm Booking
-                </Button>
+                <div className="flex gap-x-4">
+                  <button
+                    className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                    onClick={handleConfirmBooking}
+                  >
+                    Online Payment
+                  </button>
+
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                    onClick={handleWalletBooking}
+                  >
+                    Book with Wallet
+                  </button>
+                </div>
               </Box>
             ) : (
               <Typography variant="body1" className="text-center text-gray-600">

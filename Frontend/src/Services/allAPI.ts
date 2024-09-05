@@ -499,3 +499,71 @@ export const deleteReviewAPI = async (reviewId: string, token: string) => {
     throw new Error("Failed to delete review");
   }
 };
+
+
+
+
+
+
+
+
+
+
+export const getWalletBalanceAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/wallet/balance`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getWalletBalanceAPI:", error);
+    throw new Error("Failed to fetch wallet balance");
+  }
+};
+
+// Cancel Booking API
+export const cancelBookingAPI = async (bookingId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "POST",
+      `${SERVER_URL}/cancel/${bookingId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in cancelBookingAPI:", error);
+    throw new Error("Failed to cancel booking");
+  }
+};
+
+
+
+
+
+
+
+// Book Worker API
+export const bookWorkerWithWalletAPI = async (reqBody: any, token: string) => {
+  try {
+    const response = await commonAPI(
+      "POST",
+      `${SERVER_URL}/walletBooking`,
+      reqBody,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in bookWorkerWithWalletAPI:", error);
+    throw new Error("Failed to book worker using wallet balance");
+  }
+};

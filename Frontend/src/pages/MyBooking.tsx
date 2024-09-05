@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { getUserBookedWorkersAPI } from "../Services/allAPI";
+import {
+  getUserBookedWorkersAPI,
+  getWalletBalanceAPI,
+  cancelBookingAPI,
+} from "../Services/allAPI";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { FaWhatsapp, FaPhone } from "react-icons/fa";
-import { Pagination, Stack } from "@mui/material";
+import {
+  Pagination,
+  Stack,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+} from "@mui/material";
 
 interface Worker {
   _id: string;
@@ -14,20 +27,39 @@ interface Worker {
 }
 
 interface Booking {
+  _id: string;
   workerId: Worker | null;
   amount: number;
   status: string;
   createdAt: string;
 }
 
+interface WalletTransaction {
+  transactionDate: string;
+  transactionAmount: number;
+  transactionType: "credit" | "debit";
+}
+
 const MyBooking: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [walletTransactions, setWalletTransactions] = useState<
+    WalletTransaction[]
+  >([]);
   const [page, setPage] = useState(1);
-  const [bookingsPerPage] = useState(5);
+  const [bookingsPerPage] = useState(4);
+  const [walletPage, setWalletPage] = useState(1);
+  const [walletTransactionsPerPage] = useState(2);
+
+  // State for managing the modal
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchBookingsAndWalletData = async () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -36,11 +68,19 @@ const MyBooking: React.FC = () => {
       }
 
       try {
-        const response = await getUserBookedWorkersAPI(token);
-        setBookings(response.data);
+        // Fetch bookings
+        const bookingsResponse = await getUserBookedWorkersAPI(token);
+        setBookings(bookingsResponse.data);
+
+        // Fetch wallet balance and transactions
+        const walletResponse = await getWalletBalanceAPI(token);
+        console.log(walletResponse);
+
+        setWalletBalance(walletResponse.walletBalance);
+        setWalletTransactions(walletResponse.walletTransactions);
       } catch (error) {
         if (error instanceof Error) {
-          console.error("Error fetching bookings:", error);
+          console.error("Error fetching data:", error);
           setError(error.message);
         } else {
           console.error("Unexpected error:", error);
@@ -49,14 +89,91 @@ const MyBooking: React.FC = () => {
       }
     };
 
-    fetchBookings();
+    fetchBookingsAndWalletData();
   }, []);
+
+  const fetchWalletData = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("No token found");
+      return;
+    }
+  
+    try {
+      // Fetch updated wallet balance and transactions
+      const walletResponse = await getWalletBalanceAPI(token);
+      setWalletBalance(walletResponse.walletBalance);
+      setWalletTransactions(walletResponse.walletTransactions);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error fetching wallet data:", error);
+        setError(error.message);
+      } else {
+        console.error("Unexpected error:", error);
+        setError("An unexpected error occurred while fetching wallet data.");
+      }
+    }
+  };
+  
+
+  const handleOpenModal = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedBookingId(null);
+  };
+
+  const handleConfirmCancelBooking = async () => {
+    if (selectedBookingId) {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        setError("No token found");
+        return;
+      }
+  
+      try {
+        await cancelBookingAPI(selectedBookingId, token);
+        setBookings((prevBookings) =>
+          prevBookings.filter((booking) => booking._id !== selectedBookingId)
+        );
+        await fetchWalletData(); // Fetch updated wallet data
+        handleCloseModal();
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error("Error canceling booking:", error);
+          setError(error.message);
+        } else {
+          console.error("Unexpected error:", error);
+          setError("An unexpected error occurred while canceling the booking.");
+        }
+      }
+    }
+  };
+  
 
   // Pagination logic
   const indexOfLastBooking = page * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
-  const currentBookings = bookings.slice(indexOfFirstBooking, indexOfLastBooking);
+  const currentBookings = bookings.slice(
+    indexOfFirstBooking,
+    indexOfLastBooking
+  );
   const totalPages = Math.ceil(bookings.length / bookingsPerPage);
+
+  const indexOfLastTransaction = walletPage * walletTransactionsPerPage;
+  const indexOfFirstTransaction =
+    indexOfLastTransaction - walletTransactionsPerPage;
+  const currentWalletTransactions = walletTransactions.slice(
+    indexOfFirstTransaction,
+    indexOfLastTransaction
+  );
+  const totalWalletPages = Math.ceil(
+    walletTransactions.length / walletTransactionsPerPage
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -80,6 +197,7 @@ const MyBooking: React.FC = () => {
                     <th className="py-4 px-6 border-b">Amount</th>
                     <th className="py-4 px-6 border-b">Status</th>
                     <th className="py-4 px-6 border-b">Contact</th>
+                    <th className="py-4 px-6 border-b">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -109,7 +227,7 @@ const MyBooking: React.FC = () => {
                             {worker ? worker.name : "N/A"}
                           </td>
                           <td className="py-4 px-6 border-b text-gray-900 font-medium">
-                          ₹{booking.amount.toFixed(2)}
+                            ₹{booking.amount.toFixed(2)}
                           </td>
                           <td className="py-4 px-6 border-b text-gray-700 capitalize">
                             {booking.status}
@@ -118,7 +236,12 @@ const MyBooking: React.FC = () => {
                             <div className="flex items-center justify-center space-x-3">
                               {worker?.whatsappNumber && (
                                 <button
-                                  onClick={() => window.open(`https://wa.me/${worker.whatsappNumber}`, "_blank")}
+                                  onClick={() =>
+                                    window.open(
+                                      `https://wa.me/${worker.whatsappNumber}`,
+                                      "_blank"
+                                    )
+                                  }
                                   className="flex items-center px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 shadow-md transition-transform duration-300 transform hover:scale-105"
                                 >
                                   <FaWhatsapp className="mr-2 text-lg" />
@@ -136,13 +259,22 @@ const MyBooking: React.FC = () => {
                               )}
                             </div>
                           </td>
+                          <td className="py-4 px-6 border-b">
+                            <Button
+                              onClick={() => handleOpenModal(booking._id)}
+                              variant="contained"
+                              color="error"
+                            >
+                              Cancel
+                            </Button>
+                          </td>
                         </tr>
                       );
                     })
                   ) : (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="py-8 px-4 text-center text-gray-500"
                       >
                         No bookings found.
@@ -166,10 +298,105 @@ const MyBooking: React.FC = () => {
                 />
               </Stack>
             </div>
+
+            <br />
+
+
+      
+            {/* Wallet Balance and Wallet Transactions */}
+            <div className="flex mt-8 space-x-4">
+              
+              {/* Wallet Transactions */}
+              <div className="flex-1 p-4 bg-white shadow-lg rounded-lg">
+                <h3 className="text-2xl font-extrabold mb-4 text-teal-800">
+                  Wallet Transactions
+                </h3>
+                <table className="min-w-full bg-white border border-gray-200">
+                  <thead>
+                    <tr className="bg-teal-700 text-white">
+                      <th className="py-4 px-6 border-b">Date</th>
+                      <th className="py-4 px-6 border-b">Amount</th>
+                      <th className="py-4 px-6 border-b">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentWalletTransactions.length > 0 ? (
+                      currentWalletTransactions.map((transaction, index) => (
+                        <tr
+                          key={index}
+                          className={`text-center border-b ${
+                            index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                          } hover:bg-gray-200 transition-colors`}
+                        >
+                          <td className="py-4 px-6 border-b text-gray-700">
+                            {new Date(
+                              transaction.transactionDate
+                            ).toLocaleDateString()}
+                          </td>
+                          <td className="py-4 px-6 border-b text-gray-900">
+                            ₹{transaction.transactionAmount.toFixed(2)}
+                          </td>
+                          <td className="py-4 px-6 border-b text-gray-700 capitalize">
+                            {transaction.transactionType}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="py-8 px-4 text-center text-gray-500"
+                        >
+                          No transactions found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                {/* Pagination for wallet transactions */}
+                <div className="flex justify-center mt-8">
+                  <Stack spacing={2}>
+                    <Pagination
+                      count={totalWalletPages}
+                      page={walletPage}
+                      onChange={(event, value) => setWalletPage(value)}
+                      color="primary"
+                    />
+                  </Stack>
+                </div>
+              </div>
+              {/* Wallet Balance */}
+              <div className="flex-2 p-6 bg-gradient-to-r from-teal-400 to-teal-600 shadow-xl rounded-lg border border-teal-500 transform hover:scale-105 transition-transform duration-300 ease-in-out">
+                <h3 className="text-3xl font-bold mb-4 text-white">
+                  Wallet Balance
+                </h3>
+                <p className="text-2xl font-semibold text-white">
+                  ₹
+                  {walletBalance !== null
+                    ? walletBalance.toFixed(2)
+                    : "Loading..."}
+                </p>
+              </div>
+            </div>
           </>
         )}
       </div>
       <Footer />
+      {/* Cancel Booking Confirmation Modal */}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Confirm Cancellation</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to cancel this booking?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmCancelBooking} color="error">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

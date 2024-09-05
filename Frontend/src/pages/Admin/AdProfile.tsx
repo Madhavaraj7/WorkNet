@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import AdHeader from '../../components/Admin/AdHeader';
 import { Button, TextField, CircularProgress } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
-import { updateAdminProfileAPI } from "../../Services/allAPI"; // Adjust path as needed
-import { SERVER_URL } from "../../Services/serverURL"; // Adjust path as needed
+import { updateAdminProfileAPI } from "../../Services/allAPI"; 
+import { SERVER_URL } from "../../Services/serverURL"; 
 import { toast } from "react-toastify";
 
 interface UserProfile {
@@ -68,7 +68,6 @@ function AdProfile() {
 
         if (result._id) {
           toast.success("Profile updated successfully");
-          // Handle successful update (e.g., redirect or update local state)
         } else {
           toast.info(result.response);
         }
@@ -120,7 +119,7 @@ function AdProfile() {
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               InputProps={{ readOnly: true }}
-              sx={{ backgroundColor: "#f5f5f5" }} // Optional: to visually indicate non-editability
+              sx={{ backgroundColor: "#f5f5f5" }} 
             />
             <Button
               onClick={handleUpdate}
@@ -128,7 +127,7 @@ function AdProfile() {
               variant="contained"
               color="primary"
               size="large"
-              disabled={loading} // Disable the button while loading
+              disabled={loading} 
             >
               {loading ? <CircularProgress size={24} /> : "Update"}
             </Button>

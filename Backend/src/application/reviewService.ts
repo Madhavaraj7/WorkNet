@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import { createReview, hasUserReviewedWorker, hasUserBookedWorker, getReviewsByWorkerId } from '../infrastructure/reviewRepository';
 import { IReview } from '../domain/review';
 
-// Inside your review service
 export const addReview = async (reviewData: IReview): Promise<IReview> => {
     const { userId, workerId } = reviewData;
 
@@ -12,13 +11,11 @@ export const addReview = async (reviewData: IReview): Promise<IReview> => {
             throw new Error('User has already given feedback for this worker.');
         }
 
-        // Check if the user has booked the worker
         const hasBooked = await hasUserBookedWorker(userId, workerId);
         if (!hasBooked) {
             throw new Error('User has not booked this worker.');
         }
 
-        // Proceed with creating the review
         return await createReview(reviewData);
     } catch (error: unknown) {
         if (error instanceof Error) {

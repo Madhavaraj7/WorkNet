@@ -214,7 +214,6 @@ export const updateWorkerController = async (
 };
 
 const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
-  // Extract the public ID from the image URL
   const publicId = imageUrl.split("/").pop()?.split(".")[0];
   if (publicId) {
     await cloudinary.uploader.destroy(publicId);

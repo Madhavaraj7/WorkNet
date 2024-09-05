@@ -17,13 +17,11 @@ export const getReviewsByWorkerId = async (workerId: mongoose.Types.ObjectId): P
 };
 
 
-// Check if a user has already reviewed a worker
 export const hasUserReviewedWorker = async (userId: mongoose.Types.ObjectId, workerId: mongoose.Types.ObjectId): Promise<boolean> => {
     const review = await Review.findOne({ userId, workerId });
     return review !== null;
 };
 
-// Check if the user has booked the worker
 export const hasUserBookedWorker = async (userId: mongoose.Types.ObjectId, workerId: mongoose.Types.ObjectId): Promise<boolean> => {
     const booking = await Booking.findOne({ userId, workerId, status: 'Confirmed' });
     return booking !== null;
@@ -31,9 +29,9 @@ export const hasUserBookedWorker = async (userId: mongoose.Types.ObjectId, worke
 
 
 export const getAllReviewsWithDetails = async () => {
-    return await Review.find({ isDeleted: false })  // Filter reviews with isDeleted: false
-        .populate('userId', 'username profileImage')  // Populate with user details (name and photo)
-        .populate('workerId', 'name')      // Populate with worker details (name)
+    return await Review.find({ isDeleted: false }) 
+        .populate('userId', 'username profileImage')  
+        .populate('workerId', 'name')      
         .select('workerId userId ratingPoints feedback createdAt updatedAt');
 };
 

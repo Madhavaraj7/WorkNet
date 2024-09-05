@@ -36,7 +36,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 interface Review {
-  _id: string; // Add _id to represent the review ID
+  _id: string; 
   profileImage: string | undefined;
   username: string | undefined;
   workerId: {
@@ -90,7 +90,6 @@ const AdReviews: React.FC = () => {
       try {
         await deleteReviewAPI(selectedReviewId, token);
         toast.success("Review deleted successfully");
-        // Remove the deleted review from the state
         setReviews(reviews.filter((review) => review._id !== selectedReviewId));
         setIsDeleteDialogOpen(false);
         setSelectedReviewId(null);
@@ -198,7 +197,7 @@ const AdReviews: React.FC = () => {
             {filteredReviews.length > 0 ? (
               filteredReviews.map((review, index) => (
                 <TableRow
-                  key={review._id} // Use review._id here
+                  key={review._id} 
                   className="hover:bg-gray.100"
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >

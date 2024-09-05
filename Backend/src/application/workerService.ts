@@ -2,8 +2,8 @@ import { blockWorker, createWorker, findWorkerByIdInDB, findWorkerByUserIdInDB, 
 import { uploadToCloudinary } from '../cloudinaryConfig';
 import { Category, ICategory } from '../domain/category';
 import { User } from '../domain/user';
-import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
-import { Worker } from '../domain/worker'; // Adjust the import path
+import { UserModel } from '../infrastructure/userRepository'; 
+import { Worker } from '../domain/worker'; 
 
 
 
@@ -12,7 +12,6 @@ import { Booking } from '../domain/booking';
 import { Slot } from '../domain/slot';
 
 // register a worker
-// Assuming you need to handle both names and IDs
 export const registerWorker = async (workerData: any, files: any): Promise<any> => {
   try {
 

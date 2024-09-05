@@ -4,7 +4,7 @@ import { OTP } from '../domain/otp';
 
 //gegenerateAndSaveOTP in database
 export const generateAndSaveOTP = async (otp: OTP) => {
-    await deleteOTP(otp.email); // Delete existing OTP for the user
+    await deleteOTP(otp.email); 
     return createOTP(otp);
 };
 

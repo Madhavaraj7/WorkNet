@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getReviewsByWorkerIdAPI } from "../Services/allAPI"; // Adjust the import path
+import { getReviewsByWorkerIdAPI } from "../Services/allAPI"; 
 import {
   Box,
   Typography,

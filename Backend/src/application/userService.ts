@@ -13,8 +13,6 @@ import { otpGenerator } from "../utils/otpGenerator"; // Make sure this function
 import { Slot } from "../domain/slot";
 import { Booking } from "../domain/booking";
 
-
-
 // registerUser new User
 export const registerUser = async (user: User) => {
   try {
@@ -115,7 +113,7 @@ export const loginUser = async (email: string, password: string) => {
     throw new Error("Invalid Email/Password");
   }
   if (user.isBlocked) {
-    throw new Error('User is blocked');
+    throw new Error("User is blocked");
   }
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
@@ -127,24 +125,25 @@ export const loginUser = async (email: string, password: string) => {
   return { user, token };
 };
 
+export const updateUserProfile = async (
+  userId: string,
+  update: Partial<User>
+) => {
+  try {
+    console.log("userId:", userId);
+    // console.log('update:', update);
+    const updatedUser = await updateUserProfileRepo(userId, update);
+    // console.log(updateUser);
 
-export const updateUserProfile = async (userId: string, update: Partial<User>) => {
-    try {
-        console.log('userId:', userId);
-        // console.log('update:', update);
-        const updatedUser = await updateUserProfileRepo(userId, update);
-        // console.log(updateUser);
-        
-        if (!updatedUser) {
-            throw new Error("User not found");
-        }
-        return updatedUser;
-    } catch (error) {
-        console.error("Error updating user profile:", error);
-        throw new Error("Failed to update user profile");
+    if (!updatedUser) {
+      throw new Error("User not found");
     }
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw new Error("Failed to update user profile");
+  }
 };
-
 
 export const forgotPassword = async (email: string) => {
   try {
@@ -154,11 +153,11 @@ export const forgotPassword = async (email: string) => {
       throw new Error("User not found");
     }
 
-    const otp = otpGenerator(); // Generate an OTP
-    await updateUser(email, { otp }); // Store the OTP in the user's record
+    const otp = otpGenerator(); 
+    await updateUser(email, { otp }); 
 
-    await sendEmail(email, otp, "Your OTP for password reset is:"); // Send OTP email
-    
+    await sendEmail(email, otp, "Your OTP for password reset is:"); 
+
     return { message: "OTP sent to your email" };
   } catch (error) {
     console.error("Error during password reset request:", error);
@@ -166,9 +165,12 @@ export const forgotPassword = async (email: string) => {
   }
 };
 
-
 // Function to handle password reset
-export const resetPassword = async (email: string, otp: string, newPassword: string) => {
+export const resetPassword = async (
+  email: string,
+  otp: string,
+  newPassword: string
+) => {
   try {
     const user = await findUserByEmail(email);
 
@@ -192,31 +194,29 @@ export const fetchAllCategories = async () => {
   return getAllCategories();
 };
 
-
-
 export const getSlotsByWorkerIdService = async (workerId: string) => {
   try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      const slots = await Slot.find({
-          workerId,
-          isAvailable: true,
-          date: { $gte: today }, 
-      }).exec();
+    const slots = await Slot.find({
+      workerId,
+      isAvailable: true,
+      date: { $gte: today },
+    }).exec();
 
-      return slots;
+    return slots;
   } catch (error) {
-      throw new Error('Error retrieving available slots');
+    throw new Error("Error retrieving available slots");
   }
 };
 
-
 export const getUserBookedWorkers = async (userId: string) => {
-  return Booking.find({ userId })
+  return Booking.find({ userId, status: "Confirmed" })
     .populate({
-      path: 'workerId',
-      select: 'name phoneNumber whatsappNumber registerImage', 
+      path: "workerId",
+      select: "name phoneNumber whatsappNumber registerImage",
     })
+    .sort({ createdAt: -1 }) 
     .exec();
 };

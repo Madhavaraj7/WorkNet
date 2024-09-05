@@ -19,7 +19,6 @@ export const createCategory = async (categoryData: Partial<ICategory>) => {
 };
 
 
-// Fetch all categories
 export const getAllCategories = async (): Promise<ICategory[]> => {
   try {
     return await Category.find().sort({ name: 1 });

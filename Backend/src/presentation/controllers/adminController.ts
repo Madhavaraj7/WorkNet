@@ -176,9 +176,6 @@ export const deleteWorkerController = async (req: Request, res: Response, next: 
 
 
 
-
-
-
 // Controller to add a new category
 export const addCategoryController = async (req: Request, res: Response, next: NextFunction) => {
   const { name, description } = req.body;
@@ -204,8 +201,6 @@ export const getCategoriesController = async (req: Request, res: Response, next:
     next(error);
   }
 };
-
-
 
 
 export const editCategoryController = async (
@@ -244,11 +239,6 @@ export const editCategoryController = async (
 
 
 
-
-
-
-
-
 export const getAllReviewsWithDetailsController = async (req: Request, res: Response) => {
   try {
       const reviews = await fetchAllReviewsWithDetails();
@@ -259,10 +249,6 @@ export const getAllReviewsWithDetailsController = async (req: Request, res: Resp
       res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 };
-
-
-
-
 
 
 export const deleteReviewController = async (req: Request, res: Response) => {

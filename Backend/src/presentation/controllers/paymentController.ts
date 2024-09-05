@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { stripe } from '../../Config/stripe'; 
 import { updateBookingStatus } from '../../application/bookingService'; 
 import { Slot } from '../../domain/slot'; 
-import { ParsedQs } from 'qs'; // Ensure this is imported for query parsing
-import { Worker } from '../../domain/worker'; // Import the Worker model
+import { ParsedQs } from 'qs'; 
+import { Worker } from '../../domain/worker'; 
 
 
 export const confirmPayment = async (req: Request, res: Response) => {
@@ -28,7 +28,6 @@ export const confirmPayment = async (req: Request, res: Response) => {
             if (booking) {
                 await Slot.findByIdAndUpdate(booking.slotId, { isAvailable: false }).exec();
                 
-                // Fetch the worker associated with this booking
                 const worker = await Worker.findById(booking.workerId).exec();
 
                 if (!worker) {

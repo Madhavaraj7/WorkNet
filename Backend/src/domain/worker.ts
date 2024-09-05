@@ -48,7 +48,7 @@ const workerSchema = new Schema<IWorker>({
   },
   categories: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',  // Reference to the Category model
+    ref: 'Category',  
     required: true,
   }],
   experience: {

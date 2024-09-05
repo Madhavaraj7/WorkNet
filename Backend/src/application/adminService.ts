@@ -202,6 +202,9 @@ export const addCategory = async (name: string, description?: string) => {
   return newCategory;
 };
 
+
+// Function to update a category
+
 export const updateCategory = async (
   _id: string,
   updateData: Partial<ICategory>
@@ -237,22 +240,9 @@ export const findCategoryByName = async (name: string) => {
 };
 
 
-
-
 export const fetchAllReviewsWithDetails = async () => {
   return await getAllReviewsWithDetails();
 };
 
 
 
-
-// export const deleteReviewById = async (_id: string) => {
-//   try {
-//       const deletedReview = await deleteReviewInRepo(_id);
-//       console.log("dddddd",deletedReview);
-      
-//       return deletedReview;
-//   } catch (error) {
-//       throw new Error("Error deleting review.");
-//   }
-// };

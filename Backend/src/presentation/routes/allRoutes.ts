@@ -50,10 +50,11 @@ import {
   createSlotController,
   getSlotsByWorkerController,
 } from "../controllers/slotController";
-import { createBooking } from "../controllers/bookingController";
+import { cancelBookingController, createBooking, createBookingController } from "../controllers/bookingController";
 import { confirmPayment } from "../controllers/paymentController";
-import { handleStripeWebhook } from "../controllers/stripeWebhookController";
+// import { handleStripeWebhook } from "../controllers/stripeWebhookController";
 import { getReviews, postReview } from "../controllers/reviewController";
+import {  getWalletBalance } from "../controllers/walletController";
 
 const router = express.Router();
 
@@ -86,6 +87,10 @@ router.post('/payments/confirm', jwtMiddleware,confirmPayment);
 router.get('/user/booked-workers', jwtMiddleware, getUserBookedWorkersController);
 router.post('/reviews', jwtMiddleware,postReview);
 router.get('/reviews/:workerId', getReviews);
+router.get('/wallet/balance', jwtMiddleware, getWalletBalance);
+
+router.post('/cancel/:bookingId', cancelBookingController);
+router.post('/walletBooking', jwtMiddleware,createBookingController); // User books a worker through wallet balance
 
 
 

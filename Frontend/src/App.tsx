@@ -52,11 +52,7 @@ function App() {
         </Route>
 
         <Route path="/workers" element={<Workers />} />
-        <Route path='/worker/:wId' element={<Worker/>}/>
-
-
-
-        
+        <Route path="/worker/:wId" element={<Worker />} />
 
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
@@ -65,11 +61,6 @@ function App() {
           <Route path="/create-slots" element={<Slots />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/myBooking" element={<MyBooking />} />
-
-          
-
-
-
         </Route>
 
         <Route path="/admin" element={<AdminAuth />} />
@@ -82,8 +73,6 @@ function App() {
             <Route path="/adworkers" element={<AdWorkers />} />
             <Route path="/adCategory" element={<AdCategory />} />
             <Route path="/adreviews" element={<AdReviews />} />
-
-
           </Route>
         </Route>
       </Routes>

@@ -327,8 +327,8 @@ const AdWorkers: React.FC = () => {
         <Box
           sx={{
             position: "relative",
-            width: "600px", // Fixed width
-            height: "400px", // Fixed height
+            width: "600px", 
+            height: "400px", 
             backgroundColor: "white",
             borderRadius: "8px",
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
@@ -343,9 +343,9 @@ const AdWorkers: React.FC = () => {
             src={currentImages[currentImageIndex]}
             alt="Worker Work"
             style={{
-              width: "100%", // Scale image to fit within fixed dimensions
+              width: "100%", 
               height: "100%",
-              objectFit: "contain", // Ensure the image maintains its aspect ratio
+              objectFit: "contain", 
             }}
           />
           <IconButton

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createBooking as createBookingService } from '../../application/bookingService';
+import { bookWorker, createBooking as createBookingService, handleBookingCancellation } from '../../application/bookingService';
 import { stripe } from '../../Config/stripe';
 import { IBooking } from '../../domain/booking';
 
@@ -64,3 +64,38 @@ export const createBooking = async (req: CustomRequest, res: Response) => {
       res.status(400).json({ error: error.message || 'An error occurred while creating the booking.' });
   }
 };
+
+
+
+
+export const cancelBookingController = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { bookingId } = req.params;
+      console.log({bookingId});
+      
+      const message = await handleBookingCancellation(bookingId);
+      res.status(200).json({ message });
+    } catch (error:any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+
+
+  export const createBookingController = async (req: any, res: Response) => {
+    const {  workerId, slotId, amount } = req.body;
+
+    console.log({workerId,slotId,amount});
+    
+    const userId = req.userId;
+
+  
+    try {
+      const booking = await bookWorker(userId, workerId, slotId, amount);
+      console.log("booki",booking);
+      
+      res.status(201).json(booking);
+    } catch (error:any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
