@@ -36,7 +36,9 @@
     "react-spinners": "^0.14.1",
     "react-stripe-checkout": "^2.6.3",
     "react-toastify": "^10.0.5",
+    "recharts": "^2.12.7",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.7.5",
     "styled-components": "^6.1.12",
     "yup": "^1.4.0"
   },

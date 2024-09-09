@@ -109,21 +109,37 @@ export const updateUserOtp = async (email: string, otp: string) => {
 // login the user
 export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmail(email);
+
+  // Check if the user exists
   if (!user) {
     throw new Error("Invalid Email/Password");
   }
+
+  // Check if the user is blocked
   if (user.isBlocked) {
     throw new Error("User is blocked");
   }
+
+  // Check if OTP has been verified
+  if (!user.otpVerified) {
+    throw new Error("OTP verification required");
+  }
+
+  // Validate the password
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw new Error("Invalid Email/Password");
   }
+
+  // Generate JWT token
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY!, {
     expiresIn: "1h",
   });
+
+  // Return user and token if all checks pass
   return { user, token };
 };
+
 
 export const updateUserProfile = async (
   userId: string,

@@ -129,7 +129,7 @@ const AdHeader: React.FC = () => {
             "workers",
             "Category",
             "reviews",
-            "report",
+            "revenue",
             "messages",
             "profile",
           ].map((icon) => (
@@ -186,7 +186,7 @@ const AdHeader: React.FC = () => {
                     }}
                   />
                 )}
-                {icon === "report" && (
+                {icon === "revenue" && (
                   <ReportIcon
                     className="me-3"
                     fontSize="large"

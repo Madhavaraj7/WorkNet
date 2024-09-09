@@ -26,6 +26,9 @@ import Slots from "./pages/Slots";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import MyBooking from "./pages/MyBooking";
 import AdReviews from "./pages/Admin/AdReviews";
+import AdRevenue from "./pages/Admin/AdRevenue";
+import Help from "./pages/Help";
+import Admessages from "./pages/Admin/Admessages";
 
 function App() {
   return (
@@ -61,6 +64,8 @@ function App() {
           <Route path="/create-slots" element={<Slots />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/myBooking" element={<MyBooking />} />
+          <Route path="/Help" element={<Help />} />
+
         </Route>
 
         <Route path="/admin" element={<AdminAuth />} />
@@ -73,6 +78,10 @@ function App() {
             <Route path="/adworkers" element={<AdWorkers />} />
             <Route path="/adCategory" element={<AdCategory />} />
             <Route path="/adreviews" element={<AdReviews />} />
+            <Route path="/adrevenue" element={<AdRevenue />} />
+            <Route path="/admessages" element={<Admessages />} />
+
+
           </Route>
         </Route>
       </Routes>

@@ -10,10 +10,10 @@ import {
   ListItemIcon,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Logout from "@mui/icons-material/Logout";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { tokenAuthenticationContext } from "../ContextAPI/TokenAuth";
 import { toast } from "react-toastify";
 
@@ -63,6 +63,7 @@ const Header: React.FC = () => {
     navigate("/profile");
     handleMenuClose();
   };
+
   const handleLogoutClick = () => {
     toast.success("Logout Successfully");
     localStorage.removeItem("user");
@@ -169,7 +170,17 @@ const Header: React.FC = () => {
                   <span>Register</span>
                 </Button>
               </Link>
-              
+              <Link to="/help">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="bg-teal-500 hover:bg-teal-600 flex items-center space-x-1 px-2 py-1 text-sm"
+                  size="small" // Smaller button size
+                >
+                  <HelpOutlineIcon fontSize="small" />
+                  <span className="hidden md:inline">Help</span>
+                </Button>
+              </Link>
             </div>
           ) : (
             <>

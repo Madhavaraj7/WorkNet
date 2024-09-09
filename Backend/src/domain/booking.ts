@@ -2,6 +2,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBooking extends Document {
+  createdAt: any;
   userId: mongoose.Schema.Types.ObjectId;
   slotId: mongoose.Schema.Types.ObjectId;
   workerId: mongoose.Schema.Types.ObjectId; 

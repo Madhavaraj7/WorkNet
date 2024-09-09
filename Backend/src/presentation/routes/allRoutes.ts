@@ -22,8 +22,10 @@ import {
   deleteReviewController,
   deleteWorkerController,
   editCategoryController,
+  getAllCounts,
   getAllReviewsWithDetailsController,
   getAllWorkersController,
+  getDailyRevenue,
   getUsersList,
   unblockUserController,
   updateWorkerStatusController,
@@ -89,8 +91,8 @@ router.post('/reviews', jwtMiddleware,postReview);
 router.get('/reviews/:workerId', getReviews);
 router.get('/wallet/balance', jwtMiddleware, getWalletBalance);
 
-router.post('/cancel/:bookingId', cancelBookingController);
-router.post('/walletBooking', jwtMiddleware,createBookingController); // User books a worker through wallet balance
+router.post('/cancel/:bookingId',jwtMiddleware, cancelBookingController);
+router.post('/walletBooking', jwtMiddleware,createBookingController); 
 
 
 
@@ -148,6 +150,10 @@ router.post("/categories", AdminjwtMiddleware, addCategoryController);
 router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
 router.get('/Adreviews',AdminjwtMiddleware, getAllReviewsWithDetailsController);
 router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
+router.get('/counts', AdminjwtMiddleware,getAllCounts);
+router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
+
+
 
 
 export default router;

@@ -567,3 +567,43 @@ export const bookWorkerWithWalletAPI = async (reqBody: any, token: string) => {
     throw new Error("Failed to book worker using wallet balance");
   }
 };
+
+
+// Get All Counts API
+export const getAllCountsAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/counts`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getAllCountsAPI:", error);
+    throw new Error("Failed to fetch counts");
+  }
+};
+
+
+// Fetch monthly revenue
+export const getDailyRevenueAPI = async (year: number, month: number, day: number, token: string) => {
+  try {
+    // Construct the URL with query parameters for year, month, and day
+    const url = `${SERVER_URL}/revenue?year=${year}&month=${month}&day=${day}`;
+    
+    // Make the API call
+    const response = await commonAPI("GET", url, undefined, {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching daily revenue:', error);
+    throw new Error('Failed to fetch daily revenue');
+  }
+};
+

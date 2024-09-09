@@ -2,6 +2,8 @@
 import { Category, ICategory } from '../domain/category';
 import { Worker } from '../domain/worker';
 import {Review,IReview }  from "../domain/review";
+import { Booking } from '../domain/booking';
+import { UserModel } from './userRepository';
 
 export const getAllWorkersFromDB = async () => {
   return Worker.find().sort({ createdAt: -1 }).populate('categories', 'name description');
@@ -54,3 +56,19 @@ export const deleteReviewById = async (_id: string): Promise<IReview | null> => 
     throw new Error("Error updating review status: " + error.message);
   }
 };
+
+
+
+export const getUsersCount = async (): Promise<number> => {
+  return await UserModel.countDocuments();
+};
+
+export const getWorkersCount = async (): Promise<number> => {
+  return await Worker.countDocuments();
+};
+
+export const getBookingsCount = async (): Promise<number> => {
+  return await Booking.countDocuments();
+};
+
+
