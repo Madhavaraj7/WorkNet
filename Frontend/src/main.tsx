@@ -7,6 +7,7 @@ import TokenAuthProvider from "./ContextAPI/TokenAuth"; // Ensure correct import
 import AdminAuthProvider from "./ContextAPI/AdminAuth"; // Ensure correct import
 
 import AvarageRes from "./ContextAPI/AvarageRes"; // Ensure correct import
+import NewMessageArrivedResp from "./ContextAPI/NewMessageArrivedResp";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <TokenAuthProvider>
         <AdminAuthProvider>
           <AvarageRes>
-            <App />
+            <NewMessageArrivedResp>
+              <App />
+            </NewMessageArrivedResp>
           </AvarageRes>
         </AdminAuthProvider>
       </TokenAuthProvider>

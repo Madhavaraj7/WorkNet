@@ -29,6 +29,7 @@ import AdReviews from "./pages/Admin/AdReviews";
 import AdRevenue from "./pages/Admin/AdRevenue";
 import Help from "./pages/Help";
 import Admessages from "./pages/Admin/Admessages";
+import Chat from "./pages/Admin/Chat";
 
 function App() {
   return (
@@ -79,7 +80,7 @@ function App() {
             <Route path="/adCategory" element={<AdCategory />} />
             <Route path="/adreviews" element={<AdReviews />} />
             <Route path="/adrevenue" element={<AdRevenue />} />
-            <Route path="/admessages" element={<Admessages />} />
+            <Route path="/admessages" element={<Chat />} />
 
 
           </Route>
