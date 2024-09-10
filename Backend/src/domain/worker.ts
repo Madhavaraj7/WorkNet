@@ -10,7 +10,7 @@ interface IWorker extends Document {
   name: string;
   phoneNumber: number;
   whatsappNumber: number;
-  categories: mongoose.Schema.Types.ObjectId[];  // Reference to Category model
+  categories: mongoose.Schema.Types.ObjectId[];  
   experience: number;
   workingDays: string;
   availableTime: string;
@@ -48,7 +48,7 @@ const workerSchema = new Schema<IWorker>({
   },
   categories: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',  // Reference to the Category model
+    ref: 'Category',  
     required: true,
   }],
   experience: {

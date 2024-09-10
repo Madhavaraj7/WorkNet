@@ -3,6 +3,8 @@ import { registerUser, verifyAndSaveUser, loginUser, googleLogin, updateUserOtp,
 import { otpGenerator } from "../../utils/otpGenerator";
 import { sendEmail } from "../../utils/sendEmail";
 import { findUserByEmail, findUserById } from "../../infrastructure/userRepository";
+import { WalletModel } from '../../domain/wallet'; // Adjust the path if needed
+
 import axios from 'axios';
 import sharp from 'sharp';
 import cloudinary from '../../cloudinaryConfig'; 
@@ -79,9 +81,8 @@ export const register = async (req: Request, res: Response) => {
         };
 
         if (profileImage) {
-            // Upload the image to Cloudinary
             cloudinary.uploader.upload_stream(
-                (error: any, result: any) => { // Add type annotations for the callback parameters
+                (error: any, result: any) => { 
                     if (error) {
                         return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
                     }
@@ -109,8 +110,20 @@ export const verifyOtp = async (req: Request, res: Response) => {
         }
 
         if (user.otp === otp) {
+            // Verify the user
             await verifyAndSaveUser(email, otp);
-            res.status(200).json("User registered successfully");
+
+            const newWallet = new WalletModel({
+                userId: user._id,
+                walletBalance: 0, 
+                walletTransaction: [], // Empty transactions array for now
+            });
+
+            // Save the wallet to the database
+            await newWallet.save();
+
+            // Respond with success
+            res.status(200).json("User registered and wallet created successfully");
         } else {
             res.status(400).json({ error: "Invalid OTP" });
         }
@@ -160,7 +173,6 @@ export const updateProfile = async (req: any, res: Response) => {
         const profileImage = req.file ? req.file.buffer : null;
         let profileImageUrl = '';
 
-        // Fetch the user from the database
         const user = await findUserById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -186,9 +198,8 @@ export const updateProfile = async (req: any, res: Response) => {
         };
 
         if (profileImage) {
-            // Upload the image to Cloudinary
             cloudinary.uploader.upload_stream(
-                async (error: any, result: any) => { // Add type annotations for the callback parameters
+                async (error: any, result: any) => { 
                     if (error) {
                         return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
                     }
@@ -223,6 +234,8 @@ export const updateProfile = async (req: any, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
 export const forgotPasswordHandler = async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
@@ -233,7 +246,6 @@ export const forgotPasswordHandler = async (req: Request, res: Response) => {
     }
   };
   
-  // Handle password reset
   export const resetPasswordHandler = async (req: Request, res: Response) => {
     try {
       const { email, otp, newPassword } = req.body;

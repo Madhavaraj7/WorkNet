@@ -3,12 +3,12 @@ import mongoose from 'mongoose';
 import { createWorkerSlots, getSlotsByWorkerId } from '../../application/slotService';
 
 interface CustomRequest extends Request {
-    userId?: string; // Added the userId field to the request interface
+    userId?: string; 
 }
 
 
 interface CustomRequest extends Request {
-  workerId?: string;  // Use workerId instead of userId
+  workerId?: string; 
 }
 
 export const createSlotController = async (req: CustomRequest, res: Response) => {
@@ -24,7 +24,6 @@ export const createSlotController = async (req: CustomRequest, res: Response) =>
       return res.status(400).json({ message: 'Invalid workerId format' });
     }
 
-    // Use workerId instead of userId
     const slots = await createWorkerSlots(req.workerId, new Date(startDate), new Date(endDate));
     res.status(201).json(slots);
   } catch (error: any) {

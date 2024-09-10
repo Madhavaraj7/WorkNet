@@ -23,10 +23,12 @@ import {
 import { styled } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import BlockIcon from "@mui/icons-material/Block";
+import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import { getAdminAllworkersAPI, deleteWorkerAPI } from "../../Services/allAPI";
 import { toast } from "react-toastify";
+import CloseIcon from '@mui/icons-material/Close';
+
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -47,6 +49,10 @@ interface Worker {
   createdAt: string;
   isBlocked: boolean;
   status: string;
+  kycDetails: {
+    documentType: string;
+    documentImage: string;
+  }[];
 }
 
 const AdWorkers: React.FC = () => {
@@ -57,8 +63,11 @@ const AdWorkers: React.FC = () => {
   const [currentWorker, setCurrentWorker] = useState<Worker | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [currentImages, setCurrentImages] = useState<string[]>([]);
+  const [currentKycImages, setCurrentKycImages] = useState<number>(0);
+  const [showKycModal, setShowKycModal] = useState<boolean>(false);
+  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   const [page, setPage] = useState(1);
-  const [workersPerPage] = useState(5); 
+  const [workersPerPage] = useState(5);
   const token = localStorage.getItem("adtoken");
 
   const getAllWorkers = async () => {
@@ -113,6 +122,12 @@ const AdWorkers: React.FC = () => {
         toast.error("Failed to delete worker");
       }
     }
+  };
+
+  const handleOpenKycModal = (worker: Worker) => {
+    setSelectedWorker(worker);
+    setCurrentKycImages(0); 
+    setShowKycModal(true);
   };
 
   useEffect(() => {
@@ -177,7 +192,7 @@ const AdWorkers: React.FC = () => {
                 "Phone",
                 "Categories",
                 "Work Images",
-                "Created At",
+                "KYC Details",
                 "Action",
               ].map((header) => (
                 <TableCell
@@ -252,12 +267,14 @@ const AdWorkers: React.FC = () => {
                     View Images
                   </Button>
                 </TableCell>
-                <TableCell
-                  className="text-center"
-                  sx={{ fontSize: "16px", padding: "12px" }}
-                >
-                  {new Date(worker.createdAt).toLocaleDateString("en-GB")}
-                </TableCell>
+                <TableCell className="text-center">
+                    <button
+                      className="px-6 py-3 bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 font-semibold"
+                      onClick={() => handleOpenKycModal(worker)}
+                    >
+                      View KYC
+                    </button>
+                  </TableCell>
                 <TableCell
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
@@ -265,7 +282,7 @@ const AdWorkers: React.FC = () => {
                   <Button
                     variant="contained"
                     color="error"
-                    startIcon={<BlockIcon />}
+                    startIcon={<DeleteIcon />}
                     onClick={() => handleOpenDialog(worker)}
                   >
                     Delete
@@ -295,10 +312,115 @@ const AdWorkers: React.FC = () => {
 
       {/* Modal for viewing images */}
       <Modal
-      open={openModal}
-      onClose={() => setOpenModal(false)}
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(4px)",
+          transition: "opacity 0.3s ease-in-out",
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            width: "600px", 
+            height: "400px", 
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+          }}
+        >
+          <img
+            src={currentImages[currentImageIndex]}
+            alt="Worker Work"
+            style={{
+              width: "100%", 
+              height: "100%",
+              objectFit: "contain", 
+            }}
+          />
+          <IconButton
+            onClick={handlePrevImage}
+            sx={{
+              position: "absolute",
+              left: 16,
+              top: "50%",
+              transform: "translateY(-50%)",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              color: "white",
+              borderRadius: "50%",
+              width: 40,
+              height: 40,
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+              },
+            }}
+            aria-label="Previous Image"
+          >
+            <ArrowBackIosNewIcon fontSize="large" />
+          </IconButton>
+          <IconButton
+            onClick={handleNextImage}
+            sx={{
+              position: "absolute",
+              right: 16,
+              top: "50%",
+              transform: "translateY(-50%)",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              color: "white",
+              borderRadius: "50%",
+              width: 40,
+              height: 40,
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+              },
+            }}
+            aria-label="Next Image"
+          >
+            <ArrowForwardIosIcon fontSize="large" />
+          </IconButton>
+          <IconButton
+            onClick={() => setOpenModal(false)}
+            sx={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              zIndex: 1,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              color: "white",
+              borderRadius: "50%",
+              width: 40,
+              height: 40,
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+              },
+            }}
+            aria-label="Close Modal"
+          >
+            <span
+              aria-hidden="true"
+              style={{ fontSize: "24px", fontWeight: "bold" }}
+            >
+              &times;
+            </span>
+          </IconButton>
+        </Box>
+      </Modal>
+
+      <Modal
+      open={showKycModal}
+      onClose={() => setShowKycModal(false)}
+      aria-labelledby="kyc-modal-title"
+      aria-describedby="kyc-modal-description"
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -310,8 +432,8 @@ const AdWorkers: React.FC = () => {
       <Box
         sx={{
           position: 'relative',
-          width: '600px', // Fixed width
-          height: '400px', // Fixed height
+          width: '600px',
+          height: '400px',
           backgroundColor: 'white',
           borderRadius: '8px',
           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
@@ -322,75 +444,51 @@ const AdWorkers: React.FC = () => {
           p: 2,
         }}
       >
-        <img
-          src={currentImages[currentImageIndex]}
-          alt="Worker Work"
-          style={{
-            width: '100%', // Scale image to fit within fixed dimensions
-            height: '100%',
-            objectFit: 'contain', // Ensure the image maintains its aspect ratio
-          }}
-        />
+        {/* Close Button */}
         <IconButton
-          onClick={handlePrevImage}
+          onClick={() => setShowKycModal(false)}
           sx={{
             position: 'absolute',
-            left: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            },
-          }}
-          aria-label="Previous Image"
-        >
-          <ArrowBackIosNewIcon fontSize="large" />
-        </IconButton>
-        <IconButton
-          onClick={handleNextImage}
-          sx={{
-            position: 'absolute',
-            right: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            },
-          }}
-          aria-label="Next Image"
-        >
-          <ArrowForwardIosIcon fontSize="large" />
-        </IconButton>
-        <IconButton
-          onClick={() => setOpenModal(false)}
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
+            top: 8,
+            right: 8,
             zIndex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            },
           }}
-          aria-label="Close Modal"
         >
-          <span aria-hidden="true" style={{ fontSize: '24px', fontWeight: 'bold' }}>&times;</span>
+          <CloseIcon />
         </IconButton>
+        
+
+        {selectedWorker && selectedWorker.kycDetails.length > 0 ? (
+          <>
+            <img
+              src={selectedWorker.kycDetails[currentKycImages]?.documentImage}
+              alt="KYC"
+              style={{ width: "100%", borderRadius: "8px", objectFit: "cover" }}
+            />
+            <div className="flex justify-between mt-2">
+              <IconButton
+                onClick={() =>
+                  setCurrentKycImages((prevIndex) =>
+                    prevIndex === 0 ? selectedWorker.kycDetails.length - 1 : prevIndex - 1
+                  )
+                }
+              >
+                {/* Add left arrow icon */}
+              </IconButton>
+              <IconButton
+                onClick={() =>
+                  setCurrentKycImages((prevIndex) =>
+                    prevIndex === selectedWorker.kycDetails.length - 1 ? 0 : prevIndex + 1
+                  )
+                }
+              >
+                {/* Add right arrow icon */}
+              </IconButton>
+            </div>
+          </>
+        ) : (
+          <p>No KYC details available</p>
+        )}
       </Box>
     </Modal>
 
@@ -398,9 +496,7 @@ const AdWorkers: React.FC = () => {
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Delete Worker</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete this worker?
-          </Typography>
+          <Typography>Are you sure you want to delete this worker?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">

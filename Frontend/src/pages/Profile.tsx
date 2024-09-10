@@ -670,7 +670,7 @@ function Profile() {
                   onChange={handleSlotChange}
                   fullWidth
                   margin="normal"
-                  inputProps={{ min: new Date().toISOString().split("T")[0] }} // Disable previous dates
+                  inputProps={{ min: new Date().toISOString().split("T")[0] }} 
                 />
                 <TextField
                   label="End Date"
@@ -681,7 +681,7 @@ function Profile() {
                   onChange={handleSlotChange}
                   fullWidth
                   margin="normal"
-                  inputProps={{ min: new Date().toISOString().split("T")[0] }} // Disable previous dates
+                  inputProps={{ min: new Date().toISOString().split("T")[0] }} 
                 />
                 <Button
                   variant="contained"
@@ -728,12 +728,12 @@ function Profile() {
                     )}
                     <div className="flex justify-center mt-6">
                       <TablePagination
-                        rowsPerPageOptions={[]} // Remove rows per page options dropdown
+                        rowsPerPageOptions={[]} 
                         component="div"
-                        count={filteredSlots.length} // Total number of slots
-                        rowsPerPage={rowsPerPage} // Show only one slot per page
-                        page={page} // Current page
-                        onPageChange={handleChangePage} // Handle page change
+                        count={filteredSlots.length} 
+                        rowsPerPage={rowsPerPage} 
+                        page={page} 
+                        onPageChange={handleChangePage} 
                         className="bg-white rounded-lg border border-gray-300 shadow-sm"
                       />
                     </div>
@@ -800,7 +800,7 @@ function Profile() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={4} // Ensure this is a number, not a string
+                      colSpan={4} 
                       className="py-3 px-5 text-center text-gray-500 text-sm"
                     >
                       No appointments available
@@ -841,6 +841,7 @@ function Profile() {
 }
 
 export default Profile;
-function sort(arg0: (a: any, b: any) => number) {
-  throw new Error("Function not implemented.");
-}
+
+
+
+

@@ -142,6 +142,7 @@ function WorkerRegister() {
 
   const workingDaysOptions = [
     "All Days",
+    "Half Days Only",
     "Monday to Saturday",
     "Monday to Friday",
     "Saturday and Sunday",

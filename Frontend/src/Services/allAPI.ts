@@ -480,3 +480,130 @@ export const getAllReviewsWithDetailsAPI = async (token: string) => {
     throw new Error("Failed to fetch reviews with details");
   }
 };
+
+
+// Delete Review API
+export const deleteReviewAPI = async (reviewId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "DELETE",
+      `${SERVER_URL}/review/${reviewId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in deleteReviewAPI:", error);
+    throw new Error("Failed to delete review");
+  }
+};
+
+
+
+
+
+
+
+
+
+
+export const getWalletBalanceAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/wallet/balance`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getWalletBalanceAPI:", error);
+    throw new Error("Failed to fetch wallet balance");
+  }
+};
+
+// Cancel Booking API
+export const cancelBookingAPI = async (bookingId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "POST",
+      `${SERVER_URL}/cancel/${bookingId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in cancelBookingAPI:", error);
+    throw new Error("Failed to cancel booking");
+  }
+};
+
+
+
+
+
+
+
+// Book Worker API
+export const bookWorkerWithWalletAPI = async (reqBody: any, token: string) => {
+  try {
+    const response = await commonAPI(
+      "POST",
+      `${SERVER_URL}/walletBooking`,
+      reqBody,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in bookWorkerWithWalletAPI:", error);
+    throw new Error("Failed to book worker using wallet balance");
+  }
+};
+
+
+// Get All Counts API
+export const getAllCountsAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/counts`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getAllCountsAPI:", error);
+    throw new Error("Failed to fetch counts");
+  }
+};
+
+
+// Fetch monthly revenue
+export const getDailyRevenueAPI = async (year: number, month: number, day: number, token: string) => {
+  try {
+    // Construct the URL with query parameters for year, month, and day
+    const url = `${SERVER_URL}/revenue?year=${year}&month=${month}&day=${day}`;
+    
+    // Make the API call
+    const response = await commonAPI("GET", url, undefined, {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching daily revenue:', error);
+    throw new Error('Failed to fetch daily revenue');
+  }
+};
+

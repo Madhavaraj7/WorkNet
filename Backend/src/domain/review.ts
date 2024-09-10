@@ -7,6 +7,7 @@ export interface IReview extends Document {
     feedback?: string;
     userName: string;
     userPhoto?: string;
+    isDeleted?: boolean; 
 }
 
 const reviewSchema: Schema = new Schema<IReview>({
@@ -16,6 +17,7 @@ const reviewSchema: Schema = new Schema<IReview>({
     feedback: { type: String },
     userName: { type: String, required: true },
     userPhoto: { type: String },
+    isDeleted: { type: Boolean, default: false }, 
 }, { timestamps: true });
 
-export default mongoose.model<IReview>('Review', reviewSchema);
+export const Review = mongoose.model<IReview>('Review', reviewSchema);

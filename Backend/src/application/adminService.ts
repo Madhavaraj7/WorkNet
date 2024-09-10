@@ -10,14 +10,19 @@ import {
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
 import { errorHandler } from "../utils/errorHandler"; 
-import { createCategory, deleteWorkerById, getAllWorkersFromDB } from "../infrastructure/adminRepository";
+import { createCategory, deleteWorkerById, getAllWorkersFromDB} from "../infrastructure/adminRepository";
 import { Worker } from "../domain/worker"; 
 import { Category, ICategory } from "../domain/category";
 import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
+import * as adminRepository from '../infrastructure/adminRepository';
+
 
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendEamilForApprove";
 import { getAllReviewsWithDetails } from "../infrastructure/reviewRepository";
+import { deleteReviewById as deleteReviewInRepo } from "../infrastructure/adminRepository";
+import { Booking } from "../domain/booking";
+
 
 // Function to log in an admin user
 export const loginUser = async (
@@ -200,6 +205,9 @@ export const addCategory = async (name: string, description?: string) => {
   return newCategory;
 };
 
+
+// Function to update a category
+
 export const updateCategory = async (
   _id: string,
   updateData: Partial<ICategory>
@@ -235,8 +243,48 @@ export const findCategoryByName = async (name: string) => {
 };
 
 
-
-
 export const fetchAllReviewsWithDetails = async () => {
   return await getAllReviewsWithDetails();
 };
+
+
+
+export const getAllCounts = async (): Promise<{ usersCount: number; workersCount: number; bookingsCount: number; }> => {
+  const usersCount = await adminRepository.getUsersCount();
+  const workersCount = await adminRepository.getWorkersCount();
+  const bookingsCount = await adminRepository.getBookingsCount();
+  
+  return { usersCount, workersCount, bookingsCount };
+};
+
+
+
+export async function fetchDailyRevenue(year: number, month: number, day: number): Promise<number> {
+  const startDate = new Date(year, month - 1, day, 0, 0, 0); // Start of the day
+  const endDate = new Date(year, month - 1, day + 1, 0, 0, 0); // Start of the next day
+
+  const result = await Booking.aggregate([
+    {
+      $match: {
+        status: 'Confirmed',
+        createdAt: { $gte: startDate, $lt: endDate },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: '$amount' },
+      },
+    },
+  ]);
+
+  return result.length > 0 ? result[0].totalRevenue : 0;
+}
+
+
+
+
+
+
+
+

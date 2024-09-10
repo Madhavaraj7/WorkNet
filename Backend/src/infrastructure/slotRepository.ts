@@ -30,3 +30,9 @@ export const getSlotsByWorkerIdFromRepo = async (workerId: mongoose.Types.Object
     date: { $gte: today }, 
   }).exec();
 };
+
+
+
+export const updateSlotAvailability = async (slotId: mongoose.Types.ObjectId, isAvailable: boolean): Promise<void> => {
+  await Slot.findByIdAndUpdate(slotId, { isAvailable }).exec();
+};

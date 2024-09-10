@@ -19,10 +19,13 @@ import {
   adminlogin,
   adminupdateProfile,
   blockUserController,
+  deleteReviewController,
   deleteWorkerController,
   editCategoryController,
+  getAllCounts,
   getAllReviewsWithDetailsController,
   getAllWorkersController,
+  getDailyRevenue,
   getUsersList,
   unblockUserController,
   updateWorkerStatusController,
@@ -49,10 +52,11 @@ import {
   createSlotController,
   getSlotsByWorkerController,
 } from "../controllers/slotController";
-import { createBooking } from "../controllers/bookingController";
+import { cancelBookingController, createBooking, createBookingController } from "../controllers/bookingController";
 import { confirmPayment } from "../controllers/paymentController";
-import { handleStripeWebhook } from "../controllers/stripeWebhookController";
+// import { handleStripeWebhook } from "../controllers/stripeWebhookController";
 import { getReviews, postReview } from "../controllers/reviewController";
+import {  getWalletBalance } from "../controllers/walletController";
 
 const router = express.Router();
 
@@ -85,6 +89,10 @@ router.post('/payments/confirm', jwtMiddleware,confirmPayment);
 router.get('/user/booked-workers', jwtMiddleware, getUserBookedWorkersController);
 router.post('/reviews', jwtMiddleware,postReview);
 router.get('/reviews/:workerId', getReviews);
+router.get('/wallet/balance', jwtMiddleware, getWalletBalance);
+
+router.post('/cancel/:bookingId',jwtMiddleware, cancelBookingController);
+router.post('/walletBooking', jwtMiddleware,createBookingController); 
 
 
 
@@ -140,6 +148,12 @@ router.delete("/deleteWorker/:id", AdminjwtMiddleware, deleteWorkerController);
 router.get("/Adcategories", AdminjwtMiddleware, getCategoriesController);
 router.post("/categories", AdminjwtMiddleware, addCategoryController);
 router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
-router.get('/Adreviews', getAllReviewsWithDetailsController);
+router.get('/Adreviews',AdminjwtMiddleware, getAllReviewsWithDetailsController);
+router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
+router.get('/counts', AdminjwtMiddleware,getAllCounts);
+router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
+
+
+
 
 export default router;

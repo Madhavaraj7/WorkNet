@@ -117,7 +117,7 @@ const WorkerApprov: React.FC = () => {
 
   const handleOpenKycModal = (worker: Worker) => {
     setSelectedWorker(worker);
-    setCurrentKycImages(0); // Reset the index to 0
+    setCurrentKycImages(0); 
     setShowKycModal(true);
   };
 

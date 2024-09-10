@@ -14,7 +14,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import UserPlaceHolder from "../assets/Images/UserPlaceHolder.jpg";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { toast } from "react-toastify";
-import { LoginAPI, SignUpAPI,GoogleLoginAPI } from "../Services/allAPI";
+import { LoginAPI, SignUpAPI, GoogleLoginAPI } from "../Services/allAPI";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import Backdrop from "@mui/material/Backdrop";
@@ -38,17 +38,19 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
   const { setIsAuthorized }: any = useContext(tokenAuthenticationContext);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const [user, setUser] = useState<User>({
     email: "",
     password: "",
   });
   const [preview, setPreview] = useState<string>("");
-  const [googleLogin,setGoogleLogin]=useState({
+  const [googleLogin, setGoogleLogin] = useState({
     username: "",
     email: "",
     password: "",
     profileImage: "",
-  })
+  });
 
   const validateForm = (
     email: string,
@@ -96,8 +98,10 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
   };
 
   const handleSignUp = async () => {
+    
     const { username, email, password, profileImage } = user;
     if (!validateForm(email, password, username, profileImage)) return;
+    setLoading(true); // Set loading to true
 
     const reqBody = new FormData();
     reqBody.append("username", username || "");
@@ -113,7 +117,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
 
     try {
       const result = await SignUpAPI(reqBody, reqHeader);
-      console.log('SignUpAPI result:', result); // Debugging line
+      console.log("SignUpAPI result:", result); // Debugging line
 
       if (result?.status === 400) {
         toast.error("This email is already registered!");
@@ -123,42 +127,50 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       }
     } catch (err) {
       toast.error("An error occurred during signup. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false after the process
     }
   };
 
   const handleLogin = async () => {
+    
     const { email, password } = user;
-  
+    
     if (!validateForm(email, password)) return;
-  
+    setLoading(true); // Set loading to true
+
     try {
-      setOpen(true); 
+      setOpen(true);
       const result = await LoginAPI(user);
-  
+
       setOpen(false);
-  
+
       if (result && result.user && result.token) {
         localStorage.setItem("token", result.token);
         localStorage.setItem("user", JSON.stringify(result.user));
-  
+
         setIsAuthorized(true);
         setUser(result.user);
-  
+
         toast.success("Login Successful!");
         navigate("/");
       } else {
         toast.error("Invalid login credentials. Please try again.");
       }
-    } catch (err:any) {
+    } catch (err: any) {
       setOpen(false);
-  
-      const errorMessage = err.response?.data?.error || "An error occurred during login. Please try again.";
+
+      const errorMessage =
+        err.response?.data?.error ||
+        "An error occurred during login. Please try again.";
       toast.error(errorMessage);
-  
-      console.error('LoginAPI error:', err);
+
+      console.error("LoginAPI error:", err);
+    } finally {
+      setLoading(false); // Set loading to false after the process
     }
   };
-  
+
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -181,8 +193,12 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       try {
         const googleLoginResult = await GoogleLoginAPI(googleLogin);
         console.log(googleLoginResult);
-        
-        if (googleLoginResult && googleLoginResult.user && googleLoginResult.token) {
+
+        if (
+          googleLoginResult &&
+          googleLoginResult.user &&
+          googleLoginResult.token
+        ) {
           localStorage.setItem("token", googleLoginResult.token);
           localStorage.setItem("user", JSON.stringify(googleLoginResult.user));
           toast.success("Login Successful!");
@@ -193,11 +209,12 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
           toast.error("Google authentication failed. Please try again.");
         }
       } catch (err) {
-        toast.error("An error occurred during Google authentication. Please try again.");
+        toast.error(
+          "An error occurred during Google authentication. Please try again."
+        );
       }
     }
   };
-
 
   useEffect(() => {
     if (user.profileImage instanceof File) {
@@ -210,7 +227,6 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       handleGoogleSignUp();
     }
   }, [googleLogin]);
-
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -242,7 +258,6 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
         <CircularProgress size={60} color="warning" />
       </Backdrop>
       <div className="min-h-screen flex justify-center items-center bg-gray-900">
-        
         <div className="grid grid-cols-2 max-[650px]:grid-cols-1 w-[650px] shadow-2xl bg-white rounded-lg overflow-hidden">
           <div className="flex justify-center items-center max-[850px]:h-screen bg-white">
             {insideSignup ? (
@@ -258,15 +273,15 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
               </div>
             ) : (
               <div className="flex justify-center flex-col items-center h-full">
-              <EngineeringIcon
-                fontSize="large"
-                style={{ fontSize: "80px" }}
-                className="mb-5 font-bold text-gray-900"
-              />
-              <h1 className="text-5xl font-bold w-80 text-center text-gray-900">
-                WELCOME <span className="text-yellow-400">BACK</span>
-              </h1>
-            </div>
+                <EngineeringIcon
+                  fontSize="large"
+                  style={{ fontSize: "80px" }}
+                  className="mb-5 font-bold text-gray-900"
+                />
+                <h1 className="text-5xl font-bold w-80 text-center text-gray-900">
+                  WELCOME <span className="text-yellow-400">BACK</span>
+                </h1>
+              </div>
             )}
           </div>
           <div className="space-y-10 px-10 bg-gray-900 py-12">
@@ -310,6 +325,17 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                 InputProps={{
                   className: "text-white",
                 }}
+                sx={{
+                  "& .MuiInputBase-root": {
+                    color: "white", // Input text color
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "white", // Label color
+                  },
+                  "& .MuiFormHelperText-root": {
+                    color: "white", // Helper text color
+                  },
+                }}
               />
             )}
             <TextField
@@ -325,6 +351,17 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
               }}
               InputProps={{
                 className: "text-white",
+              }}
+              sx={{
+                "& .MuiInputBase-root": {
+                  color: "white",
+                },
+                "& .MuiInputLabel-root": {
+                  color: "white",
+                },
+                "& .MuiFormHelperText-root": {
+                  color: "white",
+                },
               }}
             />
             <TextField
@@ -353,27 +390,44 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                   </InputAdornment>
                 ),
               }}
+              sx={{
+                "& .MuiInputBase-root": {
+                  color: "white",
+                },
+                "& .MuiInputLabel-root": {
+                  color: "white",
+                },
+                "& .MuiFormHelperText-root": {
+                  color: "white",
+                },
+              }}
             />
-            
+
             <Button
               onClick={insideSignup ? handleSignUp : handleLogin}
               className="w-full text-white bg-gradient-to-r from-[#FF5733] to-[#FFC300] border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
+              disabled={loading} // Disable button when loading
             >
-              {insideSignup ? "Sign Up" : "Login"}
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : insideSignup ? (
+                "Sign Up"
+              ) : (
+                "Login"
+              )}
             </Button>
-           
+
             {!insideSignup && (
               <>
-              <Link to="/forgot-password">
-              <span className="font-bold text-red-600 ml-1 cursor-pointer">
-                Forgot password?
-              </span>
-            </Link>
-              
-              
+                <Link to="/forgot-password">
+                  <span className="font-bold text-red-600 ml-1 cursor-pointer">
+                    Forgot password?
+                  </span>
+                </Link>
+
                 <Button
-                onClick={handleGoogleLogin}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
+                  onClick={handleGoogleLogin}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 hover:from-blue-600 hover:to-blue-700 py-2 px-4 focus:outline-none rounded-lg text-lg transition-transform transform hover:scale-105 flex items-center justify-center"
                   startIcon={
                     <img
                       src={Google}
@@ -388,8 +442,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                 </Button>
               </>
             )}
-            
-            
+
             <div className="text-center">
               <span className="text-white">
                 {insideSignup

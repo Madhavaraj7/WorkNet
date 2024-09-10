@@ -4,6 +4,7 @@ import {
   blockUser,
   deleteWorker,
   fetchAllReviewsWithDetails,
+  fetchDailyRevenue,
   findCategoryByName,
   getAllUsers,
   getAllWorkers,
@@ -17,6 +18,9 @@ import cloudinary from "../../cloudinaryConfig";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 import { getAllCategories } from "../../infrastructure/userRepository";
 import mongoose from "mongoose";
+import { deleteReviewById } from "../../infrastructure/adminRepository";
+import * as adminService from '../../application/adminService';
+
 
 interface CustomRequest extends Request {
   userId?: string;
@@ -202,8 +206,6 @@ export const getCategoriesController = async (req: Request, res: Response, next:
 };
 
 
-
-
 export const editCategoryController = async (
   req: Request,
   res: Response,
@@ -240,11 +242,6 @@ export const editCategoryController = async (
 
 
 
-
-
-
-
-
 export const getAllReviewsWithDetailsController = async (req: Request, res: Response) => {
   try {
       const reviews = await fetchAllReviewsWithDetails();
@@ -255,3 +252,57 @@ export const getAllReviewsWithDetailsController = async (req: Request, res: Resp
       res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 };
+
+
+export const deleteReviewController = async (req: Request, res: Response) => {
+  try {
+    const reviewId = req.params.id;
+    console.log("Review ID:", reviewId);
+
+    const result = await deleteReviewById(reviewId);
+    console.log("Result:", result);
+
+    if (result) {
+      return res.status(200).json({ message: "Review marked as deleted successfully." });
+    } else {
+      return res.status(404).json({ message: "Review not found." });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to mark review as deleted.", error });
+  }
+};
+
+
+
+
+
+export const getAllCounts = async (req: Request, res: Response) => {
+  try {
+    const counts = await adminService.getAllCounts();
+    res.status(200).json(counts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching counts', error });
+  }
+};
+
+
+
+export async function getDailyRevenue(req: Request, res: Response): Promise<void> {
+  try {
+    const year = parseInt(req.query.year as string, 10);
+    const month = parseInt(req.query.month as string, 10);
+    const day = parseInt(req.query.day as string, 10);
+
+    console.log('Year:', year, 'Month:', month, 'Day:', day); // Log the parameters
+
+    if (isNaN(year) || isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) {
+      res.status(400).json({ error: 'Invalid year, month, or day' });
+      return;
+    }
+
+    const revenue = await fetchDailyRevenue(year, month, day);
+    res.status(200).json({ year, month, day, revenue });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching daily revenue' });
+  }
+}
