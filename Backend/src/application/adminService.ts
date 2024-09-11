@@ -249,12 +249,12 @@ export const fetchAllReviewsWithDetails = async () => {
 
 
 
-export const getAllCounts = async (): Promise<{ usersCount: number; workersCount: number; bookingsCount: number; }> => {
+export const getAllCounts = async (): Promise<{ usersCount: number; workersCount: number; bookingsCount: number; reviewCount : number }> => {
   const usersCount = await adminRepository.getUsersCount();
   const workersCount = await adminRepository.getWorkersCount();
   const bookingsCount = await adminRepository.getBookingsCount();
-  
-  return { usersCount, workersCount, bookingsCount };
+  const reviewCount = await adminRepository.getReviewCount();
+  return { usersCount, workersCount, bookingsCount,reviewCount };
 };
 
 

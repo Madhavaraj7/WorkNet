@@ -106,7 +106,7 @@ const AdHome: React.FC = () => {
         {/* Reviews Card */}
         <div style={{ background: '#FFBB28' }} className="w-64 h-48 rounded-lg shadow-lg hover:shadow-2xl transition-shadow flex flex-col justify-between">
           <div className="flex w-full justify-between h-36 items-center px-4">
-            <h4 className="text-2xl text-white font-bold">{allCounts?.reviewsCount || 0} <br /> Reviews</h4>
+            <h4 className="text-2xl text-white font-bold">{allCounts?.reviewCount || 0} <br /> Reviews</h4>
             <ReviewsIcon style={{ fontSize: '50px' }} className="text-white" />
           </div>
           <Link to={'/adReviews'} className="block w-full">
@@ -122,7 +122,7 @@ const AdHome: React.FC = () => {
             <h4 className="text-2xl text-white font-bold">{allCounts?.bookingsCount || 0} <br /> Bookings</h4>
             <BookingsIcon style={{ fontSize: '50px' }} className="text-white" />
           </div>
-          <Link to={'/adBookings'} className="block w-full">
+          <Link to={'/adrevenue'} className="block w-full">
             <div className="show-items h-12 flex items-center justify-center rounded-b-lg bg-white hover:bg-gray-200 transition-all">
               <h6 className="text-center text-lg text-gray-700">Show Bookings</h6>
             </div>
@@ -143,7 +143,7 @@ const AdHome: React.FC = () => {
             <Bar dataKey="count" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
-        
+
 
         {/* Daily Revenue Section */}
         {/* <h3 className="text-center text-2xl font-bold mb-5 mt-10">Daily Revenue</h3>
