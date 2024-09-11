@@ -143,6 +143,7 @@ const AdHome: React.FC = () => {
             <Bar dataKey="count" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
+        
 
         {/* Daily Revenue Section */}
         {/* <h3 className="text-center text-2xl font-bold mb-5 mt-10">Daily Revenue</h3>
