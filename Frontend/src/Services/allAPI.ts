@@ -607,3 +607,22 @@ export const getDailyRevenueAPI = async (year: number, month: number, day: numbe
   }
 };
 
+
+
+// Fetch all bookings API
+export const getAllBookingsAPI = async (token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/bookings`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getAllBookingsAPI:", error);
+    throw new Error("Failed to fetch all bookings");
+  }
+};

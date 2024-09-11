@@ -22,6 +22,7 @@ import {
   deleteReviewController,
   deleteWorkerController,
   editCategoryController,
+  getAllBookings,
   getAllCounts,
   getAllReviewsWithDetailsController,
   getAllWorkersController,
@@ -153,6 +154,7 @@ router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
 router.get('/counts', AdminjwtMiddleware,getAllCounts);
 router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
 
+router.get('/bookings',AdminjwtMiddleware, getAllBookings);
 
 
 

@@ -3,6 +3,7 @@ import {
   addCategory,
   blockUser,
   deleteWorker,
+  fetchAllBookings,
   fetchAllReviewsWithDetails,
   fetchDailyRevenue,
   findCategoryByName,
@@ -306,3 +307,17 @@ export async function getDailyRevenue(req: Request, res: Response): Promise<void
     res.status(500).json({ error: 'An error occurred while fetching daily revenue' });
   }
 }
+
+
+
+
+
+
+export const getAllBookings = async (req: Request, res: Response) => {
+  try {
+    const bookings = await fetchAllBookings();
+    res.json(bookings);
+  } catch (error:any) {
+    res.status(500).json({ error: error.message });
+  }
+};

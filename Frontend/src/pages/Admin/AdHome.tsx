@@ -145,7 +145,7 @@ const AdHome: React.FC = () => {
         </ResponsiveContainer>
 
         {/* Daily Revenue Section */}
-        <h3 className="text-center text-2xl font-bold mb-5 mt-10">Daily Revenue</h3>
+        {/* <h3 className="text-center text-2xl font-bold mb-5 mt-10">Daily Revenue</h3>
         {dailyRevenue.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={dailyRevenue}>
@@ -158,7 +158,7 @@ const AdHome: React.FC = () => {
           </ResponsiveContainer>
         ) : (
           <p className="text-center text-lg">No revenue data available for today.</p>
-        )}
+        )} */}
       </div>
     </Box>
   );

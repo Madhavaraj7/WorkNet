@@ -24,6 +24,8 @@
     "axios": "^1.7.3",
     "firebase": "^10.12.5",
     "formik": "^2.4.6",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.23",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.2",
@@ -41,6 +43,7 @@
     "slick-carousel": "^1.8.1",
     "socket.io-client": "^4.7.5",
     "styled-components": "^6.1.12",
+    "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },
   "devDependencies": {

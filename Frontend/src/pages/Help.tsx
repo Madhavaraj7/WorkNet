@@ -51,8 +51,8 @@ const Help: React.FC = () => {
         to: admin,
         message,
         time: timeStamp,
-        _id: Date.now().toString(), // Temporary ID for instant display
-        roomId: "", // Adjust this if needed
+        _id: Date.now().toString(),
+        roomId: "", 
       };
 
       setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -67,7 +67,7 @@ const Help: React.FC = () => {
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUserId(user._id || "");
-      setUserProfileImage(user.profileImage || null); // Fetch profile image from localStorage
+      setUserProfileImage(user.profileImage || null); 
     } else {
       setUserId(new Date().toString().slice(0, 24).replace(/\s+/g, ""));
     }

@@ -27,6 +27,8 @@ function Chat() {
   const [selectedConversation, setSelectedConversation] = useState<Room | null>(null);
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [msgNotification, setMsgNotification] = useState<any[]>([]);
+  const [changed, setChanged  ] =useState(false)
+  console.log('chat component reendered')
 
   // Fetch all rooms and select the first one initially
   const getAllRooms = () => {
@@ -39,8 +41,12 @@ function Chat() {
     });
   };
 
-  useEffect(() => {
+  useEffect(()=>{
     getAllRooms();
+  },[changed])
+
+  useEffect(() => {
+    
     const intervalId = setInterval(() => {
       socket.emit("adminConnected", "admin");
       socket.on("notification", (notification: any) =>
@@ -125,7 +131,7 @@ function Chat() {
         {/* Chat Box */}
         <div className="flex-1 flex flex-col">
           {selectedConversation ? (
-            <ChatBox selectedConversation={selectedConversation} />
+            <ChatBox selectedConversation={selectedConversation} setChanged={setChanged} />
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <Typography variant="h6">

@@ -1,23 +1,20 @@
 import { Socket } from 'socket.io';
-import Room from '../../domain/roomsModel'; // Corrected path
-import Message from '../../domain/messagesModel'; // Corrected path
+import Room from '../../domain/roomsModel'; 
+import Message from '../../domain/messagesModel'; 
 import { UserModel } from '../../infrastructure/userRepository';
 
 interface NewMessage {
-  roomId?: string; // Optional property
+  roomId?: string; 
   from: string;
   to: string;
   message: string;
   time: string; 
 }
 
-// Admin and user socket storage
 let adminSocket: Socket | null = null;
 const userSockets: Record<string, Socket> = {};
 
-// Handle socket connections
 export const socketHandler = (socket: Socket) => {
-  // Handle user messages
   socket.on('userMessage', async (newMessage: NewMessage) => {
     const { from, to, message, time } = newMessage;
 
@@ -55,49 +52,42 @@ export const socketHandler = (socket: Socket) => {
     }
   });
 
-  // Handle admin room opening
   socket.on('adminRoomOpen', async () => {
     try {
       const allRooms = await Room.find().sort({ createdDate: -1 });
 
-      // Fetch user details (sender's name and profile image)
       const roomDetails = await Promise.all(
         allRooms.map(async (room) => {
-          const user = await UserModel.findOne({ _id: room.roomId }); // Assuming `roomId` is the user's ID
+          const user = await UserModel.findOne({ _id: room.roomId }); 
           return {
             ...room.toObject(),
             senderName: user?.username || 'Unknown User',
-            profileImage: user?.profileImage || '', // Add profile image
+            profileImage: user?.profileImage || '', 
           };
         })
       );
 
-      socket.emit('adminRooms', roomDetails); // Emit the room details with user data
+      socket.emit('adminRooms', roomDetails); 
     } catch (error) {
       console.error('Error handling admin room open:', error);
     }
   });
 
-  // Handle admin side room messages
   socket.on('adminSideRoom', async (roomId: string) => {
     try {
-      // Find all messages for the given roomId
       const allMessages = await Message.find({ roomId });
   
-      // Fetch user details for each message
       const messagesWithUserDetails = await Promise.all(
         allMessages.map(async (message) => {
-          // Assuming each message has a senderId field to reference the user
           const user = await UserModel.findOne({ _id: message.from });
           return {
             ...message.toObject(),
             senderName: user?.username || 'Unknown User',
-            profileImage: user?.profileImage || '', // Add profile image
+            profileImage: user?.profileImage || '', 
           };
         })
       );
   
-      // Emit the messages with user details
       socket.emit('adminMessage', messagesWithUserDetails);
     } catch (error) {
       console.error('Error handling admin side room update:', error);
