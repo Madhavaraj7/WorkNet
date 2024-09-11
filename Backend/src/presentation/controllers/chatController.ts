@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Room from "../../domain/roomsModel";
 import Message from "../../domain/messagesModel";
 import mongoose, { Types } from "mongoose";
+import { io } from '../../app'; // Ensure you have an instance of Socket.io server running
 
 
 
@@ -32,33 +33,26 @@ export const createRoom = async (req: Request, res: any): Promise<void> => {
 
 // Send a message
 export const sendMessage = async (req: Request, res: any): Promise<void> => {
-  const {
-    roomId,
-    from,
-    to,
-    message,
-  }: { roomId: string; from: string; to: string; message: string } = req.body;
+  const { roomId, from, to, message } = req.body;
 
   try {
     if (!roomId || !from || !to || !message) {
-      return res
-        .status(400)
-        .json({ error: "Room ID, From, To, and Message are required" });
+      return res.status(400).json({ error: "Room ID, From, To, and Message are required" });
     }
 
-    let newMessage = new Message({
-      roomId,
-      from,
-      to,
-      message,
-    });
-
+    // Save new message to database
+    const newMessage = new Message({ roomId, from, to, message });
     await newMessage.save();
 
+    // Find the saved message with populated user fields
     const latestMsg = await Message.findById(newMessage._id)
-      .populate({ path: 'from', select: '_id username profileImage' }) 
+      .populate({ path: 'from', select: '_id username profileImage' })
       .populate({ path: 'to', select: '_id username profileImage' });
 
+    // Emit the new message to the specific room using Socket.io
+    io.to(roomId).emit('message', latestMsg);
+
+    // Respond with the saved message
     res.status(201).json(latestMsg);
   } catch (error) {
     console.error("Error sending message:", error);

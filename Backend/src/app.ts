@@ -1,4 +1,4 @@
-// server.ts or app.ts
+// src/app.ts
 
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -8,12 +8,13 @@ import { connectToDatabase } from './config';
 import morgan from 'morgan';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { socketHandler } from '../src/presentation/socket/chat'; // Adjust the path as necessary
+import { socketHandler } from './presentation/socket/chat'; // Ensure this path is correct
 
 const app = express();
 
+// Middleware setup
 app.use(cors({
-  origin: 'http://localhost:5173', // Adjust the origin as needed
+  origin: 'http://localhost:5173', // Adjust as necessary
 }));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
@@ -25,17 +26,18 @@ connectToDatabase();
 // Create an HTTP server
 const httpServer = createServer(app);
 
-// Create a Socket.io instance and integrate it with the HTTP server
-const io = new Server(httpServer, {
+// Initialize Socket.IO
+export const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:5173', // Adjust the origin as needed
-    methods: ["GET", "POST"], // Add methods allowed by CORS
+    origin: 'http://localhost:5173', // Adjust as necessary
+    methods: ['GET', 'POST'], // Allowed methods
   },
 });
 
-// Use the Socket.io handler
+// Use Socket.IO handler
 socketHandler(io);
 
+// Start server
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -1,11 +1,12 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
-import Header from "../components/Header";
 import { Avatar, Button, TextField } from "@mui/material";
 import Admin from "../assets/Images/UserPlaceHolder.jpg";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import SendIcon from "@mui/icons-material/Send";
 import Footer from "../components/Footer";
 import { SERVER_URL } from "../Services/serverURL";
+import io, { Socket } from "socket.io-client";
+import Header from "../components/Header";
 
 interface Message {
   _id: string;
@@ -29,85 +30,35 @@ const Help: React.FC = () => {
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string>("");
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const admin = "66bb2bd548e166a70bce4c66"; // Admin ID
 
-  // Scroll to the bottom of the message container
-  const scrollToBottom = () => {
-    messageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  useEffect(() => {
+    const socketConnection = io("http://localhost:3000", {
+      transports: ['websocket'],
+      autoConnect: false,
+    });
 
-  // Create or find a room
-  const createOrFindRoom = async () => {
-    try {
-      const response = await fetch(`${SERVER_URL}/room`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
+    socketConnection.connect();
+    setSocket(socketConnection);
+
+    return () => {
+      socketConnection.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('message', (newMessage: Message) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
-      const data = await response.json();
-      setRoomId(data.roomId); // Set the room ID once it's created/found
-    } catch (error) {
-      console.error("Error creating or finding room:", error);
-    }
-  };
 
-  // Fetch messages from the server based on roomId
-  const fetchMessages = async () => {
-    if (roomId) {
-      try {
-        const response = await fetch(`${SERVER_URL}/messages/${roomId}`);
-        const data = await response.json();
-        console.log(data);
-        
-        
-        // Ensure data.messages is an array before setting state
-        if (Array.isArray(data)) {
-          setMessages(data);
-        } else {
-          console.error("Unexpected response format:", data);
-          setMessages([]);
-        }
-
-        scrollToBottom();
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    }
-  };
-
-  // Handle sending a message
-  const handleUserMessageSend = async () => {
-    if (message.trim()) {
-
-      const newMessage: any = {
-        from: userId,
-        to: admin,
-        message,
-        roomId,
+      return () => {
+        socket.off('message');
       };
-
-      try {
-        // Send message to the server
-        const response = await fetch(`${SERVER_URL}/message`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newMessage),
-        });
-        const latestMsg = await response.json()
-
-        if (response.ok) {
-          setMessages((prevMessages) => [...prevMessages, latestMsg]);
-          setMessage(""); // Clear input after sending
-          scrollToBottom();
-        } else {
-          console.error("Error sending message");
-        }
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
     }
-  };
+  }, [socket]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -127,8 +78,83 @@ const Help: React.FC = () => {
   useEffect(() => {
     if (roomId) {
       fetchMessages(); // Fetch messages once roomId is available
+
+      if (socket) {
+        socket.emit('joinRoom', roomId);
+      }
     }
-  }, [roomId]);
+  }, [roomId, socket]);
+
+  const scrollToBottom = () => {
+    messageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const createOrFindRoom = async () => {
+    try {
+      const response = await fetch(`${SERVER_URL}/room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+      setRoomId(data.roomId); // Set the room ID once it's created/found
+    } catch (error) {
+      console.error("Error creating or finding room:", error);
+    }
+  };
+
+  const fetchMessages = async () => {
+    if (roomId) {
+      try {
+        const response = await fetch(`${SERVER_URL}/messages/${roomId}`);
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setMessages(data);
+        } else {
+          console.error("Unexpected response format:", data);
+          setMessages([]);
+        }
+
+        scrollToBottom();
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    }
+  };
+
+  const handleUserMessageSend = async () => {
+    if (message.trim()) {
+      const newMessage = {
+        from: userId,
+        to: admin,
+        message,
+        roomId,
+      };
+
+      try {
+        const response = await fetch(`${SERVER_URL}/message`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newMessage),
+        });
+
+        const latestMsg = await response.json();
+
+        if (response.ok) {
+          setMessage(""); // Clear input after sending
+          scrollToBottom();
+          if (socket) {
+            socket.emit('message', latestMsg); // Emit the message to the server
+          }
+        } else {
+          console.error("Error sending message");
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+  };
 
   return (
     <>
