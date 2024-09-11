@@ -10,7 +10,7 @@ import {
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
 import { errorHandler } from "../utils/errorHandler"; 
-import { createCategory, deleteWorkerById, getAllWorkersFromDB} from "../infrastructure/adminRepository";
+import { createCategory, deleteWorkerById, getAllBookingsWithDetails, getAllWorkersFromDB} from "../infrastructure/adminRepository";
 import { Worker } from "../domain/worker"; 
 import { Category, ICategory } from "../domain/category";
 import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
@@ -288,3 +288,11 @@ export async function fetchDailyRevenue(year: number, month: number, day: number
 
 
 
+export const fetchAllBookings = async () => {
+  try {
+    const bookings = await getAllBookingsWithDetails();
+    return bookings;
+  } catch (error:any) {
+    throw new Error(`Error fetching bookings: ${error.message}`);
+  }
+};

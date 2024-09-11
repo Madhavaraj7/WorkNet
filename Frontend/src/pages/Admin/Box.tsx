@@ -1,5 +1,18 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
-import { Avatar, Button, TextField, Paper, Typography, Box as MuiBox } from "@mui/material";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useContext,
+  ReactNode,
+} from "react";
+import {
+  Avatar,
+  Button,
+  TextField,
+  Paper,
+  Typography,
+  Box as MuiBox,
+} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { io, Socket } from "socket.io-client";
 import { NewMessageResContext } from "../../ContextAPI/NewMessageArrivedResp";
@@ -11,21 +24,23 @@ interface Message {
   from: string;
   message: string;
   time: string;
-  senderName?: string; // Add senderName
-  profileImage?: string; // Add profileImage
+  senderName?: string; // Optional senderName
+  profileImage?: string; // Optional profileImage
 }
 
 interface Room {
-  senderName: ReactNode;
   _id: string;
   roomId: string;
+  senderName: string; // Name of the conversation partner
+  profileImage: string; // Profile image of the conversation partner
 }
 
 interface ChatBoxProps {
   selectedConversation: Room | string;
+  setChanged: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function ChatBox({ selectedConversation }: ChatBoxProps) {
+function ChatBox({ selectedConversation, setChanged }: ChatBoxProps) {
   const { newMessageArrivedResp, setNewMessageArrivedResp } = useContext(
     NewMessageResContext
   ) as {
@@ -73,6 +88,7 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
         setMessages(newMessages);
         setNewMessageArrivedResp(newMessages.length > messages.length);
         scrollToBottom();
+        setChanged((prevState) => !prevState);
       });
 
       return () => {
@@ -86,10 +102,19 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
       {/* Chat Header */}
       <MuiBox className="bg-gray-800 h-16 flex items-center justify-between px-4 text-white">
         <Typography variant="h6">
-          {typeof selectedConversation === "object" ? selectedConversation.senderName : "Chat Room"}
+          {typeof selectedConversation === "object"
+            ? selectedConversation.senderName
+            : "Chat Room"}
         </Typography>
-        <Avatar src={selectedConversation.profileImage} />
-        </MuiBox>
+        <Avatar
+          src={
+            typeof selectedConversation === "object" &&
+            selectedConversation.profileImage
+              ? selectedConversation.profileImage
+              : "/default-profile.png"
+          }
+        />
+      </MuiBox>
 
       {/* Chat Messages */}
       <MuiBox
@@ -99,15 +124,19 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
         {messages.map((msg) => (
           <MuiBox
             key={msg._id}
-            className={`flex ${msg.from === admin ? "justify-end" : "justify-start"}`}
+            className={`flex ${
+              msg.from === admin ? "justify-end" : "justify-start"
+            }`}
           >
             <MuiBox className="flex items-start space-x-2">
               {msg.from !== admin && msg.profileImage && (
-                <Avatar src={msg.profileImage} />
+                <Avatar src={msg.profileImage || "/default-profile.png"} />
               )}
               <Paper
                 className={`p-3 rounded-lg shadow-md ${
-                  msg.from === admin ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-800"
+                  msg.from === admin
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-300 text-gray-800"
                 }`}
                 style={{
                   borderRadius: "15px",

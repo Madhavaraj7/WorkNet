@@ -72,3 +72,11 @@ export const getBookingsCount = async (): Promise<number> => {
 };
 
 
+export const getAllBookingsWithDetails = async () => {
+  return Booking.find()
+    .populate('userId', 'username') 
+    .populate('slotId', 'date') 
+    .populate('workerId', 'name') 
+    .select('amount status') 
+    .exec();
+};
