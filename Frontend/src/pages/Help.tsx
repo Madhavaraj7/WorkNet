@@ -1,64 +1,111 @@
-import React, {
-  ChangeEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
 import { Avatar, Button, TextField } from "@mui/material";
 import Admin from "../assets/Images/UserPlaceHolder.jpg";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import SendIcon from "@mui/icons-material/Send";
-import { io, Socket } from "socket.io-client";
-import { NewMessageResContext } from "../ContextAPI/NewMessageArrivedResp";
 import Footer from "../components/Footer";
-
-const socket: Socket = io("http://localhost:3000");
+import { SERVER_URL } from "../Services/serverURL";
 
 interface Message {
   _id: string;
-  from: string;
-  to: string;
+  from: {
+    _id: string;
+    username: string;
+    profileImage: string;
+  };
+  to: {
+    username: string;
+    profileImage: string;
+  };
   message: string;
-  time: string;
-  roomId: string;
+  createdAt: string;
 }
 
 const Help: React.FC = () => {
-  const { setNewMessageArrivedResp } = useContext(NewMessageResContext) || {};
   const [userId, setUserId] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string>("");
 
+  const admin = "66bb2bd548e166a70bce4c66"; // Admin ID
+
+  // Scroll to the bottom of the message container
   const scrollToBottom = () => {
     messageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const admin = "66bb2bd548e166a70bce4c66";
-
-  const handleUserMessageSend = () => {
-    if (message.trim()) {
-      const timeStamp = new Date().toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
+  // Create or find a room
+  const createOrFindRoom = async () => {
+    try {
+      const response = await fetch(`${SERVER_URL}/room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
       });
+      const data = await response.json();
+      setRoomId(data.roomId); // Set the room ID once it's created/found
+    } catch (error) {
+      console.error("Error creating or finding room:", error);
+    }
+  };
 
-      const newMessage: Message = {
+  // Fetch messages from the server based on roomId
+  const fetchMessages = async () => {
+    if (roomId) {
+      try {
+        const response = await fetch(`${SERVER_URL}/messages/${roomId}`);
+        const data = await response.json();
+        console.log(data);
+        
+        
+        // Ensure data.messages is an array before setting state
+        if (Array.isArray(data)) {
+          setMessages(data);
+        } else {
+          console.error("Unexpected response format:", data);
+          setMessages([]);
+        }
+
+        scrollToBottom();
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    }
+  };
+
+  // Handle sending a message
+  const handleUserMessageSend = async () => {
+    if (message.trim()) {
+
+      const newMessage: any = {
         from: userId,
         to: admin,
         message,
-        time: timeStamp,
-        _id: Date.now().toString(),
-        roomId: "", 
+        roomId,
       };
 
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setMessage("");
-      socket.emit("userMessage", newMessage, false);
-      scrollToBottom();
+      try {
+        // Send message to the server
+        const response = await fetch(`${SERVER_URL}/message`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newMessage),
+        });
+        const latestMsg = await response.json()
+
+        if (response.ok) {
+          setMessages((prevMessages) => [...prevMessages, latestMsg]);
+          setMessage(""); // Clear input after sending
+          scrollToBottom();
+        } else {
+          console.error("Error sending message");
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
@@ -67,47 +114,29 @@ const Help: React.FC = () => {
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUserId(user._id || "");
-      setUserProfileImage(user.profileImage || null); 
-    } else {
-      setUserId(new Date().toString().slice(0, 24).replace(/\s+/g, ""));
+      setUserProfileImage(user.profileImage || null);
     }
   }, []);
 
   useEffect(() => {
     if (userId) {
-      socket.emit("userConnected", userId);
-      socket.emit("userSideRoom", userId);
-
-      socket.on("adminMessage", (messages: Message[]) => {
-        setMessages(messages);
-        setNewMessageArrivedResp?.(messages.length > 0);
-        scrollToBottom();
-      });
-
-      socket.on("userMessage", (messages: Message[]) => {
-        setMessages(messages);
-        setNewMessageArrivedResp?.(messages.length > 0);
-        scrollToBottom();
-      });
-
-      return () => {
-        socket.off("adminMessage");
-        socket.off("userMessage");
-      };
+      createOrFindRoom(); // Create or find the room once the userId is set
     }
-  }, [userId, setNewMessageArrivedResp]);
+  }, [userId]);
+
+  useEffect(() => {
+    if (roomId) {
+      fetchMessages(); // Fetch messages once roomId is available
+    }
+  }, [roomId]);
 
   return (
     <>
       <Header />
-      <br />
       <div className="my-8"></div>
 
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div
-          className="flex flex-col flex-1 mx-auto mt-8 bg-white shadow-xl rounded-lg"
-          style={{ width: "90%", maxWidth: "600px" }}
-        >
+        <div className="flex flex-col flex-1 mx-auto mt-8 bg-white shadow-xl rounded-lg" style={{ width: "90%", maxWidth: "600px" }}>
           {/* Chat Header */}
           <div className="h-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex justify-between items-center px-4 border-b border-indigo-700 rounded-t-lg">
             <div className="flex items-center space-x-3">
@@ -119,44 +148,22 @@ const Help: React.FC = () => {
           </div>
 
           {/* Chat Messages Container */}
-          <div
-            className="flex-1 p-4 overflow-auto scrollbar-hide"
-            style={{
-              maxHeight: "400px",
-            }}
-          >
+          <div className="flex-1 p-4 overflow-auto scrollbar-hide" style={{ maxHeight: "400px" }}>
             <div className="chat-container space-y-4">
               {messages.length > 0 ? (
                 messages.map((msg) => (
-                  <div
-                    key={msg._id}
-                    className={`flex flex-col mb-2 ${
-                      msg.from === userId ? "items-end" : "items-start"
-                    }`}
-                  >
+                  <div key={msg._id} className={`flex flex-col mb-2 ${msg.from._id === userId ? "items-end" : "items-start"}`}>
                     <div className="flex items-center space-x-2">
-                      {/* Display User or Admin Avatar */}
-                      {msg.from === userId ? (
-                        <Avatar
-                          src={userProfileImage || Admin}
-                          sx={{ width: 32, height: 32 }}
-                        />
-                      ) : (
-                        <Avatar src={Admin} sx={{ width: 32, height: 32 }} />
-                      )}
-
+                      <Avatar
+                        src={msg.from._id === userId ? userProfileImage || Admin : Admin}
+                        sx={{ width: 32, height: 32 }}
+                      />
                       {/* Message bubble */}
-                      <div
-                        className={`p-3 rounded-lg shadow-md ${
-                          msg.from === userId
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100 text-gray-900"
-                        }`}
-                      >
+                      <div className={`p-3 rounded-lg shadow-md ${msg.from._id === userId ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"}`}>
                         <p>{msg.message}</p>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{msg.time}</p>
+                    <p className="text-xs text-gray-500 mt-1">{msg.createdAt}</p>
                   </div>
                 ))
               ) : (
@@ -171,9 +178,7 @@ const Help: React.FC = () => {
             {/* Input Field */}
             <TextField
               value={message}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setMessage(e.target.value)
-              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
               variant="outlined"
               placeholder="Type your message..."
               fullWidth
@@ -184,11 +189,7 @@ const Help: React.FC = () => {
                 style: {
                   padding: "12px 18px",
                   borderRadius: "16px",
-                  border: "2px solid transparent",
-                  background: "rgba(255, 255, 255, 0.5)",
-                  backgroundClip: "padding-box, border-box",
-                  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
+                  backgroundColor: "#f5f5f5",
                 },
               }}
             />
@@ -197,36 +198,18 @@ const Help: React.FC = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleUserMessageSend}
-              size="medium"
               endIcon={<SendIcon />}
-              style={{
-                background: "linear-gradient(90deg, #6366F1 0%, #A855F7 100%)",
-                padding: "0.85rem 2rem",
-                borderRadius: "50px",
-                boxShadow: "0 10px 15px rgba(133, 105, 241, 0.4)",
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0px 12px 20px rgba(133, 105, 241, 0.8)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "scale(1)";
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 10px 15px rgba(133, 105, 241, 0.4)";
-              }}
+              onClick={handleUserMessageSend}
+              className="rounded-xl shadow-md"
             >
               Send
             </Button>
           </div>
         </div>
-
-        <br />
-
-        <Footer />
       </div>
+
+      <div className="my-8"></div>
+      <Footer />
     </>
   );
 };

@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useContext,
-  ReactNode,
-} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Avatar,
   Button,
@@ -14,103 +8,113 @@ import {
   Box as MuiBox,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { io, Socket } from "socket.io-client";
-import { NewMessageResContext } from "../../ContextAPI/NewMessageArrivedResp";
-
-const socket: Socket = io("http://localhost:3000");
 
 interface Message {
   _id: string;
-  from: string;
+  from: {
+    _id: string;
+    username: string;
+    profileImage: string;
+  };
+  to: {
+    username: string;
+    profileImage: string;
+  };
   message: string;
-  time: string;
-  senderName?: string; // Optional senderName
-  profileImage?: string; // Optional profileImage
+  createdAt: string;
 }
 
 interface Room {
   _id: string;
   roomId: string;
-  senderName: string; // Name of the conversation partner
-  profileImage: string; // Profile image of the conversation partner
+  user: { _id:string, username: string; profileImage: string }; // Adjust to match backend data
 }
 
 interface ChatBoxProps {
-  selectedConversation: Room | string;
-  setChanged: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedConversation: Room | string | null; // Allow null as a valid type
 }
 
-function ChatBox({ selectedConversation, setChanged }: ChatBoxProps) {
-  const { newMessageArrivedResp, setNewMessageArrivedResp } = useContext(
-    NewMessageResContext
-  ) as {
-    newMessageArrivedResp: boolean;
-    setNewMessageArrivedResp: (value: boolean) => void;
-  };
-
+function ChatBox({ selectedConversation }: ChatBoxProps) {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const admin = "66bb2bd548e166a70bce4c66"; // Admin user ID
 
   const scrollToBottom = () => {
     messageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const admin = "66bb2bd548e166a70bce4c66"; // Admin user ID
-
-  const handleAdminMessageSend = () => {
-    if (message.trim()) {
-      const timeStamp = new Date().toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      const messageData = {
-        roomId: (selectedConversation as Room)._id,
-        from: admin,
-        to: (selectedConversation as Room).roomId,
-        message,
-        time: timeStamp,
-      };
-
-      setMessage("");
-
-      // Emit admin message
-      socket.emit("adminMessage", messageData, true); // 'true' indicates the sender is an admin
-    }
-  };
-
+  // Fetch messages when a room is selected
   useEffect(() => {
-    if (typeof selectedConversation === "object" && selectedConversation._id) {
-      socket.emit("adminSideRoom", selectedConversation._id);
+    const fetchMessages = async () => {
+      if (selectedConversation && typeof selectedConversation === "object" && selectedConversation._id) {
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/users/messages/${selectedConversation._id}`
+          );
+          const data = await response.json();
+          setMessages(data);
+          scrollToBottom();
+        } catch (error) {
+          console.error("Failed to fetch messages:", error);
+        }
+      }
+    };
 
-      socket.on("adminMessage", (newMessages: Message[]) => {
-        setMessages(newMessages);
-        setNewMessageArrivedResp(newMessages.length > messages.length);
-        scrollToBottom();
-        setChanged((prevState) => !prevState);
-      });
+    fetchMessages();
+  }, [selectedConversation]);
 
-      return () => {
-        socket.off("adminMessage");
-      };
+  const handleAdminMessageSend = async () => {
+    if (message.trim() && selectedConversation && typeof selectedConversation === "object") {
+         const messageData = {
+            roomId: selectedConversation._id,
+            from: admin,
+            to: selectedConversation.user._id,
+            message,
+        };
+
+        setMessage("");
+
+        // Send message via API
+        try {
+            const response = await fetch("http://localhost:3000/api/users/message", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(messageData),
+            });
+
+            if (response.ok) {
+                const newMessage = await response.json();
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
+                scrollToBottom();
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to send message:', errorData);
+            }
+        } catch (error) {
+            console.error("Failed to send message:", error);
+        }
     }
-  }, [selectedConversation, messages]);
+};
+
 
   return (
     <Paper className="flex flex-col h-[80vh] border border-gray-300 rounded-lg shadow-lg">
       {/* Chat Header */}
       <MuiBox className="bg-gray-800 h-16 flex items-center justify-between px-4 text-white">
         <Typography variant="h6">
-          {typeof selectedConversation === "object"
-            ? selectedConversation.senderName
+          {selectedConversation && typeof selectedConversation === "object"
+            ? selectedConversation.user.username || "Chat Room"
             : "Chat Room"}
         </Typography>
         <Avatar
           src={
-            typeof selectedConversation === "object" &&
-            selectedConversation.profileImage
-              ? selectedConversation.profileImage
+            selectedConversation && typeof selectedConversation === "object" &&
+            selectedConversation.user.profileImage
+              ? selectedConversation.user.profileImage
               : "/default-profile.png"
           }
         />
@@ -121,42 +125,36 @@ function ChatBox({ selectedConversation, setChanged }: ChatBoxProps) {
         className="flex-1 p-4 overflow-auto space-y-3 bg-gray-50"
         style={{ scrollbarWidth: "none", overflowY: "auto" }}
       >
-        {messages.map((msg) => (
+        {messages.map((msg) =>{
+          console.log({msg})
+          
+          return (
           <MuiBox
             key={msg._id}
-            className={`flex ${
-              msg.from === admin ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${msg.from._id !== admin ?  "justify-start" : "justify-end"}`}
           >
             <MuiBox className="flex items-start space-x-2">
-              {msg.from !== admin && msg.profileImage && (
-                <Avatar src={msg.profileImage || "/default-profile.png"} />
+              {msg.from.username !== admin && msg.from.profileImage && (
+                <Avatar src={msg.from.profileImage || "/default-profile.png"} />
               )}
               <Paper
                 className={`p-3 rounded-lg shadow-md ${
-                  msg.from === admin
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-300 text-gray-800"
+                  msg.from.username === admin ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-800"
                 }`}
                 style={{
                   borderRadius: "15px",
-                  borderBottomRightRadius: msg.from === admin ? "0px" : "15px",
-                  borderBottomLeftRadius: msg.from === admin ? "15px" : "0px",
+                  borderBottomRightRadius: msg.from.username === admin ? "0px" : "15px",
+                  borderBottomLeftRadius: msg.from.username === admin ? "15px" : "0px",
                 }}
               >
-                {msg.from !== admin && (
-                  <Typography variant="subtitle2" className="font-semibold">
-                    {/* {msg.senderName || "Unknown User"} */}
-                  </Typography>
-                )}
                 <Typography variant="body2">{msg.message}</Typography>
                 <Typography variant="caption" className="text-right mt-1">
-                  {msg.time}
+                  {msg.createdAt}
                 </Typography>
               </Paper>
             </MuiBox>
           </MuiBox>
-        ))}
+        )})}
         <div ref={messageContainerRef} />
       </MuiBox>
 

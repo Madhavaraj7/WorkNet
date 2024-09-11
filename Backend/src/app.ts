@@ -1,12 +1,14 @@
+// server.ts or app.ts
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import allRoutes from './presentation/routes/allRoutes';
 import { connectToDatabase } from './config';
 import morgan from 'morgan';
-import { createServer } from 'http'; // Import to create HTTP server
+import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { socketHandler } from '../src/presentation/socket/chat'; // Corrected path
+import { socketHandler } from '../src/presentation/socket/chat'; // Adjust the path as necessary
 
 const app = express();
 
@@ -26,13 +28,13 @@ const httpServer = createServer(app);
 // Create a Socket.io instance and integrate it with the HTTP server
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5173', // Adjust the origin as needed
     methods: ["GET", "POST"], // Add methods allowed by CORS
   },
 });
 
 // Use the Socket.io handler
-io.on('connection', socketHandler);
+socketHandler(io);
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {

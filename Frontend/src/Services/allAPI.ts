@@ -65,7 +65,7 @@ export const updateAdminProfileAPI = async (
   reqBody: any,
   reqHeader?: RequestHeaders
 ) => {
-  return await commonAPI("PUT", `${SERVER_URL}/profile`, reqBody, reqHeader);
+  return await commonAPI("PUT", `${SERVER_URL}/adprofile`, reqBody, reqHeader);
 };
 
 // Get All Users API
@@ -626,3 +626,6 @@ export const getAllBookingsAPI = async (token: string) => {
     throw new Error("Failed to fetch all bookings");
   }
 };
+
+
+

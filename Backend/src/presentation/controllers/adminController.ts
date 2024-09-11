@@ -57,6 +57,8 @@ export const adminupdateProfile = async (req: CustomRequest, res: Response) => {
 
     const { username, email } = req.body;
     const profileImage = req.file ? req.file.buffer : null;
+    console.log(profileImage);
+    
     let profileImageUrl = "";
 
     const proceedWithUpdate = async () => {
@@ -80,14 +82,14 @@ export const adminupdateProfile = async (req: CustomRequest, res: Response) => {
       cloudinary.uploader.upload_stream(
         (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
           if (error) {
-            return res
-              .status(500)
-              .json({ error: "Failed to upload image to Cloudinary" });
+            return res.status(500).json({ error: "Failed to upload image to Cloudinary" });
           }
           profileImageUrl = result?.secure_url || "";
+          console.log("Cloudinary URL:", profileImageUrl); // Add logging
           proceedWithUpdate();
         }
       ).end(profileImage);
+      
     } else {
       proceedWithUpdate(); // No image provided, proceed with updating other fields
     }

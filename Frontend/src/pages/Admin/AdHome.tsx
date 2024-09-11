@@ -12,7 +12,7 @@ import { getAllCountsAPI, getDailyRevenueAPI } from '../../Services/allAPI'; // 
 interface AllCounts {
   usersCount: number;
   workersCount: number;
-  reviewsCount: number;
+  reviewCount: number;
   bookingsCount: number;
 }
 
