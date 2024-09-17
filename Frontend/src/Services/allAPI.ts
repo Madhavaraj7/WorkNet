@@ -422,7 +422,22 @@ export const getUserBookedWorkersAPI = async (token: string) => {
 
 
 
-
+export const getBookingTrendsAPI = async (startDate: string, endDate: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/booking-trends?startDate=${startDate}&endDate=${endDate}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getBookingTrendsAPI:", error);
+    throw new Error("Failed to fetch booking trends");
+  }
+};
 
 export const postReviewAPI = async (reviewData: any, token: string) => {
   try {

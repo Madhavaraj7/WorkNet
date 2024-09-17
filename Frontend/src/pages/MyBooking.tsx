@@ -27,6 +27,7 @@ interface Worker {
 }
 
 interface Booking {
+  slotId: any;
   _id: string;
   workerId: Worker | null;
   amount: number;
@@ -70,6 +71,8 @@ const MyBooking: React.FC = () => {
       try {
         // Fetch bookings
         const bookingsResponse = await getUserBookedWorkersAPI(token);
+        console.log("hello", bookingsResponse);
+
         setBookings(bookingsResponse.data);
 
         // Fetch wallet balance and transactions
@@ -98,7 +101,7 @@ const MyBooking: React.FC = () => {
       setError("No token found");
       return;
     }
-  
+
     try {
       // Fetch updated wallet balance and transactions
       const walletResponse = await getWalletBalanceAPI(token);
@@ -114,7 +117,13 @@ const MyBooking: React.FC = () => {
       }
     }
   };
-  
+
+  // Helper function to check if a date is in the past
+  const isPastDate = (dateString: string): boolean => {
+    const bookingDate = new Date(dateString);
+    const now = new Date();
+    return bookingDate < now;
+  };
 
   const handleOpenModal = (bookingId: string) => {
     setSelectedBookingId(bookingId);
@@ -140,12 +149,12 @@ const MyBooking: React.FC = () => {
         setBookings((prevBookings) =>
           prevBookings.filter((booking) => booking._id !== selectedBookingId)
         );
-        await fetchWalletData(); // Fetch updated wallet data
+        await fetchWalletData();
         handleCloseModal();
       } catch (error) {
         if (error instanceof Error) {
           console.error("Error canceling booking:", error);
-          setError(error.message);
+          setError(error.message); 
         } else {
           console.error("Unexpected error:", error);
           setError("An unexpected error occurred while canceling the booking.");
@@ -189,100 +198,129 @@ const MyBooking: React.FC = () => {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-                <thead>
-                  <tr className="bg-teal-700 text-white">
-                    <th className="py-4 px-6 border-b">Profile</th>
-                    <th className="py-4 px-6 border-b">Name</th>
-                    <th className="py-4 px-6 border-b">Amount</th>
-                    <th className="py-4 px-6 border-b">Status</th>
-                    <th className="py-4 px-6 border-b">Contact</th>
-                    <th className="py-4 px-6 border-b">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentBookings.length > 0 ? (
-                    currentBookings.map((booking, index) => {
-                      const worker = booking.workerId;
+            <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+  <thead>
+    <tr className="bg-teal-700 text-white">
+      <th className="py-4 px-6 border-b">Profile</th>
+      <th className="py-4 px-6 border-b">Name</th>
+      <th className="py-4 px-6 border-b">Amount</th>
+      <th className="py-4 px-6 border-b">Booking Date</th>
+      <th className="py-4 px-6 border-b">Slotted Date</th> {/* New Column for Slot Date */}
+      <th className="py-4 px-6 border-b">Contact</th>
+      <th className="py-4 px-6 border-b">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {currentBookings.length > 0 ? (
+      currentBookings.map((booking, index) => {
+        const worker = booking.workerId;
+        const slot = booking.slotId;
 
-                      return (
-                        <tr
-                          key={index}
-                          className={`text-center border-b ${
-                            index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                          } hover:bg-gray-200 transition-colors`}
-                        >
-                          <td className="py-4 px-6 border-b">
-                            {worker?.registerImage ? (
-                              <img
-                                src={worker.registerImage}
-                                alt={worker.name}
-                                className="w-20 h-20 object-cover rounded-full mx-auto shadow-md"
-                              />
-                            ) : (
-                              <span className="text-gray-500">No Image</span>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 border-b font-semibold text-gray-800">
-                            {worker ? worker.name : "N/A"}
-                          </td>
-                          <td className="py-4 px-6 border-b text-gray-900 font-medium">
-                            ₹{booking.amount.toFixed(2)}
-                          </td>
-                          <td className="py-4 px-6 border-b text-gray-700 capitalize">
-                            {booking.status}
-                          </td>
-                          <td className="py-4 px-6 border-b">
-                            <div className="flex items-center justify-center space-x-3">
-                              {worker?.whatsappNumber && (
-                                <button
-                                  onClick={() =>
-                                    window.open(
-                                      `https://wa.me/${worker.whatsappNumber}`,
-                                      "_blank"
-                                    )
-                                  }
-                                  className="flex items-center px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 shadow-md transition-transform duration-300 transform hover:scale-105"
-                                >
-                                  <FaWhatsapp className="mr-2 text-lg" />
-                                  <span className="text-sm">WhatsApp</span>
-                                </button>
-                              )}
-                              {worker?.phoneNumber && (
-                                <a
-                                  href={`tel:${worker.phoneNumber}`}
-                                  className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md transition-transform duration-300 transform hover:scale-105"
-                                >
-                                  <FaPhone className="mr-2 text-lg" />
-                                  <span className="text-sm">Call</span>
-                                </a>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 border-b">
-                            <Button
-                              onClick={() => handleOpenModal(booking._id)}
-                              variant="contained"
-                              color="error"
-                            >
-                              Cancel
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="py-8 px-4 text-center text-gray-500"
-                      >
-                        No bookings found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+        const slotDate = slot?.date ? new Date(slot.date) : null;
+
+        // Get today's date without time
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set time to midnight for a fair comparison
+
+        // Disable button if the slotted date is before today
+        const isPastSlotDate = slotDate ? slotDate < today : true;
+
+        return (
+          <tr
+            key={index}
+            className={`text-center border-b ${
+              index % 2 === 0 ? "bg-gray-100" : "bg-white"
+            } hover:bg-gray-200 transition-colors`}
+          >
+            <td className="py-4 px-6 border-b">
+              {worker?.registerImage ? (
+                <img
+                  src={worker.registerImage}
+                  alt={worker.name}
+                  className="w-20 h-20 object-cover rounded-full mx-auto shadow-md"
+                />
+              ) : (
+                <span className="text-gray-500">No Image</span>
+              )}
+            </td>
+            <td className="py-4 px-6 border-b font-semibold text-gray-800">
+              {worker ? worker.name : "N/A"}
+            </td>
+            <td className="py-4 px-6 border-b text-gray-900 font-medium">
+              ₹{booking.amount.toFixed(2)}
+            </td>
+            <td className="py-4 px-6 border-b text-gray-700">
+              {/* Convert createdAt to a readable date */}
+              {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </td>
+            <td className="py-4 px-6 border-b text-gray-700">
+              {/* Convert slot date to a readable date */}
+              {slotDate
+                ? slotDate.toLocaleDateString("en-IN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "N/A"}
+            </td>
+            <td className="py-4 px-6 border-b">
+              <div className="flex items-center justify-center space-x-3">
+                {worker?.whatsappNumber && (
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `https://wa.me/${worker.whatsappNumber}`,
+                        "_blank"
+                      )
+                    }
+                    className="flex items-center px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 shadow-md transition-transform duration-300 transform hover:scale-105"
+                  >
+                    <FaWhatsapp className="mr-2 text-lg" />
+                    <span className="text-sm">WhatsApp</span>
+                  </button>
+                )}
+                {worker?.phoneNumber && (
+                  <a
+                    href={`tel:${worker.phoneNumber}`}
+                    className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md transition-transform duration-300 transform hover:scale-105"
+                  >
+                    <FaPhone className="mr-2 text-lg" />
+                    <span className="text-sm">Call</span>
+                  </a>
+                )}
+              </div>
+            </td>
+            <td className="py-4 px-6 border-b">
+              <Button
+                onClick={() => handleOpenModal(booking._id)}
+                variant="contained"
+                color="error"
+                disabled={isPastSlotDate} // Disable button if the slotted date is a past date
+              >
+                Cancel
+              </Button>
+            </td>
+          </tr>
+        );
+      })
+    ) : (
+      <tr>
+        <td
+          colSpan={7} // Updated to reflect the new column
+          className="py-8 px-4 text-center text-gray-500"
+        >
+          No bookings found.
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
+
             </div>
 
             {/* Pagination */}
@@ -301,11 +339,8 @@ const MyBooking: React.FC = () => {
 
             <br />
 
-
-      
             {/* Wallet Balance and Wallet Transactions */}
             <div className="flex mt-8 space-x-4">
-              
               {/* Wallet Transactions */}
               <div className="flex-1 p-4 bg-white shadow-lg rounded-lg">
                 <h3 className="text-2xl font-extrabold mb-4 text-teal-800">

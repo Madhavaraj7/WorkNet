@@ -4,10 +4,20 @@ import { Worker } from '../domain/worker';
 import { 
   cancelBooking, 
   createBooking as createBookingRepo, 
+  getBookingById, 
   getWalletByUserId, 
   updateWallet 
 } from '../infrastructure/bookingRepository'; 
 import { findWalletByUserId, updateWalletBalance } from '../infrastructure/walletRepository';
+
+
+
+// Handle booking cancellation, credit the wallet
+interface CancellationPolicy {
+  refundPercentage: number;
+  cancellable: boolean;
+  reason?: string;
+}
 
 // Create a booking, check if the slot is available and worker exists
 export const createBooking = async (userId: string, slotId: string, workerId: string, amount: number): Promise<IBooking> => {
@@ -39,25 +49,51 @@ export const updateBookingStatus = async (bookingId: string, status: 'Pending' |
   return booking;
 };
 
-// Handle booking cancellation, credit the wallet
+const getCancellationPolicy = (bookingDate: Date, eventDate: Date): CancellationPolicy => {
+  const now = new Date();
+  const hoursBeforeEvent = (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+  if (hoursBeforeEvent < 24) {
+    return { refundPercentage: 0, cancellable: false, reason: 'Cancellation not allowed within 24 hours of the event' };
+  } else if (hoursBeforeEvent < 48) {
+    return { refundPercentage: 50, cancellable: true }; // 50% refund for cancellations within 24-48 hours.
+  } else {
+    return { refundPercentage: 100, cancellable: true }; // Full refund for cancellations more than 48 hours in advance.
+  }
+};
+
 export const handleBookingCancellation = async (bookingId: string): Promise<string> => {
-  // Cancel the booking
-  const booking = await cancelBooking(bookingId);
+  // Fetch the booking details
+  const booking = await getBookingById(bookingId);
   if (!booking) {
-    throw new Error('Booking not found or not in a cancellable state');
+    throw new Error('Booking not found');
   }
 
-  // Credit user's wallet
+  const eventDate = new Date(booking.eventDate);
+  const bookingDate = new Date(booking.bookingDate);
+
+  const policy = getCancellationPolicy(bookingDate, eventDate);
+  if (!policy.cancellable) {
+    throw new Error(policy.reason || 'Booking is not in a cancellable state');
+  }
+
+  const refundAmount = (booking.amount * policy.refundPercentage) / 100;
+
+  // Cancel the booking
+  await cancelBooking(bookingId);
+
+  // Credit user's wallet with the refundable amount
   const wallet = await getWalletByUserId(booking.userId.toString());
   if (!wallet) {
     throw new Error('Wallet not found');
   }
 
-  // Update the wallet balance by crediting the amount back
-  await updateWallet(booking.userId.toString(), wallet.walletBalance + booking.amount);
+  // Update the wallet with the refund amount
+  await updateWallet(booking.userId.toString(), refundAmount);
 
-  return 'Booking cancelled and amount credited to wallet';
+  return `Booking cancelled. ${refundAmount} credited to wallet as per cancellation policy.`;
 };
+
 
 // Book a worker and deduct wallet balance
 export const bookWorker = async (userId: string, workerId: string, slotId: string, amount: number): Promise<IBooking> => {

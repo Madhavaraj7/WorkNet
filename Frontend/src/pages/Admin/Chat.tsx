@@ -5,33 +5,29 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  IconButton,
   Typography,
   Paper,
+  Divider,
+  Box,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { toast } from "react-toastify";
 import ChatBox from "../Admin/Box"; // Ensure the correct path
 
 interface Room {
   _id: string;
   roomId: string;
-  user: { _id: string, username: string; profileImage: string }; // Adjust to match backend data
+  user: { _id: string; username: string; profileImage: string };
 }
 
 function Chat() {
   const [selectedConversation, setSelectedConversation] = useState<Room | null>(null);
   const [allRooms, setAllRooms] = useState<Room[]>([]);
 
-  // Fetch all rooms when component mounts
   useEffect(() => {
     const fetchRooms = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/users/rooms");
         const data = await response.json();
-        
         setAllRooms(data);
-        // Automatically select the first room
         if (data.length > 0) {
           setSelectedConversation(data[0]);
         }
@@ -43,32 +39,27 @@ function Chat() {
     fetchRooms();
   }, []);
 
-  // const handleRoomDelete = async (id: string) => {
-  //   try {
-  //     const response = await fetch(`http://localhost:3000/api/users/rooms/${_id}`, {
-  //       method: "DELETE",
-  //     });
-
-  //     if (response.ok) {
-  //       setAllRooms(allRooms.filter((room) => room._id !== id));
-  //       if (selectedConversation && selectedConversation._id === id) {
-  //         setSelectedConversation(null);
-  //       }
-  //       toast.success("Room deleted successfully!");
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to delete room:", error);
-  //   }
-  // };
-
   return (
-    <div className="flex w-full max-w-screen-lg">
+    <>
+
+    <br />
+    <br />
+    <Box display="flex" flexDirection="row" height="100vh">
       {/* Chat Sidebar */}
-      <Paper className="flex-none w-1/3 border-r border-gray-300 bg-white shadow-md" elevation={3}>
-        <Typography variant="h6" component="div" className="bg-gray-300 p-2 text-center">
+      <Paper
+        className="flex-none w-1/3 bg-gray-100 border-r border-gray-300 shadow-md"
+        elevation={3}
+        sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
+      >
+        <Typography
+          variant="h6"
+          component="div"
+          className="bg-gray-200 p-3 text-center font-bold text-lg"
+        >
           Inbox
         </Typography>
-        <List>
+        <Divider />
+        <List sx={{ overflowY: 'auto', flex: 1 }}>
           {allRooms.length > 0 ? (
             allRooms.map((room) => (
               <ListItem
@@ -76,18 +67,20 @@ function Chat() {
                 button
                 selected={selectedConversation?._id === room._id}
                 onClick={() => setSelectedConversation(room)}
+                className="hover:bg-gray-200 transition ease-in-out"
               >
                 <ListItemAvatar>
-                  {room.user && <Avatar src={room.user.profileImage} />}
+                  {room.user.profileImage ? (
+                    <Avatar src={room.user.profileImage} />
+                  ) : (
+                    <Avatar>{room.user.username[0]}</Avatar>
+                  )}
                 </ListItemAvatar>
                 <ListItemText primary={room.user.username || "Unknown User"} />
-                {/* <IconButton edge="end" aria-label="delete" onClick={() => handleRoomDelete(room._id)}>
-                  <DeleteIcon />
-                </IconButton> */}
               </ListItem>
             ))
           ) : (
-            <Typography variant="body1" component="div" className="p-4 text-center">
+            <Typography variant="body1" component="div" className="p-4 text-center text-gray-600">
               No Rooms Found
             </Typography>
           )}
@@ -95,10 +88,25 @@ function Chat() {
       </Paper>
 
       {/* Chat Box */}
-      <div className="flex-1 flex flex-col">
-        <ChatBox selectedConversation={selectedConversation} />
-      </div>
-    </div>
+      <Box
+        className="flex-1 flex flex-col"
+        sx={{ overflow: 'hidden', display: selectedConversation ? 'flex' : 'none', height: '100vh' }}
+      >
+        {selectedConversation ? (
+          <ChatBox selectedConversation={selectedConversation} />
+        ) : (
+          <Box
+            className="flex-1 flex items-center justify-center"
+            sx={{ overflow: 'hidden' }}
+          >
+            <Typography variant="h6" color="textSecondary">
+              Select a chat to start messaging
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    </Box>
+    </>
   );
 }
 

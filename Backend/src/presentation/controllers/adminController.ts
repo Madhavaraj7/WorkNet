@@ -9,6 +9,7 @@ import {
   findCategoryByName,
   getAllUsers,
   getAllWorkers,
+  getBookingTrends,
   loginUser,
   unblockUser,
   updateCategory,
@@ -288,6 +289,16 @@ export const getAllCounts = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getBookingTrendsController = async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const bookingTrends = await getBookingTrends(new Date(startDate as string), new Date(endDate as string));
+    res.status(200).json(bookingTrends);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking trends', error });
+  }
+};
 
 
 export async function getDailyRevenue(req: Request, res: Response): Promise<void> {

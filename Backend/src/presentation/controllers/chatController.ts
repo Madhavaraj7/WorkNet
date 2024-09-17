@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Room from "../../domain/roomsModel";
 import Message from "../../domain/messagesModel";
 import mongoose, { Types } from "mongoose";
-import { io } from '../../app'; // Ensure you have an instance of Socket.io server running
+import { io } from '../../app'; 
 
 
 

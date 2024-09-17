@@ -77,10 +77,11 @@ export const getReviewCount = async (): Promise<number> => {
 
 
 export const getAllBookingsWithDetails = async () => {
-  return Booking.find()
+  return Booking.find({ status: 'Confirmed' }) 
     .populate('userId', 'username') 
     .populate('slotId', 'date') 
     .populate('workerId', 'name') 
     .select('amount status') 
     .exec();
 };
+

@@ -26,6 +26,7 @@ import {
   getAllCounts,
   getAllReviewsWithDetailsController,
   getAllWorkersController,
+  getBookingTrendsController,
   getDailyRevenue,
   getUsersList,
   unblockUserController,
@@ -153,6 +154,9 @@ router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
 router.get('/Adreviews',AdminjwtMiddleware, getAllReviewsWithDetailsController);
 router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
 router.get('/counts', AdminjwtMiddleware,getAllCounts);
+router.get('/booking-trends', AdminjwtMiddleware, getBookingTrendsController);
+
+
 router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
 
 router.get('/bookings',AdminjwtMiddleware, getAllBookings);
