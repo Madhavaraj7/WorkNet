@@ -233,6 +233,11 @@ export const getUserBookedWorkers = async (userId: string) => {
       path: "workerId",
       select: "name phoneNumber whatsappNumber registerImage",
     })
+    .populate({
+      path: "slotId",
+      select: "date", // Select the slotted date from the Slot schema
+    })
     .sort({ createdAt: -1 }) 
     .exec();
 };
+

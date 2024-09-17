@@ -656,95 +656,98 @@ function Profile() {
 
         <div className="flex-grow flex justify-start items-start py-12 px-4 lg:w-1/2">
           {workerDetails ? (
-            <Card>
-              <CardContent>
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">
-                  Create Slots
-                </h2>
-                <TextField
-                  label="Start Date"
-                  name="startDate"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  value={newSlot.startDate}
-                  onChange={handleSlotChange}
-                  fullWidth
-                  margin="normal"
-                  inputProps={{ min: new Date().toISOString().split("T")[0] }} 
-                />
-                <TextField
-                  label="End Date"
-                  name="endDate"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  value={newSlot.endDate}
-                  onChange={handleSlotChange}
-                  fullWidth
-                  margin="normal"
-                  inputProps={{ min: new Date().toISOString().split("T")[0] }} 
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSlotSubmit}
-                  className="mt-4"
-                >
-                  Create Slot
-                </Button>
-
-                <h3 className="text-lg font-semibold mt-8 mb-2">My Slots</h3>
-                {newSlots.length > 0 ? (
-                  <>
-                    {paginatedSlots.length > 0 ? (
-                      paginatedSlots.map((slot, index) => (
-                        <div
-                          key={index}
-                          className="bg-gradient-to-r from-blue-50 via-green-50 to-yellow-50 shadow-md rounded-lg border border-gray-300 p-6 mb-4"
-                        >
-                          <div className="flex justify-between items-center mb-4">
-                            <div className="flex-1 mr-4">
-                              <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-500 pb-2 mb-2">
-                                Start Date
-                              </h3>
-                              <p className="text-gray-700 text-lg">
-                                {formatDate(slot.startDate)}
-                              </p>
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-green-800 border-b-2 border-green-500 pb-2 mb-2">
-                                End Date
-                              </h3>
-                              <p className="text-gray-700 text-lg">
-                                {formatDate(slot.endDate)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center text-gray-600 py-6">
-                        No slots available.
-                      </div>
-                    )}
-                    <div className="flex justify-center mt-6">
-                      <TablePagination
-                        rowsPerPageOptions={[]} 
-                        component="div"
-                        count={filteredSlots.length} 
-                        rowsPerPage={rowsPerPage} 
-                        page={page} 
-                        onPageChange={handleChangePage} 
-                        className="bg-white rounded-lg border border-gray-300 shadow-sm"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-center text-gray-600 py-6">
-                    No slots available.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+           <Card>
+           <CardContent>
+             <h2 className="text-3xl font-bold text-gray-800 mb-6">Create Slots</h2>
+             <TextField
+               label="Start Date"
+               name="startDate"
+               type="date"
+               InputLabelProps={{ shrink: true }}
+               value={newSlot.startDate}
+               onChange={handleSlotChange}
+               fullWidth
+               margin="normal"
+               inputProps={{ 
+                 min: new Date(new Date().setDate(new Date().getDate() + 1))
+                   .toISOString()
+                   .split("T")[0], 
+               }}
+             />
+             <TextField
+               label="End Date"
+               name="endDate"
+               type="date"
+               InputLabelProps={{ shrink: true }}
+               value={newSlot.endDate}
+               onChange={handleSlotChange}
+               fullWidth
+               margin="normal"
+               inputProps={{ 
+                 min: new Date(new Date().setDate(new Date().getDate() + 1))
+                   .toISOString()
+                   .split("T")[0], // Ensuring tomorrow's date
+               }}
+             />
+             <Button
+               variant="contained"
+               color="primary"
+               onClick={handleSlotSubmit}
+               className="mt-4"
+             >
+               Create Slot
+             </Button>
+         
+             <h3 className="text-lg font-semibold mt-8 mb-2">My Slots</h3>
+             {newSlots.length > 0 ? (
+               <>
+                 {paginatedSlots.length > 0 ? (
+                   paginatedSlots.map((slot, index) => (
+                     <div
+                       key={index}
+                       className="bg-gradient-to-r from-blue-50 via-green-50 to-yellow-50 shadow-md rounded-lg border border-gray-300 p-6 mb-4"
+                     >
+                       <div className="flex justify-between items-center mb-4">
+                         <div className="flex-1 mr-4">
+                           <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-500 pb-2 mb-2">
+                             Start Date
+                           </h3>
+                           <p className="text-gray-700 text-lg">
+                             {formatDate(slot.startDate)}
+                           </p>
+                         </div>
+                         <div className="flex-1">
+                           <h3 className="text-lg font-semibold text-green-800 border-b-2 border-green-500 pb-2 mb-2">
+                             End Date
+                           </h3>
+                           <p className="text-gray-700 text-lg">
+                             {formatDate(slot.endDate)}
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="text-center text-gray-600 py-6">No slots available.</div>
+                 )}
+                 <div className="flex justify-center mt-6">
+                   <TablePagination
+                     rowsPerPageOptions={[]}
+                     component="div"
+                     count={filteredSlots.length}
+                     rowsPerPage={rowsPerPage}
+                     page={page}
+                     onPageChange={handleChangePage}
+                     className="bg-white rounded-lg border border-gray-300 shadow-sm"
+                   />
+                 </div>
+               </>
+             ) : (
+               <p className="text-center text-gray-600 py-6">No slots available.</p>
+             )}
+           </CardContent>
+         </Card>
+         
           ) : (
             <div></div>
           )}

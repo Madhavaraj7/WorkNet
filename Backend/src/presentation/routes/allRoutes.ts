@@ -26,6 +26,7 @@ import {
   getAllCounts,
   getAllReviewsWithDetailsController,
   getAllWorkersController,
+  getBookingTrendsController,
   getDailyRevenue,
   getUsersList,
   unblockUserController,
@@ -58,6 +59,7 @@ import { confirmPayment } from "../controllers/paymentController";
 // import { handleStripeWebhook } from "../controllers/stripeWebhookController";
 import { getReviews, postReview } from "../controllers/reviewController";
 import {  getWalletBalance } from "../controllers/walletController";
+import { createRoom, getMessages, getRooms, sendMessage } from "../controllers/chatController";
 
 const router = express.Router();
 
@@ -152,10 +154,25 @@ router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
 router.get('/Adreviews',AdminjwtMiddleware, getAllReviewsWithDetailsController);
 router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
 router.get('/counts', AdminjwtMiddleware,getAllCounts);
+router.get('/booking-trends', AdminjwtMiddleware, getBookingTrendsController);
+
+
 router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
 
 router.get('/bookings',AdminjwtMiddleware, getAllBookings);
 
 
+
+// Create or find a room between user and admin
+router.post('/room', createRoom);
+
+// Send a message in a room
+router.post('/message', sendMessage);
+
+// Get all rooms (admin view)
+router.get('/rooms', getRooms);
+
+// Get all messages in a room
+router.get('/messages/:roomId', getMessages);
 
 export default router;

@@ -140,12 +140,21 @@ const Header: React.FC = () => {
                       >
                         View Profile
                       </Button>
+                      <Link to="/help">
+                        <MenuItem onClick={handleMenuClose}>
+                          <ListItemIcon>
+                            <HelpOutlineIcon fontSize="small" />
+                          </ListItemIcon>
+                          Help
+                        </MenuItem>
+                      </Link>
                       <MenuItem onClick={handleLogoutClick}>
                         <ListItemIcon>
                           <Logout fontSize="small" />
                         </ListItemIcon>
                         Logout
                       </MenuItem>
+                      
                     </div>
                   </Paper>
                 </ClickAwayListener>
@@ -170,17 +179,7 @@ const Header: React.FC = () => {
                   <span>Register</span>
                 </Button>
               </Link>
-              <Link to="/help">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className="bg-teal-500 hover:bg-teal-600 flex items-center space-x-1 px-2 py-1 text-sm"
-                  size="small" // Smaller button size
-                >
-                  <HelpOutlineIcon fontSize="small" />
-                  <span className="hidden md:inline">Help</span>
-                </Button>
-              </Link>
+            
             </div>
           ) : (
             <>

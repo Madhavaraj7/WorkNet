@@ -249,14 +249,28 @@ export const fetchAllReviewsWithDetails = async () => {
 
 
 
-export const getAllCounts = async (): Promise<{ usersCount: number; workersCount: number; bookingsCount: number; }> => {
+export const getAllCounts = async (): Promise<{ usersCount: number; workersCount: number; bookingsCount: number; reviewCount : number }> => {
   const usersCount = await adminRepository.getUsersCount();
   const workersCount = await adminRepository.getWorkersCount();
   const bookingsCount = await adminRepository.getBookingsCount();
-  
-  return { usersCount, workersCount, bookingsCount };
+  const reviewCount = await adminRepository.getReviewCount();
+  return { usersCount, workersCount, bookingsCount,reviewCount };
 };
 
+
+
+export const getBookingTrends = async (startDate: Date, endDate: Date): Promise<{ date: string, count: number }[]> => {
+  const bookings = await Booking.aggregate([
+    { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+    { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+    { $sort: { _id: 1 } },
+  ]);
+
+  return bookings.map(booking => ({
+    date: booking._id,
+    count: booking.count,
+  }));
+};
 
 
 export async function fetchDailyRevenue(year: number, month: number, day: number): Promise<number> {

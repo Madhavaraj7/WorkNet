@@ -30,6 +30,7 @@ import AdRevenue from "./pages/Admin/AdRevenue";
 import Help from "./pages/Help";
 import Admessages from "./pages/Admin/Admessages";
 import Chat from "./pages/Admin/Chat";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -66,7 +67,6 @@ function App() {
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/myBooking" element={<MyBooking />} />
           <Route path="/Help" element={<Help />} />
-
         </Route>
 
         <Route path="/admin" element={<AdminAuth />} />
@@ -81,10 +81,10 @@ function App() {
             <Route path="/adreviews" element={<AdReviews />} />
             <Route path="/adrevenue" element={<AdRevenue />} />
             <Route path="/admessages" element={<Chat />} />
-
-
           </Route>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
+
       </Routes>
     </>
   );

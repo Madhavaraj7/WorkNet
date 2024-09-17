@@ -9,6 +9,7 @@ import {
   findCategoryByName,
   getAllUsers,
   getAllWorkers,
+  getBookingTrends,
   loginUser,
   unblockUser,
   updateCategory,
@@ -57,6 +58,8 @@ export const adminupdateProfile = async (req: CustomRequest, res: Response) => {
 
     const { username, email } = req.body;
     const profileImage = req.file ? req.file.buffer : null;
+    console.log(profileImage);
+    
     let profileImageUrl = "";
 
     const proceedWithUpdate = async () => {
@@ -80,14 +83,14 @@ export const adminupdateProfile = async (req: CustomRequest, res: Response) => {
       cloudinary.uploader.upload_stream(
         (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
           if (error) {
-            return res
-              .status(500)
-              .json({ error: "Failed to upload image to Cloudinary" });
+            return res.status(500).json({ error: "Failed to upload image to Cloudinary" });
           }
           profileImageUrl = result?.secure_url || "";
+          console.log("Cloudinary URL:", profileImageUrl); // Add logging
           proceedWithUpdate();
         }
       ).end(profileImage);
+      
     } else {
       proceedWithUpdate(); // No image provided, proceed with updating other fields
     }
@@ -286,6 +289,16 @@ export const getAllCounts = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getBookingTrendsController = async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const bookingTrends = await getBookingTrends(new Date(startDate as string), new Date(endDate as string));
+    res.status(200).json(bookingTrends);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking trends', error });
+  }
+};
 
 
 export async function getDailyRevenue(req: Request, res: Response): Promise<void> {

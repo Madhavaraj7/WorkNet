@@ -65,7 +65,7 @@ export const updateAdminProfileAPI = async (
   reqBody: any,
   reqHeader?: RequestHeaders
 ) => {
-  return await commonAPI("PUT", `${SERVER_URL}/profile`, reqBody, reqHeader);
+  return await commonAPI("PUT", `${SERVER_URL}/adprofile`, reqBody, reqHeader);
 };
 
 // Get All Users API
@@ -422,7 +422,22 @@ export const getUserBookedWorkersAPI = async (token: string) => {
 
 
 
-
+export const getBookingTrendsAPI = async (startDate: string, endDate: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/booking-trends?startDate=${startDate}&endDate=${endDate}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getBookingTrendsAPI:", error);
+    throw new Error("Failed to fetch booking trends");
+  }
+};
 
 export const postReviewAPI = async (reviewData: any, token: string) => {
   try {
@@ -626,3 +641,6 @@ export const getAllBookingsAPI = async (token: string) => {
     throw new Error("Failed to fetch all bookings");
   }
 };
+
+
+

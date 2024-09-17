@@ -228,7 +228,7 @@ const AdRevenue: React.FC = () => {
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
                 >
-                  ${booking.amount}
+                  ₹{booking.amount}
                 </TableCell>
                 <TableCell
                   className="text-center"

@@ -71,12 +71,17 @@ export const getBookingsCount = async (): Promise<number> => {
   return await Booking.countDocuments();
 };
 
+export const getReviewCount = async (): Promise<number> => {
+  return await Review.countDocuments();
+};
+
 
 export const getAllBookingsWithDetails = async () => {
-  return Booking.find()
+  return Booking.find({ status: 'Confirmed' }) 
     .populate('userId', 'username') 
     .populate('slotId', 'date') 
     .populate('workerId', 'name') 
     .select('amount status') 
     .exec();
 };
+

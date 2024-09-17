@@ -5,142 +5,107 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  IconButton,
   Typography,
   Paper,
+  Divider,
+  Box,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { io, Socket } from "socket.io-client";
-import { toast } from "react-toastify";
 import ChatBox from "../Admin/Box"; // Ensure the correct path
-
-const socket: Socket = io("http://localhost:3000");
 
 interface Room {
   _id: string;
   roomId: string;
-  senderName: string;
-  profileImage: string;
+  user: { _id: string; username: string; profileImage: string };
 }
 
 function Chat() {
   const [selectedConversation, setSelectedConversation] = useState<Room | null>(null);
   const [allRooms, setAllRooms] = useState<Room[]>([]);
-  const [msgNotification, setMsgNotification] = useState<any[]>([]);
-  const [changed, setChanged  ] =useState(false)
-  console.log('chat component reendered')
-
-  // Fetch all rooms and select the first one initially
-  const getAllRooms = () => {
-    socket.emit("adminRoomOpen");
-    socket.on("adminRooms", (rooms: Room[]) => {
-      setAllRooms(rooms);
-      if (rooms.length > 0 && selectedConversation === null) {
-        setSelectedConversation(rooms[0]); // Select the first room initially
-      }
-    });
-  };
-
-  useEffect(()=>{
-    getAllRooms();
-  },[changed])
 
   useEffect(() => {
-    
-    const intervalId = setInterval(() => {
-      socket.emit("adminConnected", "admin");
-      socket.on("notification", (notification: any) =>
-        setMsgNotification(notification)
-      );
-    }, 500);
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/users/rooms");
+        const data = await response.json();
+        setAllRooms(data);
+        if (data.length > 0) {
+          setSelectedConversation(data[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch rooms:", error);
+      }
+    };
 
-    return () => clearInterval(intervalId);
+    fetchRooms();
   }, []);
-
-  const handleRoomDelete = (id: string) => {
-    setAllRooms(allRooms.filter((room) => room._id !== id));
-    if (selectedConversation && selectedConversation._id === id) {
-      setSelectedConversation(null);
-    }
-    toast.success("Room deleted successfully!");
-  };
-
-  const roomNotification = (roomId: string) => {
-    return msgNotification.filter((msg: any) => msg.roomId === roomId).length;
-  };
 
   return (
     <>
-      <br />
-      <br />
 
-      <div className="flex w-full max-w-screen-lg ">
-        {/* Chat Sidebar */}
-        <Paper
-          className="flex-none w-1/3 border-r border-gray-300 bg-white shadow-md"
-          elevation={3}
+    <br />
+    <br />
+    <Box display="flex" flexDirection="row" height="100vh">
+      {/* Chat Sidebar */}
+      <Paper
+        className="flex-none w-1/3 bg-gray-100 border-r border-gray-300 shadow-md"
+        elevation={3}
+        sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
+      >
+        <Typography
+          variant="h6"
+          component="div"
+          className="bg-gray-200 p-3 text-center font-bold text-lg"
         >
-          <Typography
-            variant="h6"
-            component="div"
-            className="bg-gray-300 p-2 text-center"
-          >
-            Inbox
-          </Typography>
-          <List>
-            {allRooms.length > 0 ? (
-              allRooms.map((room) => (
-                <ListItem
-                  key={room._id}
-                  button
-                  selected={selectedConversation?._id === room._id}
-                  onClick={() => setSelectedConversation(room)}
-                >
-                  <ListItemAvatar>
-                    <Avatar src={room.profileImage} />
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={room.senderName}
-                    secondary={
-                      roomNotification(room._id) > 0
-                        ? `${roomNotification(room._id)} new messages`
-                        : ""
-                    }
-                  />
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={() => handleRoomDelete(room._id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItem>
-              ))
-            ) : (
-              <Typography
-                variant="body1"
-                component="div"
-                className="p-4 text-center"
+          Inbox
+        </Typography>
+        <Divider />
+        <List sx={{ overflowY: 'auto', flex: 1 }}>
+          {allRooms.length > 0 ? (
+            allRooms.map((room) => (
+              <ListItem
+                key={room._id}
+                button
+                selected={selectedConversation?._id === room._id}
+                onClick={() => setSelectedConversation(room)}
+                className="hover:bg-gray-200 transition ease-in-out"
               >
-                No Rooms Found
-              </Typography>
-            )}
-          </List>
-        </Paper>
-
-        {/* Chat Box */}
-        <div className="flex-1 flex flex-col">
-          {selectedConversation ? (
-            <ChatBox selectedConversation={selectedConversation} setChanged={setChanged} />
+                <ListItemAvatar>
+                  {room.user.profileImage ? (
+                    <Avatar src={room.user.profileImage} />
+                  ) : (
+                    <Avatar>{room.user.username[0]}</Avatar>
+                  )}
+                </ListItemAvatar>
+                <ListItemText primary={room.user.username || "Unknown User"} />
+              </ListItem>
+            ))
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <Typography variant="h6">
-                Select a conversation to start chatting
-              </Typography>
-            </div>
+            <Typography variant="body1" component="div" className="p-4 text-center text-gray-600">
+              No Rooms Found
+            </Typography>
           )}
-        </div>
-      </div>
+        </List>
+      </Paper>
+
+      {/* Chat Box */}
+      <Box
+        className="flex-1 flex flex-col"
+        sx={{ overflow: 'hidden', display: selectedConversation ? 'flex' : 'none', height: '100vh' }}
+      >
+        {selectedConversation ? (
+          <ChatBox selectedConversation={selectedConversation} />
+        ) : (
+          <Box
+            className="flex-1 flex items-center justify-center"
+            sx={{ overflow: 'hidden' }}
+          >
+            <Typography variant="h6" color="textSecondary">
+              Select a chat to start messaging
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    </Box>
     </>
   );
 }
