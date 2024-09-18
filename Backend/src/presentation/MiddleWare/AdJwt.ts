@@ -17,13 +17,11 @@ const adminJwtMiddleware = (req: CustomRequest, res: Response, next: NextFunctio
     }
 
     try {
-        // console.log("try");
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as { userId: string; role: string };
         req.userId = decoded.userId;
         req.role = decoded.role;
 
-        // console.log(decoded);
         
 
         if (req.role !== 'admin') {

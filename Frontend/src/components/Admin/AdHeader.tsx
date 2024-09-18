@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -6,9 +6,8 @@ import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography"
+import Typography from "@mui/material/Typography";
 import EngineeringIcon from "@mui/icons-material/Engineering";
-
 import Avatar from "@mui/material/Avatar";
 import { Badge, Button, Divider } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -22,7 +21,12 @@ import MessageIcon from "@mui/icons-material/Message";
 import Person4Icon from "@mui/icons-material/Person4";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { tokenAuthenticationContext } from '../../ContextAPI/AdminAuth'; // Adjust the import path as needed
+import { tokenAuthenticationContext } from '../../ContextAPI/AdminAuth';
+import { io } from "socket.io-client";
+import { getUnreadMessagesCount } from "../../Services/allAPI";
+
+// Initialize socket connection
+const socket = io("http://localhost:3000");
 
 const drawerWidth = 240;
 
@@ -33,17 +37,17 @@ const Drawer = styled(MuiDrawer)(({ theme }) => ({
   boxSizing: "border-box",
   "& .MuiDrawer-paper": {
     width: drawerWidth,
-    backgroundColor: "#2D3748", // Dark gray
-    padding: theme.spacing(2), // Adds padding inside the drawer
+    backgroundColor: "#2D3748",
+    padding: theme.spacing(2),
   },
 }));
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: "#1F2937", // bg-gray-900
-  color: "#FFFFFF", // text-white
-  padding: theme.spacing(1, 2), // py-4
-  boxShadow: theme.shadows[10], // shadow-lg
+  backgroundColor: "#1F2937",
+  color: "#FFFFFF",
+  padding: theme.spacing(1, 2),
+  boxShadow: theme.shadows[10],
   marginLeft: drawerWidth,
   width: `calc(100% - ${drawerWidth}px)`,
 }));
@@ -51,6 +55,7 @@ const AppBar = styled(MuiAppBar)(({ theme }) => ({
 const AdHeader: React.FC = () => {
   const navigate = useNavigate();
   const [activeIcon, setActiveIcon] = useState<string>("home");
+  const [unreadCount, setUnreadCount] = useState<number>(0);
   const authContext = useContext(tokenAuthenticationContext);
 
   const handleIconClick = (iconName: string) => {
@@ -71,14 +76,50 @@ const AdHeader: React.FC = () => {
     }
   };
 
+  const token = localStorage.getItem("adtoken") || '';
+
+  const fetchUnreadCount = async () => {
+    try {
+      if (authContext?.admin?._id) {
+        const response = await getUnreadMessagesCount(authContext.admin._id, token);
+        setUnreadCount(response.unreadCount);
+      }
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+  
+    fetchUnreadCount();
+  
+    socket.on("unreadCount", (data) => {
+      console.log("Unread count received:", data);
+      setUnreadCount(data.unreadCount);
+    });
+  
+    return () => {
+      socket.off("unreadCount");
+    };
+  }, [authContext?.admin?._id]);
+
+  useEffect(() => {
+    if (authContext?.admin?._id) {
+      socket.emit('userOnline', authContext.admin._id); 
+    }
+  }, [authContext?.admin?._id]);
+
   return (
     <Box>
       <CssBaseline />
       <AppBar position="fixed">
         <Toolbar className="flex justify-between items-center">
           <div className="flex items-center">
-          <EngineeringIcon fontSize="large" className="text-teal-400" />
-          <Link to="/adHome" className="text-2xl font-bold hover:text-teal-400">WORKNET</Link>
+            <EngineeringIcon fontSize="large" className="text-teal-400" />
+            <Link to="/adHome" className="text-2xl font-bold hover:text-teal-400">WORKNET</Link>
           </div>
           <div className="flex space-x-4">
             <Badge badgeContent={0} color="error">
@@ -123,15 +164,8 @@ const AdHeader: React.FC = () => {
         </Box>
         <Divider />
         <List>
-          {[
-            "home",
-            "users",
-            "workers",
-            "Category",
-            "reviews",
-            "revenue",
-            "messages",
-            "profile",
+          {[ 
+            "home", "users", "workers", "Category", "reviews", "revenue", "messages", "profile"
           ].map((icon) => (
             <React.Fragment key={icon}>
               <div
@@ -141,88 +175,20 @@ const AdHeader: React.FC = () => {
                   color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
                 }}
               >
-                {icon === "home" && (
-                  <HomeIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
-                {icon === "users" && (
-                  <PeopleAltIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
-                {icon === "workers" && (
-                  <PeopleAltIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
-                {icon === "Category" && (
-                  <BarChartIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
-                {icon === "reviews" && (
-                  <ReviewsIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
-                {icon === "revenue" && (
-                  <ReportIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
+                {icon === "home" && <HomeIcon className="me-3" fontSize="large" />}
+                {icon === "users" && <PeopleAltIcon className="me-3" fontSize="large" />}
+                {icon === "workers" && <PeopleAltIcon className="me-3" fontSize="large" />}
+                {icon === "Category" && <BarChartIcon className="me-3" fontSize="large" />}
+                {icon === "reviews" && <ReviewsIcon className="me-3" fontSize="large" />}
+                {icon === "revenue" && <ReportIcon className="me-3" fontSize="large" />}
                 {icon === "messages" && (
-                  <MessageIcon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
+                  <Badge badgeContent={unreadCount} color="error">
+                    <MessageIcon className="me-3" fontSize="large" />
+                  </Badge>
                 )}
-                {icon === "profile" && (
-                  <Person4Icon
-                    className="me-3"
-                    fontSize="large"
-                    style={{
-                      color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                    }}
-                  />
-                )}
-                <Typography
-                  variant="h6"
-                  style={{
-                    color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
-                  }}
-                >
-                  {icon}
-                </Typography>
+                {icon === "profile" && <Person4Icon className="me-3" fontSize="large" />}
+                <Typography className="font-semibold">{icon}</Typography>
               </div>
-              <Divider />
             </React.Fragment>
           ))}
         </List>

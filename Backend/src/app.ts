@@ -12,6 +12,11 @@ import { socketHandler } from './presentation/socket/chat'; // Ensure this path 
 
 const app = express();
 
+
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 // Middleware setup
 app.use(cors({
   origin: 'http://localhost:5173', // Adjust as necessary

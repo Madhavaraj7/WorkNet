@@ -13,9 +13,7 @@ import maintenance from '../assets/Images/maintanance.jpg';
 import BuildIcon from '@mui/icons-material/Build';
 import PeopleIcon from '@mui/icons-material/People';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import EngineeringIcon from '@mui/icons-material/Engineering';
-import CarpenterIcon from '@mui/icons-material/Carpenter';
-import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
+
 import Footer from '../components/Footer';
 
 const Home: React.FC = () => {

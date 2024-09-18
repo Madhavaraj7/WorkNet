@@ -3,7 +3,7 @@ import { Avatar, Button, TextField, Paper, Typography, Box as MuiBox } from "@mu
 import SendIcon from "@mui/icons-material/Send";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:3000"); // Adjust the URL to your server
+const socket = io("http://localhost:3000"); // Your server URL
 
 interface Message {
   _id: string;
@@ -28,9 +28,10 @@ interface Room {
 
 interface ChatBoxProps {
   selectedConversation: Room | null;
+  onlineUsers: Set<string>; // Prop to keep track of online users
 }
 
-function ChatBox({ selectedConversation }: ChatBoxProps) {
+function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
@@ -57,6 +58,8 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
 
+      
+
       return () => {
         socket.off('message');
       };
@@ -64,7 +67,6 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
   }, [selectedConversation]);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     messageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -95,6 +97,8 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
           const errorData = await response.json();
           console.error('Failed to send message:', errorData);
         }
+
+
       } catch (error) {
         console.error("Failed to send message:", error);
       }
@@ -112,9 +116,22 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
         <Typography variant="h6">
           {selectedConversation?.user.username || "Chat Room"}
         </Typography>
-        <Avatar
-          src={selectedConversation?.user.profileImage || "/default-profile.png"}
-        />
+        <MuiBox className="flex items-center">
+          <Avatar
+            src={selectedConversation?.user.profileImage || "/default-profile.png"}
+            sx={{ width: 48, height: 48 }}
+          />
+          <MuiBox
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              backgroundColor: onlineUsers.has(selectedConversation?.user._id || "") ? "green" : "red",
+              marginLeft: 1,
+              border: '2px solid white',
+            }}
+          />
+        </MuiBox>
       </MuiBox>
 
       <MuiBox
@@ -133,16 +150,11 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
                 )}
                 <Paper
                   className={`p-3 rounded-lg shadow-md ${
-                    msg.from._id === admin ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-800"
+                    msg.from._id === admin ? "bg-blue-500 text-white" : "bg-gray-300 text-black"
                   }`}
-                  style={{
-                    borderRadius: "15px",
-                    borderBottomRightRadius: msg.from._id === admin ? "0px" : "15px",
-                    borderBottomLeftRadius: msg.from._id === admin ? "15px" : "0px",
-                  }}
                 >
-                  <Typography variant="body2">{msg.message}</Typography>
-                  <Typography variant="caption" className="text-right mt-1 text-gray-600">
+                  <Typography variant="body1">{msg.message}</Typography>
+                  <Typography variant="caption" className="text-xs">
                     {formatTime(msg.createdAt)}
                   </Typography>
                 </Paper>
@@ -150,30 +162,34 @@ function ChatBox({ selectedConversation }: ChatBoxProps) {
             </MuiBox>
           ))
         ) : (
-          <Typography variant="body1" className="text-center text-gray-600">
+          <Typography variant="body1" className="text-center text-gray-500">
             No messages yet
           </Typography>
         )}
         <div ref={messageContainerRef} />
       </MuiBox>
 
-      <MuiBox className="p-4 bg-gray-100 flex items-center border-t border-gray-300">
+      <MuiBox className="flex items-center p-4 bg-gray-100 border-t border-gray-300">
         <TextField
           fullWidth
+          label="Type your message"
+          variant="outlined"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
-          variant="outlined"
-          size="small"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAdminMessageSend();
+            }
+          }}
         />
         <Button
           variant="contained"
           color="primary"
           onClick={handleAdminMessageSend}
-          disabled={!message.trim()}
+          startIcon={<SendIcon />}
           className="ml-2"
         >
-          <SendIcon />
+          Send
         </Button>
       </MuiBox>
     </Paper>

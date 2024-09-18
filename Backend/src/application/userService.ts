@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import {
   createUser,
   findUserByEmail,
+  findUserById,
   getAllCategories,
   updateUser,
 } from "../infrastructure/userRepository";
@@ -106,40 +107,66 @@ export const updateUserOtp = async (email: string, otp: string) => {
   return updateUser(email, { otp });
 };
 
+
+
 // login the user
+// Function to generate tokens
+const generateAccessToken = (userId: string) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET_KEY!, { expiresIn: "1h" });
+};
+
+const generateRefreshToken = (userId: string) => {
+  return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET_KEY!, { expiresIn: "7d" });
+};
+
 export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmail(email);
 
-  // Check if the user exists
   if (!user) {
     throw new Error("Invalid Email/Password");
   }
 
-  // Check if the user is blocked
   if (user.isBlocked) {
     throw new Error("User is blocked");
   }
 
-  // Check if OTP has been verified
   if (!user.otpVerified) {
     throw new Error("OTP verification required");
   }
 
-  // Validate the password
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw new Error("Invalid Email/Password");
   }
 
-  // Generate JWT token
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY!, {
-    expiresIn: "1h",
-  });
+  // Generate JWT access and refresh tokens
+  const accessToken = generateAccessToken(user._id as string);
+  const refreshToken = generateRefreshToken(user._id as string);
 
-  // Return user and token if all checks pass
-  return { user, token };
+  // Return user and tokens
+  return { user, accessToken, refreshToken };
 };
 
+export const refreshAccessToken = async (refreshToken: string) => {
+  try {
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY!);
+    const userId = (decoded as any).userId;
+
+    const user = await findUserById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Generate a new access token
+    const newAccessToken = generateAccessToken(userId);
+
+    // Return new access token
+    return { accessToken: newAccessToken };
+  } catch (error) {
+    throw new Error("Invalid or expired refresh token");
+  }
+};
 
 export const updateUserProfile = async (
   userId: string,

@@ -56,9 +56,9 @@ const getCancellationPolicy = (bookingDate: Date, eventDate: Date): Cancellation
   if (hoursBeforeEvent < 24) {
     return { refundPercentage: 0, cancellable: false, reason: 'Cancellation not allowed within 24 hours of the event' };
   } else if (hoursBeforeEvent < 48) {
-    return { refundPercentage: 50, cancellable: true }; // 50% refund for cancellations within 24-48 hours.
+    return { refundPercentage: 50, cancellable: true }; 
   } else {
-    return { refundPercentage: 100, cancellable: true }; // Full refund for cancellations more than 48 hours in advance.
+    return { refundPercentage: 100, cancellable: true }; 
   }
 };
 

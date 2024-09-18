@@ -1,5 +1,6 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { DNA } from 'react-loader-spinner';  // Import Dna from react-loader-spinner
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import OtpPage from "./pages/OtpPage";
@@ -33,8 +34,35 @@ import Chat from "./pages/Admin/Chat";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
+  const [loading, setLoading] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setLoading(false); 
+    }, 1000); 
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
   return (
     <>
+      {/* Loading spinner */}
+      {loading && (
+        <div className="flex justify-center items-center fixed inset-0 bg-white z-50">
+          <DNA
+            visible={true}
+            height="80"  
+            width="80"   
+            ariaLabel="dna-loading"
+            wrapperStyle={{}}
+            wrapperClass="dna-wrapper"
+          />
+        </div>
+      )}
+
+      {/* Toast notifications */}
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -46,6 +74,8 @@ function App() {
         draggable
         pauseOnHover
       />
+
+      {/* Routes */}
       <Routes>
         <Route path="/" element={<Home />} />
 
@@ -84,7 +114,6 @@ function App() {
           </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />
-
       </Routes>
     </>
   );
