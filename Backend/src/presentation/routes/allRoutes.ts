@@ -59,7 +59,8 @@ import { confirmPayment } from "../controllers/paymentController";
 // import { handleStripeWebhook } from "../controllers/stripeWebhookController";
 import { getReviews, postReview } from "../controllers/reviewController";
 import {  getWalletBalance } from "../controllers/walletController";
-import { createRoom, getMessages, getRooms, sendMessage } from "../controllers/chatController";
+import { createRoom, getMessages, getRooms, getUnreadMessagesCount, sendMessage } from "../controllers/chatController";
+import { refreshToken } from "../controllers/tokenController";
 
 const router = express.Router();
 
@@ -72,6 +73,8 @@ router.post("/signUp", upload.single("profileImage"), register);
 router.post("/verifyOtp", verifyOtp);
 router.post("/resendOtp", resendOtp);
 router.post("/login", login);
+router.post("/refresh-token", refreshToken);
+
 router.post("/googleLogin", googleLoginHandler);
 router.put(
   "/profile",
@@ -160,19 +163,14 @@ router.get('/booking-trends', AdminjwtMiddleware, getBookingTrendsController);
 router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
 
 router.get('/bookings',AdminjwtMiddleware, getAllBookings);
-
-
-
-// Create or find a room between user and admin
+router.get('/messages/unread-count/:userId',AdminjwtMiddleware,getUnreadMessagesCount);
 router.post('/room', createRoom);
-
-// Send a message in a room
 router.post('/message', sendMessage);
-
-// Get all rooms (admin view)
 router.get('/rooms', getRooms);
-
-// Get all messages in a room
 router.get('/messages/:roomId', getMessages);
+
+
+
+
 
 export default router;

@@ -158,9 +158,14 @@ export const resendOtp = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
-        const { user, token } = await loginUser(email, password);
-        res.status(200).json({ user, token });
+        
+        const { user, accessToken, refreshToken } = await loginUser(email, password);
+
+        // console.log({ user, accessToken, refreshToken });
+
+        res.status(200).json({ user, accessToken, refreshToken });
     } catch (error: any) {
+        // Handle login errors
         res.status(400).json({ error: error.message });
     }
 };

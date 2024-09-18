@@ -220,10 +220,9 @@ const MyBooking: React.FC = () => {
 
         // Get today's date without time
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set time to midnight for a fair comparison
+        today.setHours(0, 0, 0, 0); 
 
-        // Disable button if the slotted date is before today
-        const isPastSlotDate = slotDate ? slotDate < today : true;
+        const isPastSlotDate = slotDate ? slotDate <= today : true;
 
         return (
           <tr

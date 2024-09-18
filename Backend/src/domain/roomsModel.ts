@@ -4,12 +4,17 @@ const roomSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
+      ref: "User",
       required: true,
+    },
+    latestMessage: {
+      type: Schema.Types.ObjectId,
+      ref: "Message",  // Reference the latest message in this room
     },
   },
   { timestamps: true }
 );
+
 
 const Room = mongoose.model("Room", roomSchema);
 export default Room;

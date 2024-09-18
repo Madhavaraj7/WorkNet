@@ -2,10 +2,8 @@ import { Request, Response } from "express";
 import Room from "../../domain/roomsModel";
 import Message from "../../domain/messagesModel";
 import mongoose, { Types } from "mongoose";
-import { io } from '../../app'; 
-
-
-
+import { io } from "../../app";
+import { onlineUsers } from "../socket/chat";
 
 // Create or find a room
 export const createRoom = async (req: Request, res: any): Promise<void> => {
@@ -40,19 +38,25 @@ export const sendMessage = async (req: Request, res: any): Promise<void> => {
       return res.status(400).json({ error: "Room ID, From, To, and Message are required" });
     }
 
-    // Save new message to database
     const newMessage = new Message({ roomId, from, to, message });
     await newMessage.save();
 
-    // Find the saved message with populated user fields
+    await Room.findByIdAndUpdate(roomId, { latestMessage: newMessage._id });
+
     const latestMsg = await Message.findById(newMessage._id)
-      .populate({ path: 'from', select: '_id username profileImage' })
-      .populate({ path: 'to', select: '_id username profileImage' });
+      .populate({ path: "from", select: "_id username profileImage" })
+      .populate({ path: "to", select: "_id username profileImage" });
 
-    // Emit the new message to the specific room using Socket.io
-    io.to(roomId).emit('message', latestMsg);
+    io.to(roomId).emit("message", latestMsg);
 
-    // Respond with the saved message
+    // Update unread count for the recipient
+    const unreadCount = await Message.countDocuments({ to, isRead: false });
+
+    const recipientSocketId = onlineUsers.get(to);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("unreadCount", { unreadCount });
+    }
+
     res.status(201).json(latestMsg);
   } catch (error) {
     console.error("Error sending message:", error);
@@ -63,10 +67,16 @@ export const sendMessage = async (req: Request, res: any): Promise<void> => {
 // Get rooms list (admin view)
 export const getRooms = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rooms = await Room.find().populate({
-      path: "user",
-      select: "_id username profileImage",
-    });
+    const rooms = await Room.find()
+      .populate({
+        path: "user",
+        select: "_id username profileImage",
+      })
+      .populate({
+        path: "latestMessage", 
+        select: "message createdAt",
+      })
+      .sort({ "latestMessage.createdAt": -1 }); 
 
     res.status(200).json(rooms);
   } catch (error) {
@@ -76,8 +86,11 @@ export const getRooms = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Get messages in a room
+
 export const getMessages = async (req: Request, res: any): Promise<void> => {
   const { roomId } = req.params;
+  const admin = "66bb2bd548e166a70bce4c66"; // Admin user ID
+
 
   try {
     if (!roomId) {
@@ -85,18 +98,47 @@ export const getMessages = async (req: Request, res: any): Promise<void> => {
     }
 
     const messages = await Message.find({ roomId })
-      .populate({
-        path: "from",
-        select: "username profileImage",
-      })
-      .populate({
-        path: "to",
-        select: "username profileImage",
-      });
+      .populate({ path: "from", select: "username profileImage" })
+      .populate({ path: "to", select: "username profileImage" });
 
+    await Message.updateMany({ roomId, isRead: false }, { $set: { isRead: true } });
+
+    const unreadCount = await Message.countDocuments({ roomId, isRead: false });
+
+    const recipientSocketId = onlineUsers.get(admin);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("unreadCount", { unreadCount });
+      console.log('emitted')
+    }
     res.status(200).json(messages);
   } catch (error) {
     console.error("Error fetching messages:", error);
     res.status(500).json({ error: "Error fetching messages" });
+  }
+};
+
+// Get unread messages count for a specific room or user
+export const getUnreadMessagesCount = async (
+  req: Request,
+  res: any
+): Promise<void> => {
+  const { userId } = req.params;
+
+  // console.log({userId});
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const unreadCount = await Message.countDocuments({
+      to: userId,
+      isRead: false,
+    });
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    console.error("Error fetching unread messages count:", error);
+    res.status(500).json({ error: "Error fetching unread messages count" });
   }
 };

@@ -22,6 +22,13 @@ export const LoginAPI = async (reqBody: any) => {
   return await commonAPI("POST", `${SERVER_URL}/login`, reqBody);
 };
 
+// Refresh token API call
+export const RefreshTokenAPI = async (refreshToken: string) => {
+  return await axios.post(`${SERVER_URL}/refresh-token`, { refreshToken })
+    .then(res => res.data)
+    .catch(err => { throw err; });
+};
+
 // Google Api
 export const GoogleLoginAPI = async (reqBody: any) => {
   return await commonAPI("POST", `${SERVER_URL}/googleLogin`, reqBody);
@@ -644,3 +651,18 @@ export const getAllBookingsAPI = async (token: string) => {
 
 
 
+export const getUnreadMessagesCount = async (userId: string, token: string) => {
+  try {
+    const response = await commonAPI(
+      'GET',
+      `${SERVER_URL}/messages/unread-count/${userId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response; // return response as per your API structure
+  } catch (error) {
+    throw new Error('Failed to fetch unread messages count');
+  }
+};

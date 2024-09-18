@@ -1,9 +1,7 @@
 import {
   Button,
-  FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
   TextField,
 } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
@@ -20,7 +18,6 @@ import { auth } from "../firebase/firebase";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import EngineeringIcon from "@mui/icons-material/Engineering";
-import LoginBack from "../assets/Images/LoginBack.png";
 import { tokenAuthenticationContext } from "../ContextAPI/TokenAuth";
 
 interface AuthProps {
@@ -131,29 +128,35 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       setLoading(false); // Set loading to false after the process
     }
   };
-
   const handleLogin = async () => {
-    
     const { email, password } = user;
-    
+
     if (!validateForm(email, password)) return;
-    setLoading(true); // Set loading to true
+
+    setLoading(true);
 
     try {
       setOpen(true);
+
       const result = await LoginAPI(user);
 
       setOpen(false);
 
-      if (result && result.user && result.token) {
-        localStorage.setItem("token", result.token);
+
+      console.log(result);
+      
+
+      if (result && result.accessToken && result.refreshToken) {
+        // Save tokens in localStorage
+        localStorage.setItem("token", result.accessToken);
+        localStorage.setItem("refreshToken", result.refreshToken);
         localStorage.setItem("user", JSON.stringify(result.user));
 
         setIsAuthorized(true);
         setUser(result.user);
 
         toast.success("Login Successful!");
-        navigate("/");
+        navigate("/"); 
       } else {
         toast.error("Invalid login credentials. Please try again.");
       }
@@ -164,10 +167,8 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
         err.response?.data?.error ||
         "An error occurred during login. Please try again.";
       toast.error(errorMessage);
-
-      console.error("LoginAPI error:", err);
     } finally {
-      setLoading(false); // Set loading to false after the process
+      setLoading(false);
     }
   };
 
