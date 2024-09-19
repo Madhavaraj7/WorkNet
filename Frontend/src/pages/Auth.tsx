@@ -446,7 +446,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                   onClick={handleAdminLogin}
                   className="w-full text-white bg-gradient-to-r from-red-500 to-red-600 border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
                 >
-                  Admin
+                  Admin Login
                 </Button>
               </>
             )}
