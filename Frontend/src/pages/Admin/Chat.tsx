@@ -15,7 +15,7 @@ import ChatBox from "../Admin/Box";
 import io from "socket.io-client";
 import { SERVER_URL } from "../../Services/serverURL";
 
-const socket = io("http://localhost:3000"); // Your server URL
+const socket = io("https://worknet.onrender.com"); // Your server URL
 
 interface Room {
   _id: string;

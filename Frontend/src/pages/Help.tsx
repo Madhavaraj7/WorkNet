@@ -35,7 +35,7 @@ const Help: React.FC = () => {
   const admin = "66bb2bd548e166a70bce4c66"; // Admin ID
 
   useEffect(() => {
-    const socketConnection = io("http://localhost:3000", {
+    const socketConnection = io("https://worknet.onrender.com", {
       transports: ["websocket"],
       autoConnect: false,
     });
