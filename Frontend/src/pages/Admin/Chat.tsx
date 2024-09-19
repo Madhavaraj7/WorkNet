@@ -18,8 +18,8 @@ import { SERVER_URL } from "../../Services/serverURL";
 
 
 
-// const socket = io("https://worknet.onrender.com"); // Your server URL
-const socket = io("http://localhost:3000"); // for localhost
+const socket = io("https://worknet.onrender.com"); // Your server URL
+// const socket = io("http://localhost:3000"); // for localhost
 
 
 interface Room {
