@@ -36,7 +36,9 @@ export const io = new Server(httpServer, {
   cors: {
     origin: `${process.env.CLIENT_URL}`, // Adjust as necessary
     methods: ['GET', 'POST'], // Allowed methods
+
   },
+  
 });
 
 // Use Socket.IO handler
