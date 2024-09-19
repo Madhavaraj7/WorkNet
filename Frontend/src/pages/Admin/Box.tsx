@@ -4,7 +4,9 @@ import SendIcon from "@mui/icons-material/Send";
 import io from "socket.io-client";
 import { SERVER_URL } from "../../Services/serverURL";
 
-const socket = io("https://worknet.onrender.com"); // Your server URL
+// const socket = io("https://worknet.onrender.com"); // for production
+const socket = io("http://localhost:3000"); // for localhost
+
 
 interface Message {
   _id: string;

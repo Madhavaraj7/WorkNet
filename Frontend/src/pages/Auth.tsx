@@ -256,6 +256,10 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
     }
   };
 
+  const handleAdminLogin = () => {
+    navigate("/admin"); // Navigate to the admin route
+  };
+
   return (
     <>
       <Backdrop
@@ -447,6 +451,12 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                     Sign in with Google
                   </span>
                 </Button>
+                <Button
+                onClick={handleAdminLogin}
+                className="w-full text-white bg-gradient-to-r from-red-500 to-red-600 border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
+              >
+                Admin Login
+              </Button>
               </>
             )}
 
