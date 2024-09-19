@@ -1,6 +1,6 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { DNA } from 'react-loader-spinner';  // Import Dna from react-loader-spinner
+import { DNA } from "react-loader-spinner"; // Import Dna from react-loader-spinner
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import OtpPage from "./pages/OtpPage";
@@ -37,8 +37,8 @@ function App() {
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
-      setLoading(false); 
-    }, 1000); 
+      setLoading(false);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [location]);
@@ -50,15 +50,14 @@ function App() {
         <div className="flex justify-center items-center fixed inset-0 bg-white z-50">
           <DNA
             visible={true}
-            height="80"  
-            width="80"   
+            height="80"
+            width="80"
             ariaLabel="dna-loading"
             wrapperStyle={{}}
             wrapperClass="dna-wrapper"
           />
         </div>
       )}
-      
 
       {/* Toast notifications */}
       <ToastContainer
@@ -95,18 +94,19 @@ function App() {
           <Route path="/Help" element={<Help />} />
         </Route>
 
-        <Route path="/admin" element={<AdminAuth />} />
-        <Route element={<AdminPrivateRoute />}>
-          <Route element={<AdminLayout />}>
-            <Route path="/adhome" element={<AdHome />} />
-            <Route path="/adprofile" element={<AdProfile />} />
-            <Route path="/adusers" element={<AdUsers />} />
-            <Route path="/adapprove" element={<WorkerApprov />} />
-            <Route path="/adworkers" element={<AdWorkers />} />
-            <Route path="/adCategory" element={<AdCategory />} />
-            <Route path="/adreviews" element={<AdReviews />} />
-            <Route path="/adrevenue" element={<AdRevenue />} />
-            <Route path="/admessages" element={<Chat />} />
+        <Route path="/admin" element={<AdminAuth />}>
+          <Route element={<AdminPrivateRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="adhome" element={<AdHome />} />
+              <Route path="adprofile" element={<AdProfile />} />
+              <Route path="adusers" element={<AdUsers />} />
+              <Route path="adapprove" element={<WorkerApprov />} />
+              <Route path="adworkers" element={<AdWorkers />} />
+              <Route path="adCategory" element={<AdCategory />} />
+              <Route path="adreviews" element={<AdReviews />} />
+              <Route path="adrevenue" element={<AdRevenue />} />
+              <Route path="admessages" element={<Chat />} />
+            </Route>
           </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />
