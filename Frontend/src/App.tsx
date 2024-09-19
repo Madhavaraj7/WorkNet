@@ -94,19 +94,18 @@ function App() {
           <Route path="/Help" element={<Help />} />
         </Route>
 
-        <Route path="/admin" element={<AdminAuth />}>
-          <Route element={<AdminPrivateRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="adhome" element={<AdHome />} />
-              <Route path="adprofile" element={<AdProfile />} />
-              <Route path="adusers" element={<AdUsers />} />
-              <Route path="adapprove" element={<WorkerApprov />} />
-              <Route path="adworkers" element={<AdWorkers />} />
-              <Route path="adCategory" element={<AdCategory />} />
-              <Route path="adreviews" element={<AdReviews />} />
-              <Route path="adrevenue" element={<AdRevenue />} />
-              <Route path="admessages" element={<Chat />} />
-            </Route>
+        <Route path="/admin" element={<AdminAuth />} />
+        <Route element={<AdminPrivateRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/adhome" element={<AdHome />} />
+            <Route path="/adprofile" element={<AdProfile />} />
+            <Route path="/adusers" element={<AdUsers />} />
+            <Route path="/adapprove" element={<WorkerApprov />} />
+            <Route path="/adworkers" element={<AdWorkers />} />
+            <Route path="/adCategory" element={<AdCategory />} />
+            <Route path="/adreviews" element={<AdReviews />} />
+            <Route path="/adrevenue" element={<AdRevenue />} />
+            <Route path="/admessages" element={<Chat />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />

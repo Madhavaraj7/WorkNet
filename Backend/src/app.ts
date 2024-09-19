@@ -17,7 +17,7 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173', // Adjust as needed
+  origin: process.env.CLIENT_URL || '*', // Adjust as needed
 }));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
@@ -31,10 +31,13 @@ connectToDatabase();
 // Create an HTTP server
 const httpServer = createServer(app);
 
+
+
+
 // Initialize Socket.IO
 export const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173', // Adjust as needed
+    origin: process.env.CLIENT_URL || '*', // Adjust as needed
     methods: ['GET', 'POST'], // Allowed methods
   },
 });
