@@ -1,9 +1,4 @@
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Google from "../assets/Images/google.png";
@@ -95,7 +90,6 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
   };
 
   const handleSignUp = async () => {
-    
     const { username, email, password, profileImage } = user;
     if (!validateForm(email, password, username, profileImage)) return;
     setLoading(true); // Set loading to true
@@ -142,9 +136,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
 
       setOpen(false);
 
-
       console.log(result);
-      
 
       if (result && result.accessToken && result.refreshToken) {
         // Save tokens in localStorage
@@ -156,7 +148,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
         setUser(result.user);
 
         toast.success("Login Successful!");
-        navigate("/"); 
+        navigate("/");
       } else {
         toast.error("Invalid login credentials. Please try again.");
       }
@@ -178,10 +170,10 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       const result = await signInWithPopup(auth, provider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential?.accessToken;
-  
+
       // You can store the token in state or localStorage if needed
       if (token) {
-        localStorage.setItem('googleToken', token);
+        localStorage.setItem("googleToken", token);
       }
       setGoogleLogin({
         email: result.user.email!,
@@ -193,7 +185,6 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       toast.error("Google login failed. Please try again.");
     }
   };
-  
 
   const handleGoogleSignUp = async () => {
     if (googleLogin.email) {
@@ -452,11 +443,11 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                   </span>
                 </Button>
                 <Button
-                onClick={handleAdminLogin}
-                className="w-full text-white bg-gradient-to-r from-red-500 to-red-600 border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
-              >
-                Admin Login
-              </Button>
+                  onClick={handleAdminLogin}
+                  className="w-full text-white bg-gradient-to-r from-red-500 to-red-600 border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
+                >
+                  Admin
+                </Button>
               </>
             )}
 
