@@ -35,14 +35,13 @@ const httpServer = createServer(app);
 export const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || '*', // Adjust as needed
-    methods: ['GET', 'POST'], // Allowed methods
+    methods: ['GET', 'POST'], 
   },
 });
 
 // Use Socket.IO handler
 socketHandler(io);
 
-// Start server on Render's assigned port or a default
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
