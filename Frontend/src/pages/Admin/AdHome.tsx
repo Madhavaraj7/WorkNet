@@ -9,8 +9,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
+
 } from "recharts";
 import PersonIcon from "@mui/icons-material/Person";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -41,7 +40,7 @@ interface BookingTrend {
 
 const AdHome: React.FC = () => {
   const [allCounts, setAllCounts] = useState<AllCounts | null>(null);
-  const [dailyRevenue, setDailyRevenue] = useState<DailyRevenue[]>([]);
+  const [, setDailyRevenue] = useState<DailyRevenue[]>([]);
   const [bookingTrends, setBookingTrends] = useState<BookingTrend[]>([]);
 
   // Get the auth token

@@ -20,7 +20,6 @@ import {
   Pagination,
   Stack,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -30,13 +29,6 @@ import { toast } from "react-toastify";
 import CloseIcon from '@mui/icons-material/Close';
 
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
 
 interface Worker {
   _id: string;

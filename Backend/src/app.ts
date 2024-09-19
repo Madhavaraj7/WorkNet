@@ -19,7 +19,7 @@ dotenv.config();
 
 // Middleware setup
 app.use(cors({
-  origin: 'http://localhost:5173', // Adjust as necessary
+  origin: `${process.env.CLIENT_URL}`, // Adjust as necessary
 }));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
@@ -34,7 +34,7 @@ const httpServer = createServer(app);
 // Initialize Socket.IO
 export const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:5173', // Adjust as necessary
+    origin: `${process.env.CLIENT_URL}`, // Adjust as necessary
     methods: ['GET', 'POST'], // Allowed methods
   },
 });

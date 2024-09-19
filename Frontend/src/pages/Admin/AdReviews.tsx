@@ -21,19 +21,11 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getAllReviewsWithDetailsAPI, deleteReviewAPI } from "../../Services/allAPI";
 import { toast } from "react-toastify";
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
 
 interface Review {
   _id: string; 

@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react'
+import  { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react'
 
 interface AvarageResProps {
   children: ReactNode;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent, useContext } from "react";
+import  { useEffect, useState, ChangeEvent,  } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -27,7 +27,6 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { city } from "../assets/AllCities/Cities";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { tokenAuthenticationContext } from "../ContextAPI/TokenAuth";
 
 // interface IKycDocument {
 //   documentType: string;
@@ -56,7 +55,7 @@ interface RegisterData {
 function WorkerRegister() {
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState(false);
+  const [open] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]); // State to hold categories
 
@@ -86,8 +85,6 @@ function WorkerRegister() {
   const [cities, setCities] = useState<string[]>([]);
 
   const theme = useTheme();
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
 
   useEffect(() => {
     if (registerData.workImages.length > 0) {
@@ -100,14 +97,6 @@ function WorkerRegister() {
     }
   }, [registerData.workImages, registerData.registerImage]);
 
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
 
   // const categories = [
   //   "Plumbing",
@@ -157,12 +146,6 @@ function WorkerRegister() {
 
   const paymentModes = ["Cash", "Online"];
 
-  const getStyles = (name: string, personName: string[], theme: any) => ({
-    fontWeight:
-      personName.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  });
 
   const handleChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];

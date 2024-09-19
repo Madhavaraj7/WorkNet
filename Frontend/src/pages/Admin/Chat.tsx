@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   List,
@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import ChatBox from "../Admin/Box";
 import io from "socket.io-client";
+import { SERVER_URL } from "../../Services/serverURL";
 
 const socket = io("http://localhost:3000"); // Your server URL
 
@@ -31,7 +32,7 @@ function Chat() {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/users/rooms");
+        const response = await fetch(`${SERVER_URL}/rooms`);
         const data = await response.json();
         
         const sortedRooms = data.sort((a: Room, b: Room) => {

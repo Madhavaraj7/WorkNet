@@ -178,6 +178,11 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       const result = await signInWithPopup(auth, provider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential?.accessToken;
+  
+      // You can store the token in state or localStorage if needed
+      if (token) {
+        localStorage.setItem('googleToken', token);
+      }
       setGoogleLogin({
         email: result.user.email!,
         username: result.user.displayName!,
@@ -188,6 +193,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
       toast.error("Google login failed. Please try again.");
     }
   };
+  
 
   const handleGoogleSignUp = async () => {
     if (googleLogin.email) {

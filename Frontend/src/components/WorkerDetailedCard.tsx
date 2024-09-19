@@ -3,7 +3,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Rating from "@mui/material/Rating";
 import CallRoundedIcon from '@mui/icons-material/CallRounded';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { Button, Typography, Box } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { toast } from 'react-toastify';
 
 // Define types for workerDetails

@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
@@ -352,7 +350,7 @@ function Worker() {
   <Rating
     name="worker-rating"
     value={rating}
-    onChange={(event, newValue) => setRating(newValue)}
+    onChange={(_event, newValue) => setRating(newValue)}
     size="large"
     emptyIcon={<StarIcon fontSize="inherit" />}
   />;
@@ -747,7 +745,7 @@ function Worker() {
             <Rating
               name="worker-rating"
               value={rating}
-              onChange={(event, newValue) => setRating(newValue)}
+              onChange={(_event, newValue) => setRating(newValue)}
               size="large"
               icon={<StarIcon sx={{ color: "#fbc02d" }} />}
               emptyIcon={<StarIcon sx={{ color: "#e0e0e0" }} />}

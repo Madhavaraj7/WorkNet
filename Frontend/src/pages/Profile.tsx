@@ -94,7 +94,7 @@ function Profile() {
   const rowsPerPages = 5;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [page, setPage] = useState(0); // Current page index
   const rowsPerPage = 1; // Number of rows per page
 
@@ -178,9 +178,6 @@ function Profile() {
     "9 AM to 9 PM",
   ];
 
-  const navigateToDetailsPage = () => {
-    navigate("/updateWorker");
-  };
 
   const handleUpdate = async () => {
     const { username, profileImage, oldPassword, newPassword } = userProfile;
@@ -365,7 +362,6 @@ function Profile() {
       toast.error("An error occurred while creating the slot.");
     }
   };
-  const today = new Date().toISOString().split("T")[0];
 
   const formatDate = (dateString: string | number | Date) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -430,11 +426,6 @@ function Profile() {
   }, []);
 
   const totalPages = Math.ceil(appointments.length / rowsPerPages);
-  const startIndex = (currentPage - 1) * rowsPerPages;
-  const currentAppointments = appointments.slice(
-    startIndex,
-    startIndex + rowsPerPages
-  );
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {

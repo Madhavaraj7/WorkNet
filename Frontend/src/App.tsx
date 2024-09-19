@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { DNA } from 'react-loader-spinner';  // Import Dna from react-loader-spinner
 import Home from "./pages/Home";
@@ -19,17 +19,14 @@ import AdminLayout from "./components/Admin/AdminLayout";
 import WorkerRegister from "./pages/WorkerRegister";
 import WorkerApprov from "./pages/Admin/WorkerApprov";
 import AdWorkers from "./pages/Admin/AdWorkers";
-import UserEditableWorkCard from "./pages/UserEditableWorkCard";
 import Workers from "./pages/Workers";
 import Worker from "./pages/Worker";
 import AdCategory from "./pages/Admin/AdCategory";
-import Slots from "./pages/Slots";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import MyBooking from "./pages/MyBooking";
 import AdReviews from "./pages/Admin/AdReviews";
 import AdRevenue from "./pages/Admin/AdRevenue";
 import Help from "./pages/Help";
-import Admessages from "./pages/Admin/Admessages";
 import Chat from "./pages/Admin/Chat";
 import NotFoundPage from "./pages/NotFoundPage";
 
@@ -92,8 +89,6 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<WorkerRegister />} />
-          <Route path="/updateWorker" element={<UserEditableWorkCard />} />
-          <Route path="/create-slots" element={<Slots />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/myBooking" element={<MyBooking />} />
           <Route path="/Help" element={<Help />} />

@@ -1,7 +1,7 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { Link } from "react-router-dom";
-import { Button, Tooltip } from "@mui/material";
+import { Button } from "@mui/material";
 
 interface Category {
   name: string;
