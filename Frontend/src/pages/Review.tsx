@@ -59,7 +59,7 @@ const WorkerReviews: React.FC = () => {
     fetchReviews();
   }, [wId, token]);
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
   };
 

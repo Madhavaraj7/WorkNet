@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, TextField, CircularProgress, Avatar } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { updateAdminProfileAPI } from "../../Services/allAPI"; 
-import { SERVER_URL } from "../../Services/serverURL"; 
 import { toast } from "react-toastify";
 import AdHeader from '../../components/Admin/AdHeader';
 

@@ -21,7 +21,6 @@ import {
   Stack,
   Pagination,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -32,13 +31,6 @@ import {
 } from "../../Services/allAPI";
 import { toast } from "react-toastify";
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
 
 interface User {
   _id: string;

@@ -119,11 +119,6 @@ const MyBooking: React.FC = () => {
   };
 
   // Helper function to check if a date is in the past
-  const isPastDate = (dateString: string): boolean => {
-    const bookingDate = new Date(dateString);
-    const now = new Date();
-    return bookingDate < now;
-  };
 
   const handleOpenModal = (bookingId: string) => {
     setSelectedBookingId(bookingId);
@@ -393,7 +388,7 @@ const MyBooking: React.FC = () => {
                     <Pagination
                       count={totalWalletPages}
                       page={walletPage}
-                      onChange={(event, value) => setWalletPage(value)}
+                      onChange={(_event, value) => setWalletPage(value)}
                       color="primary"
                     />
                   </Stack>

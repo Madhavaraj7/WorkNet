@@ -15,7 +15,6 @@ import {
   Modal,
   IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
@@ -26,13 +25,6 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import { toast } from "react-toastify";
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
 
 interface Worker {
   _id: string;

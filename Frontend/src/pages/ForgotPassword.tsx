@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ForgotPasswordAPI, VerifyResetPasswordAPI } from "../Services/allAPI";
 import Header from "../components/Header";

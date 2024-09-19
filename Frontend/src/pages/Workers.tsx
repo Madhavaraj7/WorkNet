@@ -6,11 +6,9 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { Alert, Pagination, Stack, Button, InputAdornment, TextField } from "@mui/material";
 import { city } from "../assets/AllCities/Cities";
-import SearchIcon from '@mui/icons-material/Search';
 import { Search } from "@mui/icons-material";
 
 
-const states = Array.from(new Set(city.map((city) => city.state)));
 
 const Workers: React.FC = () => {
   const [workers, setWorkers] = useState<Worker[]>([]);

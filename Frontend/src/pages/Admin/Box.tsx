@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Avatar, Button, TextField, Paper, Typography, Box as MuiBox } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import io from "socket.io-client";
+import { SERVER_URL } from "../../Services/serverURL";
 
 const socket = io("http://localhost:3000"); // Your server URL
 
@@ -44,7 +45,7 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
 
       const fetchMessages = async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/users/messages/${selectedConversation._id}`);
+          const response = await fetch(`${SERVER_URL}/messages/${selectedConversation._id}`);
           const data = await response.json();
           setMessages(data);
         } catch (error) {
@@ -82,7 +83,7 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
       setMessage("");
 
       try {
-        const response = await fetch("http://localhost:3000/api/users/message", {
+        const response = await fetch(`${SERVER_URL}/message`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

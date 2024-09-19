@@ -19,18 +19,10 @@ import {
   Pagination,
   InputAdornment,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { Search } from '@mui/icons-material';
 import { getAdminCategoriesAPI, addCategoryAPI, editCategoryAPI } from '../../Services/allAPI';
 import { toast } from 'react-toastify';
 
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
 
 interface Category {
   _id: string;
@@ -287,7 +279,7 @@ const AdCategory: React.FC = () => {
         <Pagination
           count={totalPages}
           page={page}
-          onChange={(e, value) => setPage(value)}
+          onChange={(_e, value) => setPage(value)}
           color="primary"
         />
       </Box>
