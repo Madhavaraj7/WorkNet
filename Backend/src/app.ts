@@ -31,6 +31,7 @@ connectToDatabase();
 // Create an HTTP server
 const httpServer = createServer(app);
 
+
 // Initialize Socket.IO
 export const io = new Server(httpServer, {
   cors: {
@@ -38,7 +39,7 @@ export const io = new Server(httpServer, {
     methods: ['GET', 'POST'], // Allowed methods
 
   },
-  
+
 });
 
 // Use Socket.IO handler
