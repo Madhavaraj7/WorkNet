@@ -26,7 +26,7 @@ import { io } from "socket.io-client";
 import { getUnreadMessagesCount } from "../../Services/allAPI";
 
 // Initialize socket connection
-const socket = io("http://localhost:3000");
+const socket = io("https://worknet.onrender.com");
 
 const drawerWidth = 240;
 
