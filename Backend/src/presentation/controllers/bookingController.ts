@@ -43,8 +43,8 @@ export const createBooking = async (req: CustomRequest, res: Response) => {
               quantity: 1,
           }],
           mode: 'payment',
-          success_url: `https://work-net-seven.vercel.app/payment-success?session_id={CHECKOUT_SESSION_ID}`, 
-          cancel_url: `https://work-net-seven.vercel.app/cancel`,
+          success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`, 
+          cancel_url: `${process.env.CLIENT_URL}/cancel`,
           customer_email: customerEmail,
           shipping_address_collection: {
               allowed_countries: ['IN'],
