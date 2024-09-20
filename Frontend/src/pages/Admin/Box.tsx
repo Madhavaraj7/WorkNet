@@ -173,28 +173,39 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
       </MuiBox>
 
       <MuiBox className="flex items-center p-4 bg-gray-100 border-t border-gray-300">
-        <TextField
-          fullWidth
-          label="Type your message"
-          variant="outlined"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleAdminMessageSend();
-            }
-          }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleAdminMessageSend}
-          startIcon={<SendIcon />}
-          className="ml-2"
-        >
-          Send
-        </Button>
-      </MuiBox>
+  <TextField
+    fullWidth
+    label="Type your message"
+    variant="outlined"
+    value={message}
+    onChange={(e) => setMessage(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        handleAdminMessageSend();
+      }
+    }}
+    multiline
+    rows={1}
+    className="bg-white rounded-xl shadow-md"
+    InputProps={{
+      style: {
+        padding: "12px 18px",
+        borderRadius: "16px",
+        backgroundColor: "#f5f5f5",
+      },
+    }}
+  />
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={handleAdminMessageSend}
+    startIcon={<SendIcon />}
+    className="ml-2 rounded-xl shadow-md"
+  >
+    Send
+  </Button>
+</MuiBox>
+
     </Paper>
   );
 }
