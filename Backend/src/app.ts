@@ -32,9 +32,6 @@ connectToDatabase();
 // Create an HTTP server
 const httpServer = createServer(app);
 
-
-
-
 // Initialize Socket.IO
 export const io = new Server(httpServer, {
   cors: {
@@ -46,15 +43,16 @@ export const io = new Server(httpServer, {
 // Use Socket.IO handler
 socketHandler(io);
 
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  // Correct path to the Frontend build folder
+  app.use(express.static(path.join(__dirname, '../../Frontend/build')));
 
-//production code
-
-app.use(express.static(path.join(__dirname, 'Frontend/build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'Frontend', 'build', 'index.html'));
-});
-
+  // All other routes serve the React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../../Frontend', 'build', 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
