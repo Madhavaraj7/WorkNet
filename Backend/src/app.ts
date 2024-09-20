@@ -8,6 +8,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { socketHandler } from './presentation/socket/chat';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -47,6 +48,13 @@ socketHandler(io);
 
 
 //production code
+
+app.use(express.static(path.join(__dirname, 'Frontend/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'Frontend', 'build', 'index.html'));
+});
+
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
