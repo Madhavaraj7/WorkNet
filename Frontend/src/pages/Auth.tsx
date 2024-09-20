@@ -136,7 +136,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
 
       setOpen(false);
 
-      console.log(result);
+      console.log("hello",result);
 
       if (result && result.accessToken && result.refreshToken) {
         // Save tokens in localStorage
