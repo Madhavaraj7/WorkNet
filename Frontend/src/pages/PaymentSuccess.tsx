@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { SERVER_URL } from "../Services/serverURL";
+import { SERVER_URLFORPAYMENT } from "../Services/serverURL";
 import { toast } from "react-toastify";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -31,7 +31,7 @@ const PaymentSuccess = () => {
 
       try {
         const response = await fetch(
-          `${SERVER_URL}/payments/confirm?session_id=${sessionId}`,
+          `${SERVER_URLFORPAYMENT}/payments/confirm?session_id=${sessionId}`,
           {
             method: "POST",
             headers: {
