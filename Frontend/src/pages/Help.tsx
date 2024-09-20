@@ -185,15 +185,14 @@ const Help: React.FC = () => {
   <Header />
   <br />
   <br />
-  
   <div className="my-8"></div>
-  
+
   <div
-    className="flex flex-col mx-auto bg-white shadow-2xl rounded-lg"
-    style={{ width: "90%", maxWidth: "600px", height: "600px" }} // Fixed width and height
+    className="flex flex-col mx-auto bg-white shadow-xl rounded-lg"
+    style={{ width: "90%", maxWidth: "600px", height: "80vh" }} // Set height relative to viewport for a responsive layout
   >
     {/* Chat Header */}
-    <div className="h-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white flex justify-between items-center px-4 border-b border-indigo-700 rounded-t-lg shadow-lg">
+    <div className="h-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex justify-between items-center px-4 border-b border-indigo-700 rounded-t-lg shadow-lg">
       <div className="flex items-center space-x-3">
         <Avatar src={Admin} sx={{ width: 48, height: 48 }} />
         <p className="text-lg font-semibold flex items-center space-x-1">
@@ -238,8 +237,8 @@ const Help: React.FC = () => {
       </div>
     </div>
 
-    {/* Chat Input Fixed at Bottom */}
-    <div className="p-4 border-t border-gray-300 bg-gradient-to-r from-white to-gray-50 rounded-b-lg shadow-lg flex items-center space-x-4 fixed bottom-0 w-full" style={{ maxWidth: "600px", left: "50%", transform: "translateX(-50%)" }}>
+    {/* Chat Input */}
+    <div className="p-4 border-t border-gray-300 bg-white rounded-b-lg shadow-lg flex items-center space-x-4">
       <TextField
         value={message}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
@@ -272,6 +271,7 @@ const Help: React.FC = () => {
   <div className="my-8"></div>
   <Footer />
 </>
+
 
 
   );
