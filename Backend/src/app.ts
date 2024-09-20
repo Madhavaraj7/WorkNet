@@ -45,6 +45,9 @@ export const io = new Server(httpServer, {
 // Use Socket.IO handler
 socketHandler(io);
 
+
+//production code
+
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
