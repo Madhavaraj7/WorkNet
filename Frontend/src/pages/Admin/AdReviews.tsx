@@ -167,9 +167,9 @@ const AdReviews: React.FC = () => {
             <TableRow>
               {[
                 "#",
-                "Worker Name",
                 "User Profile",
-                "Username",
+                "User Profile",
+                "Worker name",
                 "Rating",
                 "Feedback",
                 "Created At",
