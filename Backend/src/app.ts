@@ -8,7 +8,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { socketHandler } from './presentation/socket/chat';
 import dotenv from 'dotenv';
-import path from 'path';
+// import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -43,16 +43,16 @@ export const io = new Server(httpServer, {
 // Use Socket.IO handler
 socketHandler(io);
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  // Correct path to the Frontend build folder
-  app.use(express.static(path.join(__dirname, '../../Frontend/build')));
+// // Serve static files in production
+// if (process.env.NODE_ENV === 'production') {
+//   // Correct path to the Frontend build folder
+//   app.use(express.static(path.join(__dirname, '../../Frontend/build')));
 
-  // All other routes serve the React app
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../../Frontend', 'build', 'index.html'));
-  });
-}
+//   // All other routes serve the React app
+//   app.get('*', (req, res) => {
+//     res.sendFile(path.resolve(__dirname, '../../Frontend', 'build', 'index.html'));
+//   });
+// }
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
