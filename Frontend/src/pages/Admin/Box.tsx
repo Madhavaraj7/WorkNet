@@ -5,7 +5,7 @@ import io from "socket.io-client";
 import { SERVER_URL } from "../../Services/serverURL";
 
 // const socket = io("https://worknet.onrender.com"); // for production
-const socket = io("http://worknet.solutions"); // for localhost
+const socket = io("https://worknet.solutions"); // for localhost
 // 
 
 interface Message {
