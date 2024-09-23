@@ -41,7 +41,7 @@ const Help: React.FC = () => {
   //   });
 
   useEffect(() => {
-    const socketConnection = io("http://localhost:3000", {
+    const socketConnection = io("http://worknet.solutions", {
       transports: ["websocket"],
       autoConnect: false,
     });

@@ -1,0 +1,84 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const multer_1 = __importDefault(require("multer"));
+const userController_1 = require("../controllers/userController");
+const adminController_1 = require("../controllers/adminController");
+// const jwtMiddleware = require('../../MiddleWare/jwt')
+const jwt_1 = __importDefault(require("../MiddleWare/jwt"));
+const workerRoleMiddleware_1 = __importDefault(require("../MiddleWare/workerRoleMiddleware"));
+const AdJwt_1 = __importDefault(require("../MiddleWare/AdJwt"));
+const multerConfig_1 = require("../MiddleWare/multerConfig");
+const workerController_1 = require("../controllers/workerController");
+const checkUserStatusMiddleware_1 = __importDefault(require("../MiddleWare/checkUserStatusMiddleware"));
+const slotController_1 = require("../controllers/slotController");
+const bookingController_1 = require("../controllers/bookingController");
+const paymentController_1 = require("../controllers/paymentController");
+// import { handleStripeWebhook } from "../controllers/stripeWebhookController";
+const reviewController_1 = require("../controllers/reviewController");
+const walletController_1 = require("../controllers/walletController");
+const chatController_1 = require("../controllers/chatController");
+const tokenController_1 = require("../controllers/tokenController");
+const router = express_1.default.Router();
+// Configure multer storage
+const storage = multer_1.default.memoryStorage();
+const upload = (0, multer_1.default)({ storage });
+// user Routes
+router.post("/signUp", upload.single("profileImage"), userController_1.register);
+router.post("/verifyOtp", userController_1.verifyOtp);
+router.post("/resendOtp", userController_1.resendOtp);
+router.post("/login", userController_1.login);
+router.post("/refresh-token", tokenController_1.refreshToken);
+router.post("/googleLogin", userController_1.googleLoginHandler);
+router.put("/profile", jwt_1.default, checkUserStatusMiddleware_1.default, upload.single("profileImage"), userController_1.updateProfile);
+router.post("/forgotPassword", userController_1.forgotPasswordHandler);
+router.post("/resetPassword", userController_1.resetPasswordHandler);
+router.get("/getWorkers", workerController_1.getWorkersController);
+router.get("/worker/:wId", workerController_1.getWorkerController);
+router.get("/categories", userController_1.getCategoriesController);
+router.get('/worker/:wId/slots', jwt_1.default, checkUserStatusMiddleware_1.default, userController_1.getSlotsByWorkerIdController);
+router.post('/bookings', jwt_1.default, bookingController_1.createBooking);
+router.post('/payments/confirm', jwt_1.default, paymentController_1.confirmPayment);
+router.get('/user/booked-workers', jwt_1.default, userController_1.getUserBookedWorkersController);
+router.post('/reviews', jwt_1.default, reviewController_1.postReview);
+router.get('/reviews/:workerId', reviewController_1.getReviews);
+router.get('/wallet/balance', jwt_1.default, walletController_1.getWalletBalance);
+router.post('/cancel/:bookingId', jwt_1.default, bookingController_1.cancelBookingController);
+router.post('/walletBooking', jwt_1.default, bookingController_1.createBookingController);
+//worker Routes
+router.post("/register", jwt_1.default, multerConfig_1.uploadMiddleware, checkUserStatusMiddleware_1.default, workerController_1.registerWorkerController);
+router.get("/getUserWorkDetails", jwt_1.default, checkUserStatusMiddleware_1.default, workerController_1.getLoginedUserWorksController);
+//update worker profile pending
+router.put("/updateWorker", jwt_1.default, multerConfig_1.uploadMiddleware, workerController_1.updateWorkerController);
+router.post("/create-slot", workerRoleMiddleware_1.default, slotController_1.createSlotController);
+router.get("/slots", workerRoleMiddleware_1.default, slotController_1.getSlotsByWorkerController);
+router.get("/appointments", workerRoleMiddleware_1.default, workerController_1.getWorkerAppointmentsController);
+// admin Routes
+router.post("/adminLogin", adminController_1.adminlogin);
+router.put("/adprofile", AdJwt_1.default, upload.single("profileImage"), adminController_1.adminupdateProfile);
+router.get("/getAllUsers", AdJwt_1.default, adminController_1.getUsersList);
+router.put("/blockUser/:id", AdJwt_1.default, adminController_1.blockUserController);
+router.put("/unblockUser/:id", AdJwt_1.default, adminController_1.unblockUserController);
+router.get("/getAllWorkers", AdJwt_1.default, adminController_1.getAllWorkersController);
+router.put("/updateWorkerStatus/:id", AdJwt_1.default, adminController_1.updateWorkerStatusController);
+router.put("/blockWorker/:id", AdJwt_1.default, workerController_1.blockWorkerController);
+router.put("/unblockWorker/:id", AdJwt_1.default, workerController_1.unblockWorkerController);
+router.delete("/deleteWorker/:id", AdJwt_1.default, adminController_1.deleteWorkerController);
+router.get("/Adcategories", AdJwt_1.default, userController_1.getCategoriesController);
+router.post("/categories", AdJwt_1.default, adminController_1.addCategoryController);
+router.put("/editCategory/:id", AdJwt_1.default, adminController_1.editCategoryController);
+router.get('/Adreviews', AdJwt_1.default, adminController_1.getAllReviewsWithDetailsController);
+router.delete("/review/:id", AdJwt_1.default, adminController_1.deleteReviewController);
+router.get('/counts', AdJwt_1.default, adminController_1.getAllCounts);
+router.get('/booking-trends', AdJwt_1.default, adminController_1.getBookingTrendsController);
+router.get('/revenue', AdJwt_1.default, adminController_1.getDailyRevenue);
+router.get('/bookings', AdJwt_1.default, adminController_1.getAllBookings);
+router.get('/messages/unread-count/:userId', AdJwt_1.default, chatController_1.getUnreadMessagesCount);
+router.post('/room', chatController_1.createRoom);
+router.post('/message', chatController_1.sendMessage);
+router.get('/rooms', chatController_1.getRooms);
+router.get('/messages/:roomId', chatController_1.getMessages);
+exports.default = router;
