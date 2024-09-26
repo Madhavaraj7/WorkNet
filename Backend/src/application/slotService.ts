@@ -1,15 +1,16 @@
 import { createSlot, findSlotByWorkerAndDate, getSlotsByWorkerIdFromRepo } from '../infrastructure/slotRepository';
 import { ISlot } from '../domain/slot';
 import mongoose from 'mongoose';
+
+
+// Create slots for a worker within a specified date range, ensuring they don't overlap
 export const createWorkerSlots = async (workerId: string, startDate: Date, endDate: Date): Promise<ISlot[]> => {
   const slots: ISlot[] = [];
   const workerObjectId = new mongoose.Types.ObjectId(workerId);
 
-  // Get today's date and set the time to 00:00:00 for accurate comparison
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Ensure the startDate is at least tomorrow's date
   const start = new Date(startDate);
   if (start <= today) {
     throw new Error("Start date must be tomorrow or a future date.");
@@ -39,7 +40,7 @@ export const createWorkerSlots = async (workerId: string, startDate: Date, endDa
   return slots;
 };
 
-
+// Fetch all slots for a specific worker by their ID
 export const getSlotsByWorkerId = async (workerId: string): Promise<ISlot[]> => {
   const workerObjectId = new mongoose.Types.ObjectId(workerId);
   return await getSlotsByWorkerIdFromRepo(workerObjectId);

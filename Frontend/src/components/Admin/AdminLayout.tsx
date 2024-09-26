@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import AdHeader from './AdHeader'; // Adjust the path as needed
+import AdHeader from './AdHeader'; 
 
 const AdminLayout: React.FC = () => {
   return (

@@ -10,7 +10,6 @@ export const createRoom = async (req: Request, res: any): Promise<void> => {
   const { userId }: { userId: string } = req.body;
 
   try {
-    // Validate IDs
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
     }
@@ -35,7 +34,9 @@ export const sendMessage = async (req: Request, res: any): Promise<void> => {
 
   try {
     if (!roomId || !from || !to || !message) {
-      return res.status(400).json({ error: "Room ID, From, To, and Message are required" });
+      return res
+        .status(400)
+        .json({ error: "Room ID, From, To, and Message are required" });
     }
 
     const newMessage = new Message({ roomId, from, to, message });
@@ -49,7 +50,6 @@ export const sendMessage = async (req: Request, res: any): Promise<void> => {
 
     io.to(roomId).emit("message", latestMsg);
 
-    // Update unread count for the recipient
     const unreadCount = await Message.countDocuments({ to, isRead: false });
 
     const recipientSocketId = onlineUsers.get(to);
@@ -73,10 +73,10 @@ export const getRooms = async (req: Request, res: Response): Promise<void> => {
         select: "_id username profileImage",
       })
       .populate({
-        path: "latestMessage", 
+        path: "latestMessage",
         select: "message createdAt",
       })
-      .sort({ "latestMessage.createdAt": -1 }); 
+      .sort({ "latestMessage.createdAt": -1 });
 
     res.status(200).json(rooms);
   } catch (error) {
@@ -89,8 +89,7 @@ export const getRooms = async (req: Request, res: Response): Promise<void> => {
 
 export const getMessages = async (req: Request, res: any): Promise<void> => {
   const { roomId } = req.params;
-  const admin = "66bb2bd548e166a70bce4c66"; // Admin user ID
-
+  const admin = "66bb2bd548e166a70bce4c66";
 
   try {
     if (!roomId) {
@@ -101,14 +100,17 @@ export const getMessages = async (req: Request, res: any): Promise<void> => {
       .populate({ path: "from", select: "username profileImage" })
       .populate({ path: "to", select: "username profileImage" });
 
-    await Message.updateMany({ roomId, isRead: false }, { $set: { isRead: true } });
+    await Message.updateMany(
+      { roomId, isRead: false },
+      { $set: { isRead: true } }
+    );
 
     const unreadCount = await Message.countDocuments({ roomId, isRead: false });
 
     const recipientSocketId = onlineUsers.get(admin);
     if (recipientSocketId) {
       io.to(recipientSocketId).emit("unreadCount", { unreadCount });
-      console.log('emitted')
+      console.log("emitted");
     }
     res.status(200).json(messages);
   } catch (error) {
@@ -124,8 +126,6 @@ export const getUnreadMessagesCount = async (
 ): Promise<void> => {
   const { userId } = req.params;
 
-  // console.log({userId});
-
   try {
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
@@ -140,5 +140,34 @@ export const getUnreadMessagesCount = async (
   } catch (error) {
     console.error("Error fetching unread messages count:", error);
     res.status(500).json({ error: "Error fetching unread messages count" });
+  }
+};
+
+// Get unread messages count from admin for a specific user
+export const getUnreadMessagesFromAdmin = async (
+  req: Request,
+  res: any
+): Promise<void> => {
+  const { userId } = req.params;
+  const adminId = "66bb2bd548e166a70bce4c66";
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const unreadCount = await Message.countDocuments({
+      to: userId,
+      from: adminId,
+      isRead: false,
+    });
+
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    console.error("Error fetching unread messages count from admin:", error);
+    res
+      .status(500)
+      .json({ error: "Error fetching unread messages count from admin" });
   }
 };

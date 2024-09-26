@@ -10,7 +10,7 @@ import {
 import { updateUserProfile as updateUserProfileRepo } from "../infrastructure/userRepository";
 import { sendEmail } from "../utils/sendEmail";
 import { User } from "../domain/user";
-import { otpGenerator } from "../utils/otpGenerator"; // Make sure this function generates OTPs
+import { otpGenerator } from "../utils/otpGenerator"; 
 import { Slot } from "../domain/slot";
 import { Booking } from "../domain/booking";
 
@@ -18,7 +18,6 @@ import { Booking } from "../domain/booking";
 export const registerUser = async (user: User) => {
   try {
     const existingUser = await findUserByEmail(user.email);
-    // console.log(existingUser);
 
     if (existingUser) {
       if (existingUser.otpVerified) {
@@ -88,6 +87,8 @@ export const googleLogin = async ({
   }
 };
 
+
+// Verify OTP and save the user
 export const verifyAndSaveUser = async (email: string, otp: string) => {
   const user = await findUserByEmail(email);
   if (user && user.otp === otp) {
@@ -99,6 +100,7 @@ export const verifyAndSaveUser = async (email: string, otp: string) => {
   throw new Error("Invalid OTP");
 };
 
+// Update user OTP
 export const updateUserOtp = async (email: string, otp: string) => {
   const user = await findUserByEmail(email);
   if (!user) {
@@ -110,15 +112,16 @@ export const updateUserOtp = async (email: string, otp: string) => {
 
 
 // login the user
-// Function to generate tokens
 const generateAccessToken = (userId: string) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET_KEY!, { expiresIn: "1h" });
 };
 
+// Refresh the access token using a refresh token
 const generateRefreshToken = (userId: string) => {
   return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET_KEY!, { expiresIn: "7d" });
 };
 
+// Login the user
 export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmail(email);
 
@@ -147,6 +150,7 @@ export const loginUser = async (email: string, password: string) => {
   return { user, accessToken, refreshToken };
 };
 
+// Refresh the access token using a refresh token
 export const refreshAccessToken = async (refreshToken: string) => {
   try {
     // Verify refresh token
@@ -158,25 +162,23 @@ export const refreshAccessToken = async (refreshToken: string) => {
       throw new Error("User not found");
     }
 
-    // Generate a new access token
     const newAccessToken = generateAccessToken(userId);
 
-    // Return new access token
     return { accessToken: newAccessToken };
   } catch (error) {
     throw new Error("Invalid or expired refresh token");
   }
 };
 
+
+// Update user profile
 export const updateUserProfile = async (
   userId: string,
   update: Partial<User>
 ) => {
   try {
-    console.log("userId:", userId);
-    // console.log('update:', update);
+    
     const updatedUser = await updateUserProfileRepo(userId, update);
-    // console.log(updateUser);
 
     if (!updatedUser) {
       throw new Error("User not found");
@@ -188,6 +190,7 @@ export const updateUserProfile = async (
   }
 };
 
+// Handle forgot password
 export const forgotPassword = async (email: string) => {
   try {
     const user = await findUserByEmail(email);
@@ -233,10 +236,12 @@ export const resetPassword = async (
   }
 };
 
+// Fetch all categories
 export const fetchAllCategories = async () => {
   return getAllCategories();
 };
 
+// Get available slots by worker ID
 export const getSlotsByWorkerIdService = async (workerId: string) => {
   try {
     const today = new Date();
@@ -254,6 +259,7 @@ export const getSlotsByWorkerIdService = async (workerId: string) => {
   }
 };
 
+// Get confirmed bookings for a user
 export const getUserBookedWorkers = async (userId: string) => {
   return Booking.find({ userId, status: "Confirmed" })
     .populate({
@@ -262,7 +268,7 @@ export const getUserBookedWorkers = async (userId: string) => {
     })
     .populate({
       path: "slotId",
-      select: "date", // Select the slotted date from the Slot schema
+      select: "date", 
     })
     .sort({ createdAt: -1 }) 
     .exec();

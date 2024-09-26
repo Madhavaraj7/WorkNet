@@ -20,7 +20,6 @@ function AdProfile() {
   });
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch previous image from localStorage (assuming it's a URL)
   useEffect(() => {
     const previousProfileImage = JSON.parse(localStorage.getItem("admin") || "{}")?.profileImage;
     if (previousProfileImage) {

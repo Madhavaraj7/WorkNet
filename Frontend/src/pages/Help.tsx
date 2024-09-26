@@ -35,13 +35,13 @@ const Help: React.FC = () => {
   const admin = "66bb2bd548e166a70bce4c66"; // Admin ID
 
   // useEffect(() => {
-  //   const socketConnection = io("https://worknet.onrender.com", {
+  //   const socketConnection = io("http://localhost:3000", {
   //     transports: ["websocket"],
   //     autoConnect: false,
   //   });
 
   useEffect(() => {
-    const socketConnection = io("https://worknet.solutions", {
+    const socketConnection = io("https://worknet.solutions", {            // for prodcution
       transports: ["websocket"],
       autoConnect: false,
     });
@@ -50,12 +50,10 @@ const Help: React.FC = () => {
     socketConnection.connect();
     setSocket(socketConnection);
 
-    // Emit user online status when user connects
     socketConnection.emit("userOnline", userId);
 
     return () => {
       if (socketConnection) {
-        // Emit user offline status when user disconnects
         socketConnection.emit("userOffline", userId);
         socketConnection.disconnect();
       }
@@ -90,7 +88,7 @@ const Help: React.FC = () => {
 
   useEffect(() => {
     if (userId) {
-      createOrFindRoom(); // Create or find the room once the userId is set
+      createOrFindRoom(); 
     }
   }, [userId]);
 
@@ -100,7 +98,9 @@ const Help: React.FC = () => {
 
       if (socket) {
         socket.emit("joinRoom", roomId);
+        
       }
+      
     }
   }, [roomId, socket]);
 
@@ -116,7 +116,7 @@ const Help: React.FC = () => {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
-      setRoomId(data.roomId); // Set the room ID once it's created/found
+      setRoomId(data.roomId); 
     } catch (error) {
       console.error("Error creating or finding room:", error);
     }
@@ -141,6 +141,10 @@ const Help: React.FC = () => {
       }
     }
   };
+
+  
+
+
 
   const handleUserMessageSend = async () => {
     if (message.trim()) {

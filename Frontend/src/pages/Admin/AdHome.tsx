@@ -9,7 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-
 } from "recharts";
 import PersonIcon from "@mui/icons-material/Person";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -19,7 +18,7 @@ import {
   getAllCountsAPI,
   getDailyRevenueAPI,
   getBookingTrendsAPI,
-} from "../../Services/allAPI"; // Updated import
+} from "../../Services/allAPI"; 
 
 // Types
 interface AllCounts {
@@ -43,35 +42,29 @@ const AdHome: React.FC = () => {
   const [, setDailyRevenue] = useState<DailyRevenue[]>([]);
   const [bookingTrends, setBookingTrends] = useState<BookingTrend[]>([]);
 
-  // Get the auth token
   const token = localStorage.getItem("adtoken") || "";
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
 
-  // Data for the bar chart comparing Users and Workers
   const userWorkerData = [
     { name: "Users", count: allCounts?.usersCount || 0 },
     { name: "Workers", count: allCounts?.workersCount || 0 },
   ];
 
-  // Helper function to format day as string (e.g., 1, 2, 3)
   const formatDay = (day: number): string => {
     return day < 10 ? `0${day}` : `${day}`;
   };
 
-  // Fetch counts and daily revenue data from API
   const getAllCountsAndRevenue = async () => {
     try {
       const countsResult = await getAllCountsAPI(token);
       console.log("Counts Data:", countsResult);
 
-      // Fetch daily revenue
       const today = now.getDate();
       const revenueResult = await getDailyRevenueAPI(year, month, today, token);
       console.log("Daily Revenue Data:", revenueResult);
 
-      // Set data into state
       if (countsResult) setAllCounts(countsResult);
       if (revenueResult) {
         const formattedRevenueData = revenueResult.map(
@@ -106,7 +99,6 @@ const AdHome: React.FC = () => {
     }
   };
 
-  // UseEffect hook to fetch data on component mount
   useEffect(() => {
     getAllCountsAndRevenue();
     getBookingTrends();

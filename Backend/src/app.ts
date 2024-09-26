@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import allRoutes from './presentation/routes/allRoutes'; // Make sure this import is correct
+import allRoutes from './presentation/routes/allRoutes'; 
 import { connectToDatabase } from './config';
 import morgan from 'morgan';
 import { createServer } from 'http';
@@ -18,13 +18,13 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*', // Adjust as needed
+  origin: process.env.CLIENT_URL || '*', 
 }));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
 // Routes setup
-app.use('/api/users', allRoutes); // Ensure this is a valid middleware function
+app.use('/api/users', allRoutes); 
 
 // Connect to the database
 connectToDatabase();
@@ -35,8 +35,8 @@ const httpServer = createServer(app);
 // Initialize Socket.IO
 export const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || '*', // Adjust as needed
-    methods: ['GET', 'POST'], // Allowed methods
+    origin: process.env.CLIENT_URL || '*', 
+    methods: ['GET', 'POST'], 
   },
 });
 

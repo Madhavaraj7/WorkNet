@@ -23,30 +23,22 @@ const workerRoleMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 
         return res.status(401).json({ error: 'No token provided' });
     }
     try {
-        // Verify the JWT token
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET_KEY);
-        console.log('Decoded token:', decoded); // Debugging line
-        // Validate the userId format
         if (!mongoose_1.default.Types.ObjectId.isValid(decoded.userId)) {
             return res.status(400).json({ error: 'Invalid userId format' });
         }
-        // Find the user by ID
         const user = yield (0, userRepository_1.findUserById)(decoded.userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        // Check if the user's role is 'worker'
         if (user.role !== 'worker') {
             return res.status(403).json({ error: 'Unauthorized: Access restricted to workers only' });
         }
-        // Find the worker associated with the userId
         const worker = yield worker_1.Worker.findOne({ userId: decoded.userId });
         if (!worker) {
             return res.status(404).json({ error: 'Worker profile not found' });
         }
-        // Set workerId in the request object
         req.workerId = worker._id;
-        // Proceed to the next middleware or route handler
         next();
     }
     catch (error) {

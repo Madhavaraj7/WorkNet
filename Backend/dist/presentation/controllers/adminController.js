@@ -69,7 +69,6 @@ const adminupdateProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         const { username, email } = req.body;
         const profileImage = req.file ? req.file.buffer : null;
-        console.log(profileImage);
         let profileImageUrl = "";
         const proceedWithUpdate = () => __awaiter(void 0, void 0, void 0, function* () {
             try {
@@ -88,14 +87,18 @@ const adminupdateProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
         if (profileImage) {
             // Upload the image to Cloudinary
-            cloudinaryConfig_1.default.uploader.upload_stream((error, result) => {
+            cloudinaryConfig_1.default.uploader
+                .upload_stream((error, result) => {
                 if (error) {
-                    return res.status(500).json({ error: "Failed to upload image to Cloudinary" });
+                    return res
+                        .status(500)
+                        .json({ error: "Failed to upload image to Cloudinary" });
                 }
                 profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || "";
                 console.log("Cloudinary URL:", profileImageUrl); // Add logging
                 proceedWithUpdate();
-            }).end(profileImage);
+            })
+                .end(profileImage);
         }
         else {
             proceedWithUpdate(); // No image provided, proceed with updating other fields
@@ -123,9 +126,10 @@ exports.getUsersList = getUsersList;
 const blockUserController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.params.id;
-        console.log("backend", userId);
         const blockedUser = yield (0, adminService_1.blockUser)(userId);
-        res.status(200).json({ message: "User blocked successfully", user: blockedUser });
+        res
+            .status(200)
+            .json({ message: "User blocked successfully", user: blockedUser });
     }
     catch (error) {
         next(error);
@@ -137,30 +141,32 @@ const unblockUserController = (req, res, next) => __awaiter(void 0, void 0, void
     try {
         const userId = req.params.id;
         const unblockedUser = yield (0, adminService_1.unblockUser)(userId);
-        res.status(200).json({ message: "User unblocked successfully", user: unblockedUser });
+        res
+            .status(200)
+            .json({ message: "User unblocked successfully", user: unblockedUser });
     }
     catch (error) {
         next(error);
     }
 });
 exports.unblockUserController = unblockUserController;
+// Get all workers
 const getAllWorkersController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const allWorkers = yield (0, adminService_1.getAllWorkers)();
         res.status(200).json(allWorkers);
     }
     catch (err) {
-        res.status(500).json({ error: 'Failed to retrieve workers' });
+        res.status(500).json({ error: "Failed to retrieve workers" });
     }
 });
 exports.getAllWorkersController = getAllWorkersController;
+// Update worker status
 const updateWorkerStatusController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { status } = req.body;
-    console.log("status in backend", status);
-    console.log("status in id", id);
-    if (status !== 'approved' && status !== 'rejected') {
-        return res.status(400).json({ message: 'Invalid status value' });
+    if (status !== "approved" && status !== "rejected") {
+        return res.status(400).json({ message: "Invalid status value" });
     }
     try {
         const updatedWorker = yield (0, adminService_1.updateWorkerStatus)(id, status);
@@ -171,18 +177,19 @@ const updateWorkerStatusController = (req, res) => __awaiter(void 0, void 0, voi
     }
 });
 exports.updateWorkerStatusController = updateWorkerStatusController;
+// Deletes a specified worker by ID
 const deleteWorkerController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const workerId = req.params.id;
         yield (0, adminService_1.deleteWorker)(workerId);
-        res.status(200).json({ message: 'Worker deleted successfully' });
+        res.status(200).json({ message: "Worker deleted successfully" });
     }
     catch (error) {
         next(error);
     }
 });
 exports.deleteWorkerController = deleteWorkerController;
-// Controller to add a new category
+// Adds a new category if it does not already exist
 const addCategoryController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, description } = req.body;
     try {
@@ -198,6 +205,7 @@ const addCategoryController = (req, res, next) => __awaiter(void 0, void 0, void
     }
 });
 exports.addCategoryController = addCategoryController;
+// Retrieves the list of all categories
 const getCategoriesController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = yield (0, userRepository_1.getAllCategories)();
@@ -208,31 +216,28 @@ const getCategoriesController = (req, res, next) => __awaiter(void 0, void 0, vo
     }
 });
 exports.getCategoriesController = getCategoriesController;
+// Updates an existing category by ID
 const editCategoryController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { name, description } = req.body;
-    console.log(id);
-    // Validate ObjectId
     if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid category ID' });
+        return res.status(400).json({ message: "Invalid category ID" });
     }
     try {
-        // Call the update service
         const updatedCategory = yield (0, adminService_1.updateCategory)(id, { name, description });
-        console.log(adminService_1.updateCategory);
         if (updatedCategory) {
             res.status(200).json(updatedCategory);
         }
         else {
-            res.status(404).json({ message: 'Category not found' });
+            res.status(404).json({ message: "Category not found" });
         }
     }
     catch (error) {
-        // Pass the error to the next middleware (usually an error handler)
         next(error);
     }
 });
 exports.editCategoryController = editCategoryController;
+// Get all reviews with details
 const getAllReviewsWithDetailsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reviews = yield (0, adminService_1.fetchAllReviewsWithDetails)();
@@ -240,38 +245,43 @@ const getAllReviewsWithDetailsController = (req, res) => __awaiter(void 0, void 
         res.json(reviews);
     }
     catch (error) {
-        res.status(500).json({ error: 'Failed to fetch reviews' });
+        res.status(500).json({ error: "Failed to fetch reviews" });
     }
 });
 exports.getAllReviewsWithDetailsController = getAllReviewsWithDetailsController;
+// Delete a review
 const deleteReviewController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reviewId = req.params.id;
-        console.log("Review ID:", reviewId);
         const result = yield (0, adminRepository_1.deleteReviewById)(reviewId);
-        console.log("Result:", result);
         if (result) {
-            return res.status(200).json({ message: "Review marked as deleted successfully." });
+            return res
+                .status(200)
+                .json({ message: "Review marked as deleted successfully." });
         }
         else {
             return res.status(404).json({ message: "Review not found." });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: "Failed to mark review as deleted.", error });
+        return res
+            .status(500)
+            .json({ message: "Failed to mark review as deleted.", error });
     }
 });
 exports.deleteReviewController = deleteReviewController;
+// Retrieves various counts related to admin statistics
 const getAllCounts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const counts = yield adminService.getAllCounts();
         res.status(200).json(counts);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching counts', error });
+        res.status(500).json({ message: "Error fetching counts", error });
     }
 });
 exports.getAllCounts = getAllCounts;
+// Retrieves daily revenue data for the admin
 const getBookingTrendsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { startDate, endDate } = req.query;
@@ -279,29 +289,39 @@ const getBookingTrendsController = (req, res) => __awaiter(void 0, void 0, void 
         res.status(200).json(bookingTrends);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching booking trends', error });
+        res.status(500).json({ message: "Error fetching booking trends", error });
     }
 });
 exports.getBookingTrendsController = getBookingTrendsController;
+// Retrieves booking trends over a specified period
 function getDailyRevenue(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const year = parseInt(req.query.year, 10);
             const month = parseInt(req.query.month, 10);
             const day = parseInt(req.query.day, 10);
-            console.log('Year:', year, 'Month:', month, 'Day:', day); // Log the parameters
-            if (isNaN(year) || isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) {
-                res.status(400).json({ error: 'Invalid year, month, or day' });
+            console.log("Year:", year, "Month:", month, "Day:", day);
+            if (isNaN(year) ||
+                isNaN(month) ||
+                isNaN(day) ||
+                month < 1 ||
+                month > 12 ||
+                day < 1 ||
+                day > 31) {
+                res.status(400).json({ error: "Invalid year, month, or day" });
                 return;
             }
             const revenue = yield (0, adminService_1.fetchDailyRevenue)(year, month, day);
             res.status(200).json({ year, month, day, revenue });
         }
         catch (error) {
-            res.status(500).json({ error: 'An error occurred while fetching daily revenue' });
+            res
+                .status(500)
+                .json({ error: "An error occurred while fetching daily revenue" });
         }
     });
 }
+// Retrieves all bookings for the admin
 const getAllBookings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const bookings = yield (0, adminService_1.fetchAllBookings)();

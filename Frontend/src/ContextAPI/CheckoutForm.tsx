@@ -30,7 +30,6 @@ function CheckoutForm() {
         if (error) {
           setError(error.message || "Payment failed");
         } else if (paymentIntent && paymentIntent.status === "succeeded") {
-          // Notify server to save booking details
           await fetch("/api/booking/confirm", {
             method: "POST",
             headers: {
@@ -43,7 +42,6 @@ function CheckoutForm() {
               amount: paymentIntent.amount,
             }),
           });
-          // Handle successful payment (e.g., redirect or show success message)
         }
       } catch (error) {
         setError("Payment failed");
@@ -55,7 +53,12 @@ function CheckoutForm() {
     <form onSubmit={handleSubmit}>
       <CardElement />
       {error && <Typography color="error">{error}</Typography>}
-      <Button type="submit" variant="contained" color="primary" disabled={!stripe}>
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={!stripe}
+      >
         Confirm Booking
       </Button>
     </form>

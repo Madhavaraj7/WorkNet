@@ -85,7 +85,6 @@ const AdUsers: React.FC = () => {
         const token = localStorage.getItem("adtoken");
         if (!token) throw new Error("No token found");
 
-        // Update the UI optimistically
         setUsers((prevUsers) =>
           prevUsers.map((user) =>
             user._id === currentUser._id
@@ -94,7 +93,6 @@ const AdUsers: React.FC = () => {
           )
         );
 
-        // Call the appropriate API based on the current status
         if (currentUser.isBlocked) {
           await unblockUserAPI(currentUser._id, token);
           toast.success("User unblocked successfully");

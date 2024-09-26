@@ -8,6 +8,7 @@ import {
   ClickAwayListener,
   MenuItem,
   ListItemIcon,
+  Badge,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -16,12 +17,19 @@ import Logout from "@mui/icons-material/Logout";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { tokenAuthenticationContext } from "../ContextAPI/TokenAuth";
 import { toast } from "react-toastify";
+import { getUnreadMessagesFromAdmin } from "../Services/allAPI";
+import { io } from "socket.io-client";
+
+// const socket = io("http://localhost:3000"); // Your server URL
+const socket = io("https://worknet.solutions"); // for production
 
 const Header: React.FC = () => {
   const authContext = useContext(tokenAuthenticationContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
   const navigate = useNavigate();
 
   const { setUser, user }: any = authContext;
@@ -43,6 +51,47 @@ const Header: React.FC = () => {
     }
   }, []);
 
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem("token") || "";
+
+      if (authContext?.user?._id) {
+        const response = await getUnreadMessagesFromAdmin(
+          authContext.user._id,
+          token
+        );
+        console.log(response);
+
+        socket.on("unreadCount", (response) => {
+          console.log("Unread count received:", response);
+          setUnreadCount(response.unreadCount);
+        });
+
+        // setUnreadCount(response.unreadCount);
+      }
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+
+    fetchUnreadCount();
+
+    return () => {
+      socket.off("unreadCount");
+    };
+  }, [authContext?.user?._id]);
+
+  useEffect(() => {
+    if (authContext?.user?._id) {
+      socket.emit("userOnline", authContext.user._id);
+    }
+  }, [authContext?.user?._id]);
+
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -56,6 +105,8 @@ const Header: React.FC = () => {
   };
 
   const handleMenuClose = () => {
+    setUnreadCount(0); // Reset unread count to zero when Help is clicked
+
     setOpen(false);
   };
 
@@ -69,12 +120,11 @@ const Header: React.FC = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("worker");
-
     setIsAuthorized(false);
     authContext.setIsAuthorized(false);
-    setUser(null); // Ensure the user state is cleared
+    setUser(null);
     handleMenuClose();
-    navigate("/"); // Redirect to the home page or login page
+    navigate("/");
   };
 
   const profileImageUrl = user?.profileImage;
@@ -118,12 +168,23 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-3">
           {isAuthorized ? (
             <div className="relative flex items-center space-x-2">
-              <Avatar
-                src={profileImageUrl}
-                alt="Profile Picture"
-                className="w-8 h-8 cursor-pointer border-2 border-teal-500"
-                onClick={handleMenuOpen}
-              />
+              <Badge
+                badgeContent={unreadCount} // Set unreadCount here
+                color="error" // This sets the badge to red
+                overlap="circular"
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <Avatar
+                  src={profileImageUrl}
+                  alt="Profile Picture"
+                  className="w-8 h-8 cursor-pointer border-2 border-teal-500"
+                  onClick={handleMenuOpen}
+                />
+              </Badge>
+
               <Popper
                 open={open}
                 anchorEl={anchorEl}
@@ -154,11 +215,11 @@ const Header: React.FC = () => {
                         </ListItemIcon>
                         Logout
                       </MenuItem>
-                      
                     </div>
                   </Paper>
                 </ClickAwayListener>
               </Popper>
+
               <Link to="/myBooking">
                 <Button
                   variant="contained"
@@ -169,6 +230,7 @@ const Header: React.FC = () => {
                   <span>Appointments</span>
                 </Button>
               </Link>
+
               <Link to="/register">
                 <Button
                   variant="contained"
@@ -179,7 +241,6 @@ const Header: React.FC = () => {
                   <span>Register</span>
                 </Button>
               </Link>
-            
             </div>
           ) : (
             <>
@@ -205,6 +266,7 @@ const Header: React.FC = () => {
             </>
           )}
         </div>
+
         <button className="md:hidden text-white hover:text-teal-400">
           {/* Mobile menu button */}
           <svg

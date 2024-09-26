@@ -47,10 +47,10 @@ const UserSchema = new mongoose_1.Schema({
         default: 0,
     },
     isBlocked: { type: Boolean, default: false },
-    role: { type: String, default: 'user' }
+    role: { type: String, default: "user" },
 });
 exports.UserModel = mongoose_1.default.model("User", UserSchema);
-// Function to create a new user
+// Function to create a new user and save it to the database.
 const createUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
     const newUser = new exports.UserModel(user);
     return newUser.save();
@@ -76,16 +76,18 @@ const updateUserProfile = (userId, update) => __awaiter(void 0, void 0, void 0, 
     return exports.UserModel.findByIdAndUpdate(userId, update, { new: true });
 });
 exports.updateUserProfile = updateUserProfile;
+// Function to find a user by their email and password.
 const findUserByEmailAdmin = (email) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield exports.UserModel.findOne({ email });
     return user ? user.toObject() : null;
 });
 exports.findUserByEmailAdmin = findUserByEmailAdmin;
+// Function to update the user's profile using their user ID.
 const updateAdminProfile = (userId, update) => __awaiter(void 0, void 0, void 0, function* () {
     return exports.UserModel.findByIdAndUpdate(userId, update, { new: true });
 });
 exports.updateAdminProfile = updateAdminProfile;
-// Function to find a user by ID
+// Function to find a user by their email address for admin purposes.
 const findUserById = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return exports.UserModel.findById(userId);
 });
@@ -105,6 +107,7 @@ const unblockUserById = (userId) => __awaiter(void 0, void 0, void 0, function* 
     return exports.UserModel.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
 });
 exports.unblockUserById = unblockUserById;
+// Function to fetch all categories from the database.
 const getAllCategories = () => __awaiter(void 0, void 0, void 0, function* () {
     return category_1.Category.find();
 });

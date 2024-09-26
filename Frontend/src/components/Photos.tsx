@@ -2,10 +2,9 @@ import React from 'react';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-// Define types for workerDetails
 interface WorkImage {
   workImages: string | undefined;
-  filename: string; // Ensure this is the full URL or adjust accordingly
+  filename: string; 
 }
 
 interface WorkerDetails {

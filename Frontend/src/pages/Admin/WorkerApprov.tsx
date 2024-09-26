@@ -323,7 +323,7 @@ const WorkerApprov: React.FC = () => {
                 <TableCell colSpan={8} sx={{ textAlign: "center", py: 4 }}>
                   <p
                     style={{
-                      color: "#F56565", // Tailwind's text-red-500 color
+                      color: "#F56565", 
                       fontSize: "18px",
                       fontWeight: "bold",
                       padding: "16px 0",
@@ -354,8 +354,8 @@ const WorkerApprov: React.FC = () => {
         <Box
           sx={{
             position: "relative",
-            width: "600px", // Fixed width
-            height: "400px", // Fixed height
+            width: "600px", 
+            height: "400px", 
             backgroundColor: "white",
             borderRadius: "8px",
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
@@ -370,9 +370,9 @@ const WorkerApprov: React.FC = () => {
             src={currentImages[currentImageIndex]}
             alt="Worker Work"
             style={{
-              width: "100%", // Scale image to fit within fixed dimensions
+              width: "100%", 
               height: "100%",
-              objectFit: "contain", // Ensure the image maintains its aspect ratio
+              objectFit: "contain", 
             }}
           />
           <IconButton

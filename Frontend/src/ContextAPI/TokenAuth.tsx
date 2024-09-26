@@ -1,7 +1,8 @@
-import React, { createContext, useEffect, useState, ReactNode } from 'react';
-import { ClipLoader } from 'react-spinners';
+import React, { createContext, useEffect, useState, ReactNode } from "react";
+import { ClipLoader } from "react-spinners";
 
 interface User {
+  _id: string;
   profileImage?: string;
 }
 
@@ -12,7 +13,9 @@ interface TokenAuthContextType {
   setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
 }
 
-export const tokenAuthenticationContext = createContext<TokenAuthContextType | undefined>(undefined);
+export const tokenAuthenticationContext = createContext<
+  TokenAuthContextType | undefined
+>(undefined);
 
 interface TokenAuthProps {
   children: ReactNode;
@@ -44,7 +47,9 @@ const TokenAuth: React.FC<TokenAuthProps> = ({ children }) => {
   }
 
   return (
-    <tokenAuthenticationContext.Provider value={{ isAuthorized, user, setIsAuthorized, setUser }}>
+    <tokenAuthenticationContext.Provider
+      value={{ isAuthorized, user, setIsAuthorized, setUser }}
+    >
       {children}
     </tokenAuthenticationContext.Provider>
   );

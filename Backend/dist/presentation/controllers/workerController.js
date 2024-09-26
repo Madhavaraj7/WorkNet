@@ -50,6 +50,7 @@ exports.getWorkerAppointmentsController = exports.getWorkerController = exports.
 const workerService_1 = require("../../application/workerService");
 const cloudinaryConfig_1 = __importStar(require("../../cloudinaryConfig"));
 const mongoose_1 = __importDefault(require("mongoose"));
+// Controller to register a new worker
 const registerWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const workerData = req.body;
@@ -70,6 +71,7 @@ const registerWorkerController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.registerWorkerController = registerWorkerController;
+// Controller to fetch all registered workers
 const getWorkersController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const workers = yield (0, workerService_1.getAllWorkersService)();
@@ -80,14 +82,13 @@ const getWorkersController = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getWorkersController = getWorkersController;
+// Controller to block a specific worker by ID
 const blockWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const blockedWorker = yield (0, workerService_1.blockWorkerService)(id);
         if (blockedWorker) {
-            res
-                .status(200)
-                .json({
+            res.status(200).json({
                 message: "Worker blocked successfully",
                 worker: blockedWorker,
             });
@@ -101,14 +102,13 @@ const blockWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.blockWorkerController = blockWorkerController;
+// Controller to unblock a specific worker by ID
 const unblockWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const unblockedWorker = yield (0, workerService_1.unblockWorkerService)(id);
         if (unblockedWorker) {
-            res
-                .status(200)
-                .json({
+            res.status(200).json({
                 message: "Worker unblocked successfully",
                 worker: unblockedWorker,
             });
@@ -122,6 +122,7 @@ const unblockWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.unblockWorkerController = unblockWorkerController;
+// Controller to get works associated with the logged-in user
 const getLoginedUserWorksController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.userId;
     // console.log(userId,"get");
@@ -142,6 +143,7 @@ const getLoginedUserWorksController = (req, res) => __awaiter(void 0, void 0, vo
     }
 });
 exports.getLoginedUserWorksController = getLoginedUserWorksController;
+// Controller to update an existing worker's details
 const updateWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -214,6 +216,7 @@ const updateWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.updateWorkerController = updateWorkerController;
+// Function to delete an image from Cloudinary using its URL
 const deleteFromCloudinary = (imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const publicId = (_a = imageUrl.split("/").pop()) === null || _a === void 0 ? void 0 : _a.split(".")[0];
@@ -221,6 +224,7 @@ const deleteFromCloudinary = (imageUrl) => __awaiter(void 0, void 0, void 0, fun
         yield cloudinaryConfig_1.default.uploader.destroy(publicId);
     }
 });
+// Controller to get a specific worker by ID
 const getWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { wId } = req.params;
     console.log("hello", wId);
@@ -239,6 +243,7 @@ const getWorkerController = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getWorkerController = getWorkerController;
+// Controller to fetch appointments associated with a specific worker
 const getWorkerAppointmentsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const workerId = req.workerId;
     console.log(workerId);

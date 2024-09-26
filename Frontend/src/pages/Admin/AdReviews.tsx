@@ -23,12 +23,14 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getAllReviewsWithDetailsAPI, deleteReviewAPI } from "../../Services/allAPI";
+import {
+  getAllReviewsWithDetailsAPI,
+  deleteReviewAPI,
+} from "../../Services/allAPI";
 import { toast } from "react-toastify";
 
-
 interface Review {
-  _id: string; 
+  _id: string;
   profileImage: string | undefined;
   username: string | undefined;
   workerId: {
@@ -189,7 +191,7 @@ const AdReviews: React.FC = () => {
             {filteredReviews.length > 0 ? (
               filteredReviews.map((review, index) => (
                 <TableRow
-                  key={review._id} 
+                  key={review._id}
                   className="hover:bg-gray.100"
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
@@ -245,7 +247,7 @@ const AdReviews: React.FC = () => {
                       color="error"
                       startIcon={<DeleteIcon />}
                       onClick={() => {
-                        setSelectedReviewId(review._id); 
+                        setSelectedReviewId(review._id);
                         setIsDeleteDialogOpen(true);
                       }}
                       sx={{
@@ -295,7 +297,9 @@ const AdReviews: React.FC = () => {
         onClose={() => setIsDeleteDialogOpen(false)}
       >
         <DialogTitle>Delete Review</DialogTitle>
-        <DialogContent>Are you sure you want to delete this review?</DialogContent>
+        <DialogContent>
+          Are you sure you want to delete this review?
+        </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDeleteDialogOpen(false)} color="primary">
             Cancel

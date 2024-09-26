@@ -15,13 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSlotsByWorkerId = exports.createWorkerSlots = void 0;
 const slotRepository_1 = require("../infrastructure/slotRepository");
 const mongoose_1 = __importDefault(require("mongoose"));
+// Create slots for a worker within a specified date range, ensuring they don't overlap
 const createWorkerSlots = (workerId, startDate, endDate) => __awaiter(void 0, void 0, void 0, function* () {
     const slots = [];
     const workerObjectId = new mongoose_1.default.Types.ObjectId(workerId);
-    // Get today's date and set the time to 00:00:00 for accurate comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    // Ensure the startDate is at least tomorrow's date
     const start = new Date(startDate);
     if (start <= today) {
         throw new Error("Start date must be tomorrow or a future date.");
@@ -45,6 +44,7 @@ const createWorkerSlots = (workerId, startDate, endDate) => __awaiter(void 0, vo
     return slots;
 });
 exports.createWorkerSlots = createWorkerSlots;
+// Fetch all slots for a specific worker by their ID
 const getSlotsByWorkerId = (workerId) => __awaiter(void 0, void 0, void 0, function* () {
     const workerObjectId = new mongoose_1.default.Types.ObjectId(workerId);
     return yield (0, slotRepository_1.getSlotsByWorkerIdFromRepo)(workerObjectId);

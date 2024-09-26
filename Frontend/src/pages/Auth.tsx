@@ -247,9 +247,9 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
     }
   };
 
-  const handleAdminLogin = () => {
-    navigate("/admin"); // Navigate to the admin route
-  };
+  // const handleAdminLogin = () => {
+  //   navigate("/admin"); // Navigate to the admin route
+  // };
 
   return (
     <>
@@ -408,7 +408,7 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
             <Button
               onClick={insideSignup ? handleSignUp : handleLogin}
               className="w-full text-white bg-gradient-to-r from-[#FF5733] to-[#FFC300] border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
-              disabled={loading} // Disable button when loading
+              disabled={loading} 
             >
               {loading ? (
                 <CircularProgress size={24} />
@@ -442,12 +442,12 @@ const Auth: React.FC<AuthProps> = ({ insideSignup }) => {
                     Sign in with Google
                   </span>
                 </Button>
-                <Button
+                {/* <Button
                   onClick={handleAdminLogin}
                   className="w-full text-white bg-gradient-to-r from-red-500 to-red-600 border-0 hover:bg-gradient-to-l py-2 px-4 focus:outline-none rounded text-lg"
                 >
                   Admin Login
-                </Button>
+                </Button> */}
               </>
             )}
 

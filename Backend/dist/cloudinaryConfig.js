@@ -4,9 +4,9 @@ exports.uploadToCloudinary = void 0;
 const cloudinary_1 = require("cloudinary");
 // Configure Cloudinary
 cloudinary_1.v2.config({
-    cloud_name: 'dgvx0kymm', // Replace with your Cloudinary cloud name
-    api_key: '747762698978995', // Replace with your Cloudinary API key
-    api_secret: 'aVQAe7vDqkVw0Ok2BbsEALiB4lU' // Replace with your Cloudinary API secret
+    cloud_name: 'dgvx0kymm',
+    api_key: '747762698978995',
+    api_secret: 'aVQAe7vDqkVw0Ok2BbsEALiB4lU'
 });
 // Upload image to Cloudinary
 const uploadToCloudinary = (file) => new Promise((resolve, reject) => {

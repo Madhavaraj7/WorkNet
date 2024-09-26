@@ -12,34 +12,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllReviewsWithDetails = exports.hasUserBookedWorker = exports.hasUserReviewedWorker = exports.getReviewsByWorkerId = exports.createReview = void 0;
 const review_1 = require("../domain/review");
 const booking_1 = require("../domain/booking");
-// Create a new review
+// Create a new review and save it to the database.
 const createReview = (reviewData) => __awaiter(void 0, void 0, void 0, function* () {
     const review = new review_1.Review(reviewData);
     return yield review.save();
 });
 exports.createReview = createReview;
-// Fetch reviews by workerId
+// Fetch reviews for a specific worker by their ID, excluding deleted reviews.
 const getReviewsByWorkerId = (workerId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield review_1.Review.find({
         workerId,
-        isDeleted: false
-    }).populate('userId', 'username profileImage');
+        isDeleted: false,
+    }).populate("userId", "username profileImage");
 });
 exports.getReviewsByWorkerId = getReviewsByWorkerId;
+// Check if a user has already reviewed a specific worker.
 const hasUserReviewedWorker = (userId, workerId) => __awaiter(void 0, void 0, void 0, function* () {
     const review = yield review_1.Review.findOne({ userId, workerId });
     return review !== null;
 });
 exports.hasUserReviewedWorker = hasUserReviewedWorker;
+// Check if a user has a confirmed booking with a specific worker.
 const hasUserBookedWorker = (userId, workerId) => __awaiter(void 0, void 0, void 0, function* () {
-    const booking = yield booking_1.Booking.findOne({ userId, workerId, status: 'Confirmed' });
+    const booking = yield booking_1.Booking.findOne({
+        userId,
+        workerId,
+        status: "Confirmed",
+    });
     return booking !== null;
 });
 exports.hasUserBookedWorker = hasUserBookedWorker;
+// Fetch all reviews with user and worker details, excluding deleted reviews.
 const getAllReviewsWithDetails = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield review_1.Review.find({ isDeleted: false })
-        .populate('userId', 'username profileImage')
-        .populate('workerId', 'name')
-        .select('workerId userId ratingPoints feedback createdAt updatedAt');
+        .populate("userId", "username profileImage")
+        .populate("workerId", "name")
+        .select("workerId userId ratingPoints feedback createdAt updatedAt");
 });
 exports.getAllReviewsWithDetails = getAllReviewsWithDetails;

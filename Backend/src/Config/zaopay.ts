@@ -8,7 +8,6 @@ export const processZaopayPayment = async (amount: number, zaopayToken: string) 
             zaopayToken
         });
 
-        // Adjust based on actual Zaopay response format
         if (response.data && response.data.success) {
             return response.data;
         } else {

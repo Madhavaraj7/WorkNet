@@ -24,9 +24,12 @@ export const LoginAPI = async (reqBody: any) => {
 
 // Refresh token API call
 export const RefreshTokenAPI = async (refreshToken: string) => {
-  return await axios.post(`${SERVER_URL}/refresh-token`, { refreshToken })
-    .then(res => res.data)
-    .catch(err => { throw err; });
+  return await axios
+    .post(`${SERVER_URL}/refresh-token`, { refreshToken })
+    .then((res) => res.data)
+    .catch((err) => {
+      throw err;
+    });
 };
 
 // Google Api
@@ -244,19 +247,16 @@ export const updateWorkerAPI = async (reqBody: FormData, token: string) => {
     const response = await axios.put(`${SERVER_URL}/updateWorker`, reqBody, {
       headers: {
         Authorization: `Bearer ${token}`,
-      }
+      },
     });
 
-    console.log('API response:', response.data);
+    console.log("API response:", response.data);
     return response.data;
   } catch (error) {
-    console.error('Error in updateWorkerAPI:', error); 
-    throw new Error('Failed to update worker');
+    console.error("Error in updateWorkerAPI:", error);
+    throw new Error("Failed to update worker");
   }
 };
-
-
-
 
 // Get Categories API
 export const getCategoriesAPI = async () => {
@@ -348,29 +348,23 @@ export const createSlotAPI = async (reqBody: any, token: string) => {
   }
 };
 
-
-
 // Get Slots by Worker API
 export const getSlotsByWorkerAPI = async (token: string) => {
   try {
-    const response = await commonAPI(
-      "GET",
-      `${SERVER_URL}/slots`,
-      undefined,
-      {
-        Authorization: `Bearer ${token}`,
-      }
-    );
+    const response = await commonAPI("GET", `${SERVER_URL}/slots`, undefined, {
+      Authorization: `Bearer ${token}`,
+    });
     return response;
   } catch (error) {
     throw new Error("Failed to fetch slots by worker");
   }
 };
 
-
-
 // Get Slots by Worker ID API
-export const getSlotsByWorkerIdAPI = async (workerId: string, token: string) => {
+export const getSlotsByWorkerIdAPI = async (
+  workerId: string,
+  token: string
+) => {
   try {
     const response = await commonAPI(
       "GET",
@@ -382,11 +376,9 @@ export const getSlotsByWorkerIdAPI = async (workerId: string, token: string) => 
     );
     return response;
   } catch (error) {
-    console.error("Error in getSlotsByWorkerIdAPI:", error); 
+    console.error("Error in getSlotsByWorkerIdAPI:", error);
   }
 };
-
-
 
 // Fetch Worker Appointments API
 export const getWorkerAppointmentsAPI = async (token: string) => {
@@ -406,8 +398,6 @@ export const getWorkerAppointmentsAPI = async (token: string) => {
   }
 };
 
-
-
 // Get Booked Workers API
 export const getUserBookedWorkersAPI = async (token: string) => {
   try {
@@ -426,10 +416,11 @@ export const getUserBookedWorkersAPI = async (token: string) => {
   }
 };
 
-
-
-
-export const getBookingTrendsAPI = async (startDate: string, endDate: string, token: string) => {
+export const getBookingTrendsAPI = async (
+  startDate: string,
+  endDate: string,
+  token: string
+) => {
   try {
     const response = await commonAPI(
       "GET",
@@ -463,9 +454,10 @@ export const postReviewAPI = async (reviewData: any, token: string) => {
   }
 };
 
-
-
-export const getReviewsByWorkerIdAPI = async (workerId: string, token: string) => {
+export const getReviewsByWorkerIdAPI = async (
+  workerId: string,
+  token: string
+) => {
   try {
     const response = await commonAPI(
       "GET",
@@ -481,9 +473,6 @@ export const getReviewsByWorkerIdAPI = async (workerId: string, token: string) =
     throw new Error("Failed to fetch reviews for worker");
   }
 };
-
-
-
 
 // Get All Reviews with Details (Admin)
 export const getAllReviewsWithDetailsAPI = async (token: string) => {
@@ -503,7 +492,6 @@ export const getAllReviewsWithDetailsAPI = async (token: string) => {
   }
 };
 
-
 // Delete Review API
 export const deleteReviewAPI = async (reviewId: string, token: string) => {
   try {
@@ -521,15 +509,6 @@ export const deleteReviewAPI = async (reviewId: string, token: string) => {
     throw new Error("Failed to delete review");
   }
 };
-
-
-
-
-
-
-
-
-
 
 export const getWalletBalanceAPI = async (token: string) => {
   try {
@@ -566,12 +545,6 @@ export const cancelBookingAPI = async (bookingId: string, token: string) => {
   }
 };
 
-
-
-
-
-
-
 // Book Worker API
 export const bookWorkerWithWalletAPI = async (reqBody: any, token: string) => {
   try {
@@ -590,18 +563,12 @@ export const bookWorkerWithWalletAPI = async (reqBody: any, token: string) => {
   }
 };
 
-
 // Get All Counts API
 export const getAllCountsAPI = async (token: string) => {
   try {
-    const response = await commonAPI(
-      "GET",
-      `${SERVER_URL}/counts`,
-      undefined,
-      {
-        Authorization: `Bearer ${token}`,
-      }
-    );
+    const response = await commonAPI("GET", `${SERVER_URL}/counts`, undefined, {
+      Authorization: `Bearer ${token}`,
+    });
     return response;
   } catch (error) {
     console.error("Error in getAllCountsAPI:", error);
@@ -609,27 +576,29 @@ export const getAllCountsAPI = async (token: string) => {
   }
 };
 
-
 // Fetch monthly revenue
-export const getDailyRevenueAPI = async (year: number, month: number, day: number, token: string) => {
+export const getDailyRevenueAPI = async (
+  year: number,
+  month: number,
+  day: number,
+  token: string
+) => {
   try {
     // Construct the URL with query parameters for year, month, and day
     const url = `${SERVER_URL}/revenue?year=${year}&month=${month}&day=${day}`;
-    
+
     // Make the API call
     const response = await commonAPI("GET", url, undefined, {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     });
-    
+
     return response;
   } catch (error) {
-    console.error('Error fetching daily revenue:', error);
-    throw new Error('Failed to fetch daily revenue');
+    console.error("Error fetching daily revenue:", error);
+    throw new Error("Failed to fetch daily revenue");
   }
 };
-
-
 
 // Fetch all bookings API
 export const getAllBookingsAPI = async (token: string) => {
@@ -649,20 +618,37 @@ export const getAllBookingsAPI = async (token: string) => {
   }
 };
 
-
-
 export const getUnreadMessagesCount = async (userId: string, token: string) => {
   try {
     const response = await commonAPI(
-      'GET',
+      "GET",
       `${SERVER_URL}/messages/unread-count/${userId}`,
       undefined,
       {
         Authorization: `Bearer ${token}`,
       }
     );
-    return response; // return response as per your API structure
+    return response;
   } catch (error) {
-    throw new Error('Failed to fetch unread messages count');
+    throw new Error("Failed to fetch unread messages count");
+  }
+};
+
+export const getUnreadMessagesFromAdmin = async (
+  userId: string,
+  token: string
+) => {
+  try {
+    const response = await commonAPI(
+      "GET",
+      `${SERVER_URL}/unread-from-admin/${userId}`,
+      undefined,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response; 
+  } catch (error) {
+    throw new Error("Failed to fetch unread messages from admin");
   }
 };

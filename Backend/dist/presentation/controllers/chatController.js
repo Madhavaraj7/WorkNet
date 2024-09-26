@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUnreadMessagesCount = exports.getMessages = exports.getRooms = exports.sendMessage = exports.createRoom = void 0;
+exports.getUnreadMessagesFromAdmin = exports.getUnreadMessagesCount = exports.getMessages = exports.getRooms = exports.sendMessage = exports.createRoom = void 0;
 const roomsModel_1 = __importDefault(require("../../domain/roomsModel"));
 const messagesModel_1 = __importDefault(require("../../domain/messagesModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -22,7 +22,6 @@ const chat_1 = require("../socket/chat");
 const createRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.body;
     try {
-        // Validate IDs
         if (!userId) {
             return res.status(400).json({ error: "User ID is required" });
         }
@@ -44,7 +43,9 @@ const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const { roomId, from, to, message } = req.body;
     try {
         if (!roomId || !from || !to || !message) {
-            return res.status(400).json({ error: "Room ID, From, To, and Message are required" });
+            return res
+                .status(400)
+                .json({ error: "Room ID, From, To, and Message are required" });
         }
         const newMessage = new messagesModel_1.default({ roomId, from, to, message });
         yield newMessage.save();
@@ -53,7 +54,6 @@ const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             .populate({ path: "from", select: "_id username profileImage" })
             .populate({ path: "to", select: "_id username profileImage" });
         app_1.io.to(roomId).emit("message", latestMsg);
-        // Update unread count for the recipient
         const unreadCount = yield messagesModel_1.default.countDocuments({ to, isRead: false });
         const recipientSocketId = chat_1.onlineUsers.get(to);
         if (recipientSocketId) {
@@ -91,7 +91,7 @@ exports.getRooms = getRooms;
 // Get messages in a room
 const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { roomId } = req.params;
-    const admin = "66bb2bd548e166a70bce4c66"; // Admin user ID
+    const admin = "66bb2bd548e166a70bce4c66";
     try {
         if (!roomId) {
             return res.status(400).json({ error: "Room ID is required" });
@@ -104,7 +104,7 @@ const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const recipientSocketId = chat_1.onlineUsers.get(admin);
         if (recipientSocketId) {
             app_1.io.to(recipientSocketId).emit("unreadCount", { unreadCount });
-            console.log('emitted');
+            console.log("emitted");
         }
         res.status(200).json(messages);
     }
@@ -117,7 +117,6 @@ exports.getMessages = getMessages;
 // Get unread messages count for a specific room or user
 const getUnreadMessagesCount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
-    // console.log({userId});
     try {
         if (!userId) {
             return res.status(400).json({ error: "User ID is required" });
@@ -134,3 +133,26 @@ const getUnreadMessagesCount = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.getUnreadMessagesCount = getUnreadMessagesCount;
+// Get unread messages count from admin for a specific user
+const getUnreadMessagesFromAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const adminId = "66bb2bd548e166a70bce4c66";
+    try {
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
+        const unreadCount = yield messagesModel_1.default.countDocuments({
+            to: userId,
+            from: adminId,
+            isRead: false,
+        });
+        res.status(200).json({ unreadCount });
+    }
+    catch (error) {
+        console.error("Error fetching unread messages count from admin:", error);
+        res
+            .status(500)
+            .json({ error: "Error fetching unread messages count from admin" });
+    }
+});
+exports.getUnreadMessagesFromAdmin = getUnreadMessagesFromAdmin;

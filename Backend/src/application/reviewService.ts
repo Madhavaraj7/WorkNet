@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import { createReview, hasUserReviewedWorker, hasUserBookedWorker, getReviewsByWorkerId } from '../infrastructure/reviewRepository';
 import { IReview } from '../domain/review';
 
+
+
+// Add a review for a worker if the user has booked them and hasn't reviewed them before
 export const addReview = async (reviewData: IReview): Promise<IReview> => {
     const { userId, workerId } = reviewData;
 
@@ -26,7 +29,7 @@ export const addReview = async (reviewData: IReview): Promise<IReview> => {
     }
 };
 
-
+// Fetch all reviews for a specific worker by their ID
 export const fetchReviewsForWorker = async (workerId: mongoose.Types.ObjectId): Promise<IReview[]> => {
     return await getReviewsByWorkerId(workerId);
 };

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getReviews = exports.postReview = void 0;
 const reviewService_1 = require("../../application/reviewService");
 const mongoose_1 = __importDefault(require("mongoose"));
+// Controller to post a new review
 const postReview = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reviewData = req.body;
@@ -24,10 +25,11 @@ const postReview = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(201).json(review);
     }
     catch (error) {
-        res.status(500).json({ message: 'Failed to add review', error });
+        res.status(500).json({ message: "Failed to add review", error });
     }
 });
 exports.postReview = postReview;
+// Controller to get reviews for a specific worker
 const getReviews = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const workerId = new mongoose_1.default.Types.ObjectId(req.params.workerId);
@@ -35,7 +37,7 @@ const getReviews = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(200).json(reviews);
     }
     catch (error) {
-        res.status(500).json({ message: 'Failed to fetch reviews', error });
+        res.status(500).json({ message: "Failed to fetch reviews", error });
     }
 });
 exports.getReviews = getReviews;

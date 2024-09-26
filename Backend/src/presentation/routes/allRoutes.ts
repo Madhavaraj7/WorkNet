@@ -33,10 +33,8 @@ import {
   updateWorkerStatusController,
 } from "../controllers/adminController";
 
-// const jwtMiddleware = require('../../MiddleWare/jwt')
 import jwtMiddleware from "../MiddleWare/jwt";
 import workerRoleMiddleware from "../MiddleWare/workerRoleMiddleware";
-
 import AdminjwtMiddleware from "../MiddleWare/AdJwt";
 import { uploadMiddleware } from "../MiddleWare/multerConfig";
 import {
@@ -54,12 +52,22 @@ import {
   createSlotController,
   getSlotsByWorkerController,
 } from "../controllers/slotController";
-import { cancelBookingController, createBooking, createBookingController } from "../controllers/bookingController";
+import {
+  cancelBookingController,
+  createBooking,
+  createBookingController,
+} from "../controllers/bookingController";
 import { confirmPayment } from "../controllers/paymentController";
-// import { handleStripeWebhook } from "../controllers/stripeWebhookController";
 import { getReviews, postReview } from "../controllers/reviewController";
-import {  getWalletBalance } from "../controllers/walletController";
-import { createRoom, getMessages, getRooms, getUnreadMessagesCount, sendMessage } from "../controllers/chatController";
+import { getWalletBalance } from "../controllers/walletController";
+import {
+  createRoom,
+  getMessages,
+  getRooms,
+  getUnreadMessagesCount,
+  getUnreadMessagesFromAdmin,
+  sendMessage,
+} from "../controllers/chatController";
 import { refreshToken } from "../controllers/tokenController";
 
 const router = express.Router();
@@ -68,14 +76,28 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// user Routes
+
+
+// User Routes
+// User registration with profile image upload
 router.post("/signUp", upload.single("profileImage"), register);
+
+// Verify OTP for user
 router.post("/verifyOtp", verifyOtp);
+
+// Resend OTP to user
 router.post("/resendOtp", resendOtp);
+
+// User login
 router.post("/login", login);
+
+// Refresh user token
 router.post("/refresh-token", refreshToken);
 
+// Google login handler
 router.post("/googleLogin", googleLoginHandler);
+
+// Update user profile with optional image upload
 router.put(
   "/profile",
   jwtMiddleware,
@@ -83,27 +105,71 @@ router.put(
   upload.single("profileImage"),
   updateProfile
 );
+
+// Handle forgot password
 router.post("/forgotPassword", forgotPasswordHandler);
+
+// Reset user password
 router.post("/resetPassword", resetPasswordHandler);
+
+// Get all workers
 router.get("/getWorkers", getWorkersController);
+
+// Get specific worker details by ID
 router.get("/worker/:wId", getWorkerController);
+
+// Get all categories
 router.get("/categories", getCategoriesController);
 
-router.get('/worker/:wId/slots', jwtMiddleware, checkUserStatusMiddleware, getSlotsByWorkerIdController);
-router.post('/bookings',jwtMiddleware, createBooking);
-router.post('/payments/confirm', jwtMiddleware,confirmPayment);
-router.get('/user/booked-workers', jwtMiddleware, getUserBookedWorkersController);
-router.post('/reviews', jwtMiddleware,postReview);
-router.get('/reviews/:workerId', getReviews);
-router.get('/wallet/balance', jwtMiddleware, getWalletBalance);
+// Get available slots for a specific worker by ID
+router.get(
+  "/worker/:wId/slots",
+  jwtMiddleware,
+  checkUserStatusMiddleware,
+  getSlotsByWorkerIdController
+);
 
-router.post('/cancel/:bookingId',jwtMiddleware, cancelBookingController);
-router.post('/walletBooking', jwtMiddleware,createBookingController); 
+// Create a booking for a user
+router.post("/bookings", jwtMiddleware, createBooking);
+
+// Confirm payment for a booking
+router.post("/payments/confirm", jwtMiddleware, confirmPayment);
+
+// Get booked workers for the logged-in user
+router.get(
+  "/user/booked-workers",
+  jwtMiddleware,
+  getUserBookedWorkersController
+);
+
+// Post a review for a worker
+router.post("/reviews", jwtMiddleware, postReview);
+
+// Get reviews for a specific worker by ID
+router.get("/reviews/:workerId", getReviews);
+
+// Get wallet balance for the logged-in user
+router.get("/wallet/balance", jwtMiddleware, getWalletBalance);
+
+// Cancel a booking by booking ID
+router.post("/cancel/:bookingId", jwtMiddleware, cancelBookingController);
+
+// Create a booking using wallet
+router.post("/walletBooking", jwtMiddleware, createBookingController);
+
+// Get unread messages from admin for a specific user
+router.get(
+  "/unread-from-admin/:userId",
+  jwtMiddleware,
+  getUnreadMessagesFromAdmin
+);
 
 
 
 
-//worker Routes
+
+// Worker Routes
+// Register a new worker with profile image upload
 router.post(
   "/register",
   jwtMiddleware,
@@ -111,13 +177,16 @@ router.post(
   checkUserStatusMiddleware,
   registerWorkerController
 );
+
+// Get work details for the logged-in user
 router.get(
   "/getUserWorkDetails",
   jwtMiddleware,
   checkUserStatusMiddleware,
   getLoginedUserWorksController
 );
-//update worker profile pending
+
+// Update worker profile with optional image upload
 router.put(
   "/updateWorker",
   jwtMiddleware,
@@ -125,52 +194,111 @@ router.put(
   updateWorkerController
 );
 
+// Create a new time slot
 router.post("/create-slot", workerRoleMiddleware, createSlotController);
+
+// Get available slots for workers
 router.get("/slots", workerRoleMiddleware, getSlotsByWorkerController);
-router.get("/appointments", workerRoleMiddleware,  getWorkerAppointmentsController);
+
+// Get appointments for a specific worker
+router.get(
+  "/appointments",
+  workerRoleMiddleware,
+  getWorkerAppointmentsController
+);
 
 
-// admin Routes
+
+
+
+// Admin Routes
+// Admin login
 router.post("/adminLogin", adminlogin);
+
+// Update admin profile with optional image upload
 router.put(
   "/adprofile",
   AdminjwtMiddleware,
   upload.single("profileImage"),
   adminupdateProfile
 );
+
+// Get all registered users
 router.get("/getAllUsers", AdminjwtMiddleware, getUsersList);
+
+// Block a user by ID
 router.put("/blockUser/:id", AdminjwtMiddleware, blockUserController);
+
+// Unblock a user by ID
 router.put("/unblockUser/:id", AdminjwtMiddleware, unblockUserController);
+
+// Get all registered workers
 router.get("/getAllWorkers", AdminjwtMiddleware, getAllWorkersController);
+
+// Update status of a worker by ID
 router.put(
   "/updateWorkerStatus/:id",
   AdminjwtMiddleware,
   updateWorkerStatusController
 );
+
+// Block a worker by ID
 router.put("/blockWorker/:id", AdminjwtMiddleware, blockWorkerController);
+
+// Unblock a worker by ID
 router.put("/unblockWorker/:id", AdminjwtMiddleware, unblockWorkerController);
+
+// Delete a worker by ID
 router.delete("/deleteWorker/:id", AdminjwtMiddleware, deleteWorkerController);
 
+// Get all categories for admin
 router.get("/Adcategories", AdminjwtMiddleware, getCategoriesController);
+
+// Add a new category
 router.post("/categories", AdminjwtMiddleware, addCategoryController);
-router.put("/editCategory/:id",AdminjwtMiddleware, editCategoryController);
-router.get('/Adreviews',AdminjwtMiddleware, getAllReviewsWithDetailsController);
+
+// Edit an existing category by ID
+router.put("/editCategory/:id", AdminjwtMiddleware, editCategoryController);
+
+// Get all reviews with details for admin
+router.get(
+  "/Adreviews",
+  AdminjwtMiddleware,
+  getAllReviewsWithDetailsController
+);
+
+// Delete a review by ID
 router.delete("/review/:id", AdminjwtMiddleware, deleteReviewController);
-router.get('/counts', AdminjwtMiddleware,getAllCounts);
-router.get('/booking-trends', AdminjwtMiddleware, getBookingTrendsController);
 
+// Get all counts for various entities
+router.get("/counts", AdminjwtMiddleware, getAllCounts);
 
-router.get('/revenue', AdminjwtMiddleware, getDailyRevenue);
+// Get booking trends
+router.get("/booking-trends", AdminjwtMiddleware, getBookingTrendsController);
 
-router.get('/bookings',AdminjwtMiddleware, getAllBookings);
-router.get('/messages/unread-count/:userId',AdminjwtMiddleware,getUnreadMessagesCount);
-router.post('/room', createRoom);
-router.post('/message', sendMessage);
-router.get('/rooms', getRooms);
-router.get('/messages/:roomId', getMessages);
+// Get daily revenue
+router.get("/revenue", AdminjwtMiddleware, getDailyRevenue);
 
+// Get all bookings
+router.get("/bookings", AdminjwtMiddleware, getAllBookings);
 
+// Get unread messages count for a specific user
+router.get(
+  "/messages/unread-count/:userId",
+  AdminjwtMiddleware,
+  getUnreadMessagesCount
+);
 
+// Create a chat room
+router.post("/room", createRoom);
 
+// Send a message in a chat
+router.post("/message", sendMessage);
+
+// Get all chat rooms
+router.get("/rooms", getRooms);
+
+// Get messages for a specific room by ID
+router.get("/messages/:roomId", getMessages);
 
 export default router;

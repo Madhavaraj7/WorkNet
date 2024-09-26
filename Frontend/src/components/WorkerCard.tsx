@@ -15,7 +15,7 @@ export interface Worker {
   place: string;
   city: string;
   state: string;
-  categories: Category[] | string[]; // Adjust based on your actual data structure
+  categories: Category[] | string[]; 
   status: string;
 }
 

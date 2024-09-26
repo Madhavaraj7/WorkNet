@@ -1,9 +1,7 @@
 // src/application/walletService.ts
 
-import { WalletModel } from '../domain/wallet';
-
-
+import { WalletModel } from "../domain/wallet";
 
 export const getWalletByUserId = async (userId: string) => {
-    return await WalletModel.findOne({ userId }).exec();
+  return await WalletModel.findOne({ userId }).exec();
 };

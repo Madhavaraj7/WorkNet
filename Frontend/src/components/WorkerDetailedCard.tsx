@@ -6,7 +6,6 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { Button, Typography } from "@mui/material";
 import { toast } from 'react-toastify';
 
-// Define types for workerDetails
 interface WorkerDetails {
   name: string;
   profileImage: string;

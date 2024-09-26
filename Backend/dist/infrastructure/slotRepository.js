@@ -22,8 +22,8 @@ const findSlotByWorkerAndDate = (workerId, date) => __awaiter(void 0, void 0, vo
     return slot_1.Slot.findOne({
         workerId,
         date: {
-            $eq: date
-        }
+            $eq: date,
+        },
     }).exec();
 });
 exports.findSlotByWorkerAndDate = findSlotByWorkerAndDate;
@@ -37,6 +37,7 @@ const getSlotsByWorkerIdFromRepo = (workerId) => __awaiter(void 0, void 0, void 
     }).exec();
 });
 exports.getSlotsByWorkerIdFromRepo = getSlotsByWorkerIdFromRepo;
+// Function to upadate slots by worker ID
 const updateSlotAvailability = (slotId, isAvailable) => __awaiter(void 0, void 0, void 0, function* () {
     yield slot_1.Slot.findByIdAndUpdate(slotId, { isAvailable }).exec();
 });

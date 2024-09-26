@@ -15,11 +15,11 @@ const getWalletBalance = (req, res) => __awaiter(void 0, void 0, void 0, functio
     const userId = req.userId;
     try {
         if (!userId) {
-            return res.status(401).json({ error: 'User not authenticated' });
+            return res.status(401).json({ error: "User not authenticated" });
         }
         const wallet = yield (0, walletService_1.getWalletByUserId)(userId);
         if (!wallet) {
-            return res.status(404).json({ error: 'Wallet not found' });
+            return res.status(404).json({ error: "Wallet not found" });
         }
         res.status(200).json({
             walletBalance: wallet.walletBalance,

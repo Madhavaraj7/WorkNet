@@ -15,12 +15,8 @@ import ChatBox from "../Admin/Box";
 import io from "socket.io-client";
 import { SERVER_URL } from "../../Services/serverURL";
 
-
-
-
-// const socket = io("https://worknet.onrender.com"); // Your server URL
-const socket = io("https://worknet.solutions"); // for localhost
-
+// const socket = io("http://localhost:3000"); // Your server URL
+const socket = io("https://worknet.solutions"); // for prodcution
 
 interface Room {
   _id: string;
@@ -30,7 +26,9 @@ interface Room {
 }
 
 function Chat() {
-  const [selectedConversation, setSelectedConversation] = useState<Room | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Room | null>(
+    null
+  );
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
@@ -39,11 +37,11 @@ function Chat() {
       try {
         const response = await fetch(`${SERVER_URL}/rooms`);
         const data = await response.json();
-        
+
         const sortedRooms = data.sort((a: Room, b: Room) => {
           const timeA = new Date(a.latestMessage?.createdAt).getTime();
           const timeB = new Date(b.latestMessage?.createdAt).getTime();
-          return timeB - timeA; 
+          return timeB - timeA;
         });
 
         setAllRooms(sortedRooms);
@@ -54,37 +52,39 @@ function Chat() {
 
     fetchRooms();
 
-    // Emit when admin is online
     socket.emit("adminOnline");
 
-    // Listen for online status updates from the server
     socket.on("onlineStatus", (users: string[]) => {
       setOnlineUsers(new Set(users));
     });
 
-    // Listen for new messages
-    socket.on("newMessage", (newMessage: { roomId: string; message: string; createdAt: string }) => {
-      setAllRooms(prevRooms => {
-        const roomIndex = prevRooms.findIndex(room => room.roomId === newMessage.roomId);
-        if (roomIndex !== -1) {
-          // Update the room with the new message
-          const updatedRoom = { ...prevRooms[roomIndex], latestMessage: newMessage };
-          // Create a new array with the updated room
-          const updatedRooms = [
-            ...prevRooms.slice(0, roomIndex),
-            updatedRoom,
-            ...prevRooms.slice(roomIndex + 1)
-          ];
-          // Sort the rooms based on the latest message timestamp
-          return updatedRooms.sort((a: Room, b: Room) => {
-            const timeA = new Date(a.latestMessage?.createdAt).getTime();
-            const timeB = new Date(b.latestMessage?.createdAt).getTime();
-            return timeB - timeA; // Sort in descending order, most recent first
-          });
-        }
-        return prevRooms;
-      });
-    });
+    socket.on(
+      "newMessage",
+      (newMessage: { roomId: string; message: string; createdAt: string }) => {
+        setAllRooms((prevRooms) => {
+          const roomIndex = prevRooms.findIndex(
+            (room) => room.roomId === newMessage.roomId
+          );
+          if (roomIndex !== -1) {
+            const updatedRoom = {
+              ...prevRooms[roomIndex],
+              latestMessage: newMessage,
+            };
+            const updatedRooms = [
+              ...prevRooms.slice(0, roomIndex),
+              updatedRoom,
+              ...prevRooms.slice(roomIndex + 1),
+            ];
+            return updatedRooms.sort((a: Room, b: Room) => {
+              const timeA = new Date(a.latestMessage?.createdAt).getTime();
+              const timeB = new Date(b.latestMessage?.createdAt).getTime();
+              return timeB - timeA;
+            });
+          }
+          return prevRooms;
+        });
+      }
+    );
 
     return () => {
       socket.off("onlineStatus");
@@ -99,7 +99,6 @@ function Chat() {
       <br />
       <br />
       <Box display="flex" flexDirection="row" height="100vh">
-        {/* Chat Sidebar */}
         <Paper
           className="flex-none w-1/3 bg-gray-100 border-r border-gray-300 shadow-md"
           elevation={3}
@@ -125,7 +124,9 @@ function Chat() {
                 >
                   <ListItemAvatar>
                     <Badge
-                      color={isUserOnline(room.user._id) ? "primary" : "default"}
+                      color={
+                        isUserOnline(room.user._id) ? "primary" : "default"
+                      }
                       variant="dot"
                       overlap="circular"
                       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -146,7 +147,9 @@ function Chat() {
                             {room.latestMessage.message}
                           </Typography>
                           <Typography variant="caption" color="textSecondary">
-                            {new Date(room.latestMessage.createdAt).toLocaleTimeString()}
+                            {new Date(
+                              room.latestMessage.createdAt
+                            ).toLocaleTimeString()}
                           </Typography>
                         </>
                       ) : (
@@ -157,7 +160,11 @@ function Chat() {
                 </ListItem>
               ))
             ) : (
-              <Typography variant="body1" component="div" className="p-4 text-center text-gray-600">
+              <Typography
+                variant="body1"
+                component="div"
+                className="p-4 text-center text-gray-600"
+              >
                 No Rooms Found
               </Typography>
             )}
@@ -167,12 +174,22 @@ function Chat() {
         {/* Chat Box */}
         <Box
           className="flex-1 flex flex-col"
-          sx={{ overflow: "hidden", display: selectedConversation ? "flex" : "none", height: "100vh" }}
+          sx={{
+            overflow: "hidden",
+            display: selectedConversation ? "flex" : "none",
+            height: "100vh",
+          }}
         >
           {selectedConversation ? (
-            <ChatBox selectedConversation={selectedConversation} onlineUsers={onlineUsers} />
+            <ChatBox
+              selectedConversation={selectedConversation}
+              onlineUsers={onlineUsers}
+            />
           ) : (
-            <Box className="flex-1 flex items-center justify-center" sx={{ overflow: "hidden" }}>
+            <Box
+              className="flex-1 flex items-center justify-center"
+              sx={{ overflow: "hidden" }}
+            >
               <Typography variant="h6" color="textSecondary">
                 Select a chat to start messaging
               </Typography>

@@ -206,112 +206,122 @@ const MyBooking: React.FC = () => {
     </tr>
   </thead>
   <tbody>
-    {currentBookings.length > 0 ? (
-      currentBookings.map((booking, index) => {
-        const worker = booking.workerId;
-        const slot = booking.slotId;
+  {currentBookings.length > 0 ? (
+    currentBookings.map((booking, index) => {
+      const worker = booking.workerId;
+      const slot = booking.slotId;
 
-        const slotDate = slot?.date ? new Date(slot.date) : null;
+      const slotDate = slot?.date ? new Date(slot.date) : null;
 
-        // Get today's date without time
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); 
+      // Get today's date without time
+      const today = new Date();
+      // today.setHours(0, 0, 0, 0); 
+      console.log("today",today);
 
-        const isPastSlotDate = slotDate ? slotDate <= today : true;
+      console.log("slo",slotDate);
+      
+      
 
-        return (
-          <tr
-            key={index}
-            className={`text-center border-b ${
-              index % 2 === 0 ? "bg-gray-100" : "bg-white"
-            } hover:bg-gray-200 transition-colors`}
-          >
-            <td className="py-4 px-6 border-b">
-              {worker?.registerImage ? (
-                <img
-                  src={worker.registerImage}
-                  alt={worker.name}
-                  className="w-20 h-20 object-cover rounded-full mx-auto shadow-md"
-                />
-              ) : (
-                <span className="text-gray-500">No Image</span>
-              )}
-            </td>
-            <td className="py-4 px-6 border-b font-semibold text-gray-800">
-              {worker ? worker.name : "N/A"}
-            </td>
-            <td className="py-4 px-6 border-b text-gray-900 font-medium">
-              ₹{booking.amount.toFixed(2)}
-            </td>
-            <td className="py-4 px-6 border-b text-gray-700">
-              {/* Convert createdAt to a readable date */}
-              {new Date(booking.createdAt).toLocaleDateString("en-IN", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </td>
-            <td className="py-4 px-6 border-b text-gray-700">
-              {/* Convert slot date to a readable date */}
-              {slotDate
-                ? slotDate.toLocaleDateString("en-IN", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                : "N/A"}
-            </td>
-            <td className="py-4 px-6 border-b">
-              <div className="flex items-center justify-center space-x-3">
-                {worker?.whatsappNumber && (
-                  <button
-                    onClick={() =>
-                      window.open(
-                        `https://wa.me/${worker.whatsappNumber}`,
-                        "_blank"
-                      )
-                    }
-                    className="flex items-center px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 shadow-md transition-transform duration-300 transform hover:scale-105"
-                  >
-                    <FaWhatsapp className="mr-2 text-lg" />
-                    <span className="text-sm">WhatsApp</span>
-                  </button>
-                )}
-                {worker?.phoneNumber && (
-                  <a
-                    href={`tel:${worker.phoneNumber}`}
-                    className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md transition-transform duration-300 transform hover:scale-105"
-                  >
-                    <FaPhone className="mr-2 text-lg" />
-                    <span className="text-sm">Call</span>
-                  </a>
-                )}
-              </div>
-            </td>
-            <td className="py-4 px-6 border-b">
-              <Button
-                onClick={() => handleOpenModal(booking._id)}
-                variant="contained"
-                color="error"
-                disabled={isPastSlotDate} // Disable button if the slotted date is a past date
-              >
-                Cancel
-              </Button>
-            </td>
-          </tr>
-        );
-      })
-    ) : (
-      <tr>
-        <td
-          colSpan={7} // Updated to reflect the new column
-          className="py-8 px-4 text-center text-gray-500"
+      // Check if the slot date is today or a past date
+      const isPastOrTodaySlotDate = slotDate ? slotDate <= today : true;
+
+      console.log(isPastOrTodaySlotDate);
+      
+
+      return (
+        <tr
+          key={index}
+          className={`text-center border-b ${
+            index % 2 === 0 ? "bg-gray-100" : "bg-white"
+          } hover:bg-gray-200 transition-colors`}
         >
-          No bookings found.
-        </td>
-      </tr>
-    )}
-  </tbody>
+          <td className="py-4 px-6 border-b">
+            {worker?.registerImage ? (
+              <img
+                src={worker.registerImage}
+                alt={worker.name}
+                className="w-20 h-20 object-cover rounded-full mx-auto shadow-md"
+              />
+            ) : (
+              <span className="text-gray-500">No Image</span>
+            )}
+          </td>
+          <td className="py-4 px-6 border-b font-semibold text-gray-800">
+            {worker ? worker.name : "N/A"}
+          </td>
+          <td className="py-4 px-6 border-b text-gray-900 font-medium">
+            ₹{booking.amount.toFixed(2)}
+          </td>
+          <td className="py-4 px-6 border-b text-gray-700">
+            {/* Convert createdAt to a readable date */}
+            {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </td>
+          <td className="py-4 px-6 border-b text-gray-700">
+            {/* Convert slot date to a readable date */}
+            {slotDate
+              ? slotDate.toLocaleDateString("en-IN", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "N/A"}
+          </td>
+          <td className="py-4 px-6 border-b">
+            <div className="flex items-center justify-center space-x-3">
+              {worker?.whatsappNumber && (
+                <button
+                  onClick={() =>
+                    window.open(
+                      `https://wa.me/${worker.whatsappNumber}`,
+                      "_blank"
+                    )
+                  }
+                  className="flex items-center px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 shadow-md transition-transform duration-300 transform hover:scale-105"
+                >
+                  <FaWhatsapp className="mr-2 text-lg" />
+                  <span className="text-sm">WhatsApp</span>
+                </button>
+              )}
+              {worker?.phoneNumber && (
+                <a
+                  href={`tel:${worker.phoneNumber}`}
+                  className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md transition-transform duration-300 transform hover:scale-105"
+                >
+                  <FaPhone className="mr-2 text-lg" />
+                  <span className="text-sm">Call</span>
+                </a>
+              )}
+            </div>
+          </td>
+          <td className="py-4 px-6 border-b">
+            <Button
+              onClick={() => handleOpenModal(booking._id)}
+              variant="contained"
+              color="error"
+              disabled={isPastOrTodaySlotDate} // Disable button if the slotted date is a past date or today
+            >
+              {isPastOrTodaySlotDate ? "No Cancellation" : "Cancel"}
+            </Button>
+          </td>
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td
+        colSpan={7} // Updated to reflect the new column
+        className="py-8 px-4 text-center text-gray-500"
+      >
+        No bookings found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
 </table>
 
 

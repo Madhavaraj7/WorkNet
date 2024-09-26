@@ -18,19 +18,13 @@ const UserSchema: Schema<UserModel> = new Schema({
     type: Number,
     default: 0,
   },
-  isBlocked: { type: Boolean, default: false }, 
-  role: { type: String, default: 'user' } 
-
-
-
+  isBlocked: { type: Boolean, default: false },
+  role: { type: String, default: "user" },
 });
 
 export const UserModel = mongoose.model<UserModel>("User", UserSchema);
 
-
-
-
-// Function to create a new user
+// Function to create a new user and save it to the database.
 export const createUser = async (user: User) => {
   const newUser = new UserModel(user);
   return newUser.save();
@@ -55,47 +49,58 @@ export const findUserByEmailAndPassword = async (
 };
 
 // Function to update the user's profile by user ID
-export const updateUserProfile = async (userId: string, update: Partial<User>) => {
+export const updateUserProfile = async (
+  userId: string,
+  update: Partial<User>
+) => {
   return UserModel.findByIdAndUpdate(userId, update, { new: true });
 };
 
-
-export const findUserByEmailAdmin = async (email: string): Promise<User | null> => {
+// Function to find a user by their email and password.
+export const findUserByEmailAdmin = async (
+  email: string
+): Promise<User | null> => {
   const user = await UserModel.findOne({ email });
   return user ? user.toObject() : null;
 };
 
-export const updateAdminProfile = async (userId: string, update: Partial<User>) => {
+// Function to update the user's profile using their user ID.
+export const updateAdminProfile = async (
+  userId: string,
+  update: Partial<User>
+) => {
   return UserModel.findByIdAndUpdate(userId, update, { new: true });
 };
 
-// Function to find a user by ID
+// Function to find a user by their email address for admin purposes.
 export const findUserById = async (userId: string) => {
   return UserModel.findById(userId);
 };
 
-
 // Fetch all users
 export const findAllUsers = async (): Promise<User[]> => {
-  return UserModel.find(); 
+  return UserModel.find();
 };
-
-
 
 // Function to block a user by ID
 export const blockUserById = async (userId: string) => {
-  return UserModel.findByIdAndUpdate(userId, { isBlocked: true }, { new: true });
+  return UserModel.findByIdAndUpdate(
+    userId,
+    { isBlocked: true },
+    { new: true }
+  );
 };
 
 // Function to unblock a user by ID
 export const unblockUserById = async (userId: string) => {
-  return UserModel.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
+  return UserModel.findByIdAndUpdate(
+    userId,
+    { isBlocked: false },
+    { new: true }
+  );
 };
 
-
-
+// Function to fetch all categories from the database.
 export const getAllCategories = async () => {
   return Category.find();
 };
-
-

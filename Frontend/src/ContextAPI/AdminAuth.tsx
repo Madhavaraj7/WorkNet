@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
 
 interface Admin {
-  _id?: string;  // Added _id field
+  _id?: string;  
   profileImage?: string;
   username?: string;
   email?: string;

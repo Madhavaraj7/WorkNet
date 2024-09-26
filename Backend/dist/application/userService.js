@@ -18,14 +18,13 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userRepository_1 = require("../infrastructure/userRepository");
 const userRepository_2 = require("../infrastructure/userRepository");
 const sendEmail_1 = require("../utils/sendEmail");
-const otpGenerator_1 = require("../utils/otpGenerator"); // Make sure this function generates OTPs
+const otpGenerator_1 = require("../utils/otpGenerator");
 const slot_1 = require("../domain/slot");
 const booking_1 = require("../domain/booking");
 // registerUser new User
 const registerUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const existingUser = yield (0, userRepository_1.findUserByEmail)(user.email);
-        // console.log(existingUser);
         if (existingUser) {
             if (existingUser.otpVerified) {
                 throw new Error("User already exists");
@@ -76,6 +75,7 @@ const googleLogin = (_a) => __awaiter(void 0, [_a], void 0, function* ({ email, 
     }
 });
 exports.googleLogin = googleLogin;
+// Verify OTP and save the user
 const verifyAndSaveUser = (email, otp) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, userRepository_1.findUserByEmail)(email);
     if (user && user.otp === otp) {
@@ -87,6 +87,7 @@ const verifyAndSaveUser = (email, otp) => __awaiter(void 0, void 0, void 0, func
     throw new Error("Invalid OTP");
 });
 exports.verifyAndSaveUser = verifyAndSaveUser;
+// Update user OTP
 const updateUserOtp = (email, otp) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, userRepository_1.findUserByEmail)(email);
     if (!user) {
@@ -96,13 +97,14 @@ const updateUserOtp = (email, otp) => __awaiter(void 0, void 0, void 0, function
 });
 exports.updateUserOtp = updateUserOtp;
 // login the user
-// Function to generate tokens
 const generateAccessToken = (userId) => {
     return jsonwebtoken_1.default.sign({ userId }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
 };
+// Refresh the access token using a refresh token
 const generateRefreshToken = (userId) => {
     return jsonwebtoken_1.default.sign({ userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: "7d" });
 };
+// Login the user
 const loginUser = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, userRepository_1.findUserByEmail)(email);
     if (!user) {
@@ -125,6 +127,7 @@ const loginUser = (email, password) => __awaiter(void 0, void 0, void 0, functio
     return { user, accessToken, refreshToken };
 });
 exports.loginUser = loginUser;
+// Refresh the access token using a refresh token
 const refreshAccessToken = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Verify refresh token
@@ -134,9 +137,7 @@ const refreshAccessToken = (refreshToken) => __awaiter(void 0, void 0, void 0, f
         if (!user) {
             throw new Error("User not found");
         }
-        // Generate a new access token
         const newAccessToken = generateAccessToken(userId);
-        // Return new access token
         return { accessToken: newAccessToken };
     }
     catch (error) {
@@ -144,12 +145,10 @@ const refreshAccessToken = (refreshToken) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.refreshAccessToken = refreshAccessToken;
+// Update user profile
 const updateUserProfile = (userId, update) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("userId:", userId);
-        // console.log('update:', update);
         const updatedUser = yield (0, userRepository_2.updateUserProfile)(userId, update);
-        // console.log(updateUser);
         if (!updatedUser) {
             throw new Error("User not found");
         }
@@ -161,6 +160,7 @@ const updateUserProfile = (userId, update) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.updateUserProfile = updateUserProfile;
+// Handle forgot password
 const forgotPassword = (email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield (0, userRepository_1.findUserByEmail)(email);
@@ -197,10 +197,12 @@ const resetPassword = (email, otp, newPassword) => __awaiter(void 0, void 0, voi
     }
 });
 exports.resetPassword = resetPassword;
+// Fetch all categories
 const fetchAllCategories = () => __awaiter(void 0, void 0, void 0, function* () {
     return (0, userRepository_1.getAllCategories)();
 });
 exports.fetchAllCategories = fetchAllCategories;
+// Get available slots by worker ID
 const getSlotsByWorkerIdService = (workerId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const today = new Date();
@@ -217,6 +219,7 @@ const getSlotsByWorkerIdService = (workerId) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.getSlotsByWorkerIdService = getSlotsByWorkerIdService;
+// Get confirmed bookings for a user
 const getUserBookedWorkers = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return booking_1.Booking.find({ userId, status: "Confirmed" })
         .populate({
@@ -225,7 +228,7 @@ const getUserBookedWorkers = (userId) => __awaiter(void 0, void 0, void 0, funct
     })
         .populate({
         path: "slotId",
-        select: "date", // Select the slotted date from the Slot schema
+        select: "date",
     })
         .sort({ createdAt: -1 })
         .exec();

@@ -17,7 +17,7 @@ const userService_1 = require("../../application/userService");
 const otpGenerator_1 = require("../../utils/otpGenerator");
 const sendEmail_1 = require("../../utils/sendEmail");
 const userRepository_1 = require("../../infrastructure/userRepository");
-const wallet_1 = require("../../domain/wallet"); // Adjust the path if needed
+const wallet_1 = require("../../domain/wallet");
 const axios_1 = __importDefault(require("axios"));
 const sharp_1 = __importDefault(require("sharp"));
 const cloudinaryConfig_1 = __importDefault(require("../../cloudinaryConfig"));
@@ -27,34 +27,38 @@ const googleLoginHandler = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const { email, username, profileImage } = req.body;
         if (!profileImage) {
-            return res.status(400).json({ error: 'Profile image URL is required' });
+            return res.status(400).json({ error: "Profile image URL is required" });
         }
         const imageResponse = yield (0, axios_1.default)({
             url: profileImage,
-            responseType: 'arraybuffer',
+            responseType: "arraybuffer",
         });
-        const imageBuffer = yield (0, sharp_1.default)(imageResponse.data)
-            .jpeg()
-            .toBuffer();
-        cloudinaryConfig_1.default.uploader.upload_stream((error, result) => {
+        const imageBuffer = yield (0, sharp_1.default)(imageResponse.data).jpeg().toBuffer();
+        cloudinaryConfig_1.default.uploader
+            .upload_stream((error, result) => {
             if (error) {
-                return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+                return res
+                    .status(500)
+                    .json({ error: "Failed to upload image to Cloudinary" });
             }
-            const profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || '';
+            const profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || "";
             (0, userService_1.googleLogin)({
                 email,
                 username,
                 profileImagePath: profileImageUrl,
-            }).then((loginResult) => {
+            })
+                .then((loginResult) => {
                 res.status(200).json(loginResult);
-            }).catch(error => {
-                res.status(500).json({ error: 'Failed to handle Google login' });
+            })
+                .catch((error) => {
+                res.status(500).json({ error: "Failed to handle Google login" });
             });
-        }).end(imageBuffer);
+        })
+            .end(imageBuffer);
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to process Google login' });
+        res.status(500).json({ error: "Failed to process Google login" });
     }
 });
 exports.googleLoginHandler = googleLoginHandler;
@@ -63,7 +67,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, email, password } = req.body;
         const profileImage = req.file ? req.file.buffer : req.body.profileImage;
-        let profileImageUrl = '';
+        let profileImageUrl = "";
         const proceedWithRegistration = () => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const otp = (0, otpGenerator_1.otpGenerator)();
@@ -81,20 +85,26 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 res.status(200).json("OTP sent to email");
             }
             catch (error) {
-                res.status(400).json({ error: 'Registration failed: ' + error.message });
+                res
+                    .status(400)
+                    .json({ error: "Registration failed: " + error.message });
             }
         });
         if (profileImage) {
-            cloudinaryConfig_1.default.uploader.upload_stream((error, result) => {
+            cloudinaryConfig_1.default.uploader
+                .upload_stream((error, result) => {
                 if (error) {
-                    return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+                    return res
+                        .status(500)
+                        .json({ error: "Failed to upload image to Cloudinary" });
                 }
-                profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || '';
+                profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || "";
                 proceedWithRegistration();
-            }).end(profileImage);
+            })
+                .end(profileImage);
         }
         else {
-            profileImageUrl = req.body.profileImage || '';
+            profileImageUrl = req.body.profileImage || "";
             proceedWithRegistration();
         }
     }
@@ -103,6 +113,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.register = register;
+// Verify OTP for user registration
 const verifyOtp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, otp } = req.body;
@@ -132,48 +143,49 @@ const verifyOtp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.verifyOtp = verifyOtp;
+// Resend OTP to the user's email
 const resendOtp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
     if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
+        return res.status(400).json({ error: "Email is required" });
     }
     try {
         const user = yield (0, userRepository_1.findUserByEmail)(email);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: "User not found" });
         }
         const otp = (0, otpGenerator_1.otpGenerator)();
         yield (0, userService_1.updateUserOtp)(email, otp);
         yield (0, sendEmail_1.sendEmail)(email, otp);
-        res.status(200).json({ message: 'OTP has been resent' });
+        res.status(200).json({ message: "OTP has been resent" });
     }
     catch (error) {
-        res.status(500).json({ error: 'Failed to resend OTP' });
+        res.status(500).json({ error: "Failed to resend OTP" });
     }
 });
 exports.resendOtp = resendOtp;
+// User login handler
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
         const { user, accessToken, refreshToken } = yield (0, userService_1.loginUser)(email, password);
-        // console.log({ user, accessToken, refreshToken });
         res.status(200).json({ user, accessToken, refreshToken });
     }
     catch (error) {
-        // Handle login errors
         res.status(400).json({ error: error.message });
     }
 });
 exports.login = login;
+// Update user profile information
 const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId } = req;
         const { username, email, oldPassword, newPassword } = req.body;
         const profileImage = req.file ? req.file.buffer : null;
-        let profileImageUrl = '';
+        let profileImageUrl = "";
         const user = yield (0, userRepository_1.findUserById)(userId);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: "User not found" });
         }
         const proceedWithUpdate = (hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
             try {
@@ -189,20 +201,27 @@ const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 res.status(200).json(updatedUser);
             }
             catch (error) {
-                res.status(400).json({ error: 'Failed to update profile: ' + error.message });
+                res
+                    .status(400)
+                    .json({ error: "Failed to update profile: " + error.message });
             }
         });
         if (profileImage) {
-            cloudinaryConfig_1.default.uploader.upload_stream((error, result) => __awaiter(void 0, void 0, void 0, function* () {
+            cloudinaryConfig_1.default.uploader
+                .upload_stream((error, result) => __awaiter(void 0, void 0, void 0, function* () {
                 if (error) {
-                    return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+                    return res
+                        .status(500)
+                        .json({ error: "Failed to upload image to Cloudinary" });
                 }
-                profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || '';
+                profileImageUrl = (result === null || result === void 0 ? void 0 : result.secure_url) || "";
                 if (newPassword) {
                     // Verify old password and hash new password
                     const isMatch = yield bcrypt_1.default.compare(oldPassword, user.password);
                     if (!isMatch) {
-                        return res.status(400).json({ error: 'Old password is incorrect. Please use the forgot password option.' });
+                        return res.status(400).json({
+                            error: "Old password is incorrect. Please use the forgot password option.",
+                        });
                     }
                     const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
                     proceedWithUpdate(hashedPassword);
@@ -210,14 +229,17 @@ const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 else {
                     proceedWithUpdate();
                 }
-            })).end(profileImage);
+            }))
+                .end(profileImage);
         }
         else {
             // Hash password if provided and old password is correct
             if (newPassword) {
                 const isMatch = yield bcrypt_1.default.compare(oldPassword, user.password);
                 if (!isMatch) {
-                    return res.status(400).json({ error: 'Old password is incorrect. Please use the forgot password option.' });
+                    return res.status(400).json({
+                        error: "Old password is incorrect. Please use the forgot password option.",
+                    });
                 }
                 const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
                 proceedWithUpdate(hashedPassword);
@@ -232,6 +254,7 @@ const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.updateProfile = updateProfile;
+// Handle password reset requests
 const forgotPasswordHandler = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = req.body;
@@ -243,6 +266,7 @@ const forgotPasswordHandler = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.forgotPasswordHandler = forgotPasswordHandler;
+// Reset user password with OTP verification
 const resetPasswordHandler = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, otp, newPassword } = req.body;
@@ -261,10 +285,11 @@ const getCategoriesController = (req, res) => __awaiter(void 0, void 0, void 0, 
         res.status(200).json(categories);
     }
     catch (error) {
-        res.status(500).json({ error: 'Failed to fetch categories' });
+        res.status(500).json({ error: "Failed to fetch categories" });
     }
 });
 exports.getCategoriesController = getCategoriesController;
+// Get slots by worker ID
 const getSlotsByWorkerIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { wId } = req.params;
@@ -272,10 +297,11 @@ const getSlotsByWorkerIdController = (req, res) => __awaiter(void 0, void 0, voi
         return res.status(200).json(slots);
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error retrieving slots', error });
+        return res.status(500).json({ message: "Error retrieving slots", error });
     }
 });
 exports.getSlotsByWorkerIdController = getSlotsByWorkerIdController;
+// Get booked workers for the user
 const getUserBookedWorkersController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.userId;

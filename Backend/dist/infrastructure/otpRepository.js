@@ -16,9 +16,9 @@ exports.deleteOTP = exports.findOTPByEmail = exports.createOTP = exports.OTPMode
 const mongoose_1 = __importDefault(require("mongoose"));
 const otpSchema = new mongoose_1.default.Schema({
     email: String,
-    otp: String
+    otp: String,
 });
-exports.OTPModel = mongoose_1.default.model('OTP', otpSchema);
+exports.OTPModel = mongoose_1.default.model("OTP", otpSchema);
 const createOTP = (otp) => __awaiter(void 0, void 0, void 0, function* () {
     return new exports.OTPModel(otp).save();
 });

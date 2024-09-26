@@ -46,7 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchAllBookings = exports.getBookingTrends = exports.getAllCounts = exports.fetchAllReviewsWithDetails = exports.findCategoryByName = exports.updateCategory = exports.addCategory = exports.deleteWorker = exports.updateWorkerStatus = exports.getAllWorkers = exports.unblockUser = exports.blockUser = exports.getAllUsers = exports.updateUserProfile = exports.loginUser = void 0;
+exports.deleteReviewById = exports.fetchAllBookings = exports.getBookingTrends = exports.getAllCounts = exports.fetchAllReviewsWithDetails = exports.findCategoryByName = exports.updateCategory = exports.addCategory = exports.deleteWorker = exports.updateWorkerStatus = exports.getAllWorkers = exports.unblockUser = exports.blockUser = exports.getAllUsers = exports.updateUserProfile = exports.loginUser = void 0;
 exports.fetchDailyRevenue = fetchDailyRevenue;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -55,13 +55,15 @@ const errorHandler_1 = require("../utils/errorHandler");
 const adminRepository_1 = require("../infrastructure/adminRepository");
 const worker_1 = require("../domain/worker");
 const category_1 = require("../domain/category");
-const userRepository_2 = require("../infrastructure/userRepository"); // Adjust the import to point to your User model
+const userRepository_2 = require("../infrastructure/userRepository");
 const adminRepository = __importStar(require("../infrastructure/adminRepository"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const sendEamilForApprove_1 = require("../utils/sendEamilForApprove");
 const reviewRepository_1 = require("../infrastructure/reviewRepository");
+const adminRepository_2 = require("../infrastructure/adminRepository");
 const booking_1 = require("../domain/booking");
 // Function to log in an admin user
+// Verifies credentials, checks if user is verified, and generates JWT token
 const loginUser = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
     const validUser = yield (0, userRepository_1.findUserByEmailAdmin)(email);
     if (!validUser) {
@@ -84,12 +86,10 @@ const loginUser = (email, password) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.loginUser = loginUser;
 // Function to update a user's profile
+// Updates profile information for an admin user
 const updateUserProfile = (userId, update) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("userId:", userId);
-        // console.log('update:', update);
         const updatedUser = yield (0, userRepository_1.updateAdminProfile)(userId, update);
-        // console.log(updateUser);
         if (!updatedUser) {
             throw new Error("User not found");
         }
@@ -102,11 +102,13 @@ const updateUserProfile = (userId, update) => __awaiter(void 0, void 0, void 0, 
 });
 exports.updateUserProfile = updateUserProfile;
 // Fetch all users
+// Retrieves all users from the database
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     return (0, userRepository_1.findAllUsers)();
 });
 exports.getAllUsers = getAllUsers;
 // Function to block a user
+// Marks a user as blocked in the database
 const blockUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, userRepository_1.findUserById)(userId);
     if (!user) {
@@ -119,6 +121,7 @@ const blockUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.blockUser = blockUser;
 // Function to unblock a user
+// Marks a user as unblocked in the database
 const unblockUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, userRepository_1.findUserById)(userId);
     if (!user) {
@@ -131,33 +134,31 @@ const unblockUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.unblockUser = unblockUser;
 // Function to Get all workers
+// Retrieves all workers from the database
 const getAllWorkers = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield (0, adminRepository_1.getAllWorkersFromDB)();
 });
 exports.getAllWorkers = getAllWorkers;
-// Function to Update all workers status
+// Function to update worker status
+// Approves or rejects a worker's application and sends a notification email
 const updateWorkerStatus = (_id, status) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Find the worker by _id
         const worker = yield worker_1.Worker.findOne({ _id });
         console.log("worker", worker);
-        // If worker is not found, throw an error
         if (!worker) {
             throw new Error("Worker not found");
         }
-        // Update the worker's status
         const updatedWorker = yield worker_1.Worker.findOneAndUpdate({ _id }, { status }, { new: true });
-        // Fetch the associated user by worker.userId
         const user = yield userRepository_2.UserModel.findOne({ _id: worker.userId });
         if (!user) {
             throw new Error("User not found");
         }
-        // If the status is approved, update the user's role to "worker"
         if (status === "approved") {
             yield userRepository_2.UserModel.findOneAndUpdate({ _id: worker.userId }, { role: "worker" }, { new: true });
         }
-        // Send email notification based on the status
-        const emailSubject = status === "approved" ? "Worker Status Approved" : "Worker Status Rejected";
+        const emailSubject = status === "approved"
+            ? "Worker Status Approved"
+            : "Worker Status Rejected";
         const emailBody = status === "approved"
             ? "Congratulations! Your worker status has been approved please login again."
             : "We regret to inform you that your worker status has been rejected.";
@@ -175,17 +176,18 @@ const updateWorkerStatus = (_id, status) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.updateWorkerStatus = updateWorkerStatus;
 // Function to delete a worker
+// Blocks a worker and marks their user account as blocked in the database
 const deleteWorker = (workerId) => __awaiter(void 0, void 0, void 0, function* () {
     const worker = yield worker_1.Worker.findById(workerId);
     if (!worker) {
-        throw (0, errorHandler_1.errorHandler)(404, 'Worker not found');
+        throw (0, errorHandler_1.errorHandler)(404, "Worker not found");
     }
     worker.isBlocked = true;
     yield worker.save();
     const userId = worker.userId;
     const user = yield userRepository_2.UserModel.findById(userId);
     if (!user) {
-        throw (0, errorHandler_1.errorHandler)(404, 'User not found');
+        throw (0, errorHandler_1.errorHandler)(404, "User not found");
     }
     user.isBlocked = true;
     yield user.save();
@@ -193,43 +195,48 @@ const deleteWorker = (workerId) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.deleteWorker = deleteWorker;
 // Function to add a new category
+// Creates a new category in the system
 const addCategory = (name, description) => __awaiter(void 0, void 0, void 0, function* () {
     const newCategory = yield (0, adminRepository_1.createCategory)({ name, description });
     return newCategory;
 });
 exports.addCategory = addCategory;
 // Function to update a category
+// Updates details of an existing category by its ID
 const updateCategory = (_id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
-    // Validate the _id
     if (!mongoose_1.default.Types.ObjectId.isValid(_id)) {
-        throw new Error('Invalid category ID');
+        throw new Error("Invalid category ID");
     }
     try {
-        // Find and update the category
         const updatedCategory = yield category_1.Category.findByIdAndUpdate(_id, updateData, {
             new: true,
-            runValidators: true, // Ensure validators are run during the update
+            runValidators: true,
         });
-        console.log(exports.updateCategory);
         if (!updatedCategory) {
-            throw new Error('Category not found');
+            throw new Error("Category not found");
         }
         return updatedCategory;
     }
     catch (error) {
-        console.error('Error updating category:', error);
-        throw new Error('Failed to update category');
+        console.error("Error updating category:", error);
+        throw new Error("Failed to update category");
     }
 });
 exports.updateCategory = updateCategory;
+// Function to find a category by name
+// Searches for a category by its name
 const findCategoryByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
     return category_1.Category.findOne({ name });
 });
 exports.findCategoryByName = findCategoryByName;
+// Function to fetch all reviews with details
+// Retrieves all reviews along with additional details
 const fetchAllReviewsWithDetails = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield (0, reviewRepository_1.getAllReviewsWithDetails)();
 });
 exports.fetchAllReviewsWithDetails = fetchAllReviewsWithDetails;
+// Function to get counts of users, workers, bookings, and reviews
+// Fetches the count of various entities in the system
 const getAllCounts = () => __awaiter(void 0, void 0, void 0, function* () {
     const usersCount = yield adminRepository.getUsersCount();
     const workersCount = yield adminRepository.getWorkersCount();
@@ -238,39 +245,50 @@ const getAllCounts = () => __awaiter(void 0, void 0, void 0, function* () {
     return { usersCount, workersCount, bookingsCount, reviewCount };
 });
 exports.getAllCounts = getAllCounts;
+// Function to get booking trends
+// Fetches the count of bookings between two dates, grouped by day
 const getBookingTrends = (startDate, endDate) => __awaiter(void 0, void 0, void 0, function* () {
     const bookings = yield booking_1.Booking.aggregate([
         { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                count: { $sum: 1 },
+            },
+        },
         { $sort: { _id: 1 } },
     ]);
-    return bookings.map(booking => ({
+    return bookings.map((booking) => ({
         date: booking._id,
         count: booking.count,
     }));
 });
 exports.getBookingTrends = getBookingTrends;
+// Function to fetch daily revenue
+// Retrieves total revenue for a specific day
 function fetchDailyRevenue(year, month, day) {
     return __awaiter(this, void 0, void 0, function* () {
-        const startDate = new Date(year, month - 1, day, 0, 0, 0); // Start of the day
-        const endDate = new Date(year, month - 1, day + 1, 0, 0, 0); // Start of the next day
+        const startDate = new Date(year, month - 1, day, 0, 0, 0);
+        const endDate = new Date(year, month - 1, day + 1, 0, 0, 0);
         const result = yield booking_1.Booking.aggregate([
             {
                 $match: {
-                    status: 'Confirmed',
+                    status: "Confirmed",
                     createdAt: { $gte: startDate, $lt: endDate },
                 },
             },
             {
                 $group: {
                     _id: null,
-                    totalRevenue: { $sum: '$amount' },
+                    totalRevenue: { $sum: "$amount" },
                 },
             },
         ]);
         return result.length > 0 ? result[0].totalRevenue : 0;
     });
 }
+// Function to fetch daily revenue
+// Retrieves total revenue for a specific day
 const fetchAllBookings = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const bookings = yield (0, adminRepository_1.getAllBookingsWithDetails)();
@@ -281,3 +299,9 @@ const fetchAllBookings = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.fetchAllBookings = fetchAllBookings;
+// Function to delete a review
+// Deletes a review from the database by its ID
+const deleteReviewById = (reviewId) => __awaiter(void 0, void 0, void 0, function* () {
+    yield (0, adminRepository_2.deleteReviewById)(reviewId);
+});
+exports.deleteReviewById = deleteReviewById;

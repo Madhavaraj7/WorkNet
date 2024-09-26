@@ -16,16 +16,16 @@ exports.processStripePayment = exports.stripe = void 0;
 const stripe_1 = __importDefault(require("stripe"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 if (!stripeSecretKey) {
-    throw new Error('Stripe secret key is not defined');
+    throw new Error("Stripe secret key is not defined");
 }
-exports.stripe = new stripe_1.default(stripeSecretKey, { apiVersion: '2024-06-20' });
+exports.stripe = new stripe_1.default(stripeSecretKey, { apiVersion: "2024-06-20" });
 const processStripePayment = (amount, stripeToken) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const paymentIntent = yield exports.stripe.paymentIntents.create({
             amount: amount * 100,
-            currency: 'inr',
+            currency: "inr",
             payment_method: stripeToken,
             confirm: true,
         });

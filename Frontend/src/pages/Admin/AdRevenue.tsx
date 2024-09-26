@@ -27,15 +27,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import jsPDF from "jspdf";
-import "jspdf-autotable"; // Ensure it's imported after jsPDF
-import * as XLSX from "xlsx"; // For Excel
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 
-// Types
 interface Booking {
   _id: string;
   userId: { username: string };
   slotId: { date: string };
-  workerId: { name: string }; // Added field for worker's name
+  workerId: { name: string };
   amount: number;
   status: string;
 }
@@ -222,7 +221,7 @@ const AdRevenue: React.FC = () => {
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
                 >
-                  {booking.workerId.name} {/* Worker Name */}
+                  {booking.workerId.name}
                 </TableCell>
                 <TableCell
                   className="text-center"
@@ -264,7 +263,6 @@ const AdRevenue: React.FC = () => {
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={bookingData}>
-            {/* Define a gradient for the line */}
             <defs>
               <linearGradient id="colorLine" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
@@ -272,14 +270,11 @@ const AdRevenue: React.FC = () => {
               </linearGradient>
             </defs>
 
-            {/* Customized Cartesian Grid */}
             <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
 
-            {/* X and Y Axes with custom styles */}
             <XAxis dataKey="date" tick={{ fontSize: 14, fill: "#333" }} />
             <YAxis tick={{ fontSize: 14, fill: "#333" }} />
 
-            {/* Tooltip customization */}
             <Tooltip
               contentStyle={{
                 backgroundColor: "#fff",
@@ -293,7 +288,6 @@ const AdRevenue: React.FC = () => {
               ]}
             />
 
-            {/* Add the line with gradient, smooth transitions, and dots */}
             <Line
               type="monotone"
               dataKey="count"

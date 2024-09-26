@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchReviewsForWorker = exports.addReview = void 0;
 const reviewRepository_1 = require("../infrastructure/reviewRepository");
+// Add a review for a worker if the user has booked them and hasn't reviewed them before
 const addReview = (reviewData) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, workerId } = reviewData;
     try {
@@ -34,6 +35,7 @@ const addReview = (reviewData) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.addReview = addReview;
+// Fetch all reviews for a specific worker by their ID
 const fetchReviewsForWorker = (workerId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield (0, reviewRepository_1.getReviewsByWorkerId)(workerId);
 });

@@ -1,12 +1,19 @@
 import { useEffect, useState, useRef } from "react";
-import { Avatar, Button, TextField, Paper, Typography, Box as MuiBox } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  TextField,
+  Paper,
+  Typography,
+  Box as MuiBox,
+} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import io from "socket.io-client";
 import { SERVER_URL } from "../../Services/serverURL";
 
-// const socket = io("https://worknet.onrender.com"); // for production
-const socket = io("https://worknet.solutions"); // for localhost
-// 
+// const socket = io("http://localhost:3000"); // Your server URL
+const socket = io("https://worknet.solutions"); // for production
+//
 
 interface Message {
   _id: string;
@@ -31,7 +38,7 @@ interface Room {
 
 interface ChatBoxProps {
   selectedConversation: Room | null;
-  onlineUsers: Set<string>; // Prop to keep track of online users
+  onlineUsers: Set<string>;
 }
 
 function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
@@ -39,15 +46,17 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const admin = "66bb2bd548e166a70bce4c66"; // Admin user ID
+  const admin = "66bb2bd548e166a70bce4c66";
 
   useEffect(() => {
     if (selectedConversation && selectedConversation._id) {
-      socket.emit('joinRoom', selectedConversation._id);
+      socket.emit("joinRoom", selectedConversation._id);
 
       const fetchMessages = async () => {
         try {
-          const response = await fetch(`${SERVER_URL}/messages/${selectedConversation._id}`);
+          const response = await fetch(
+            `${SERVER_URL}/messages/${selectedConversation._id}`
+          );
           const data = await response.json();
           setMessages(data);
         } catch (error) {
@@ -57,14 +66,12 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
 
       fetchMessages();
 
-      socket.on('message', (newMessage: Message) => {
+      socket.on("message", (newMessage: Message) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
 
-      
-
       return () => {
-        socket.off('message');
+        socket.off("message");
       };
     }
   }, [selectedConversation]);
@@ -95,13 +102,11 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
 
         if (response.ok) {
           const newMessage = await response.json();
-          socket.emit('message', newMessage);
+          socket.emit("message", newMessage);
         } else {
           const errorData = await response.json();
-          console.error('Failed to send message:', errorData);
+          console.error("Failed to send message:", errorData);
         }
-
-
       } catch (error) {
         console.error("Failed to send message:", error);
       }
@@ -110,7 +115,7 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
@@ -121,17 +126,23 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
         </Typography>
         <MuiBox className="flex items-center">
           <Avatar
-            src={selectedConversation?.user.profileImage || "/default-profile.png"}
+            src={
+              selectedConversation?.user.profileImage || "/default-profile.png"
+            }
             sx={{ width: 48, height: 48 }}
           />
           <MuiBox
             sx={{
               width: 12,
               height: 12,
-              borderRadius: '50%',
-              backgroundColor: onlineUsers.has(selectedConversation?.user._id || "") ? "green" : "red",
+              borderRadius: "50%",
+              backgroundColor: onlineUsers.has(
+                selectedConversation?.user._id || ""
+              )
+                ? "green"
+                : "red",
               marginLeft: 1,
-              border: '2px solid white',
+              border: "2px solid white",
             }}
           />
         </MuiBox>
@@ -145,15 +156,21 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
           messages.map((msg) => (
             <MuiBox
               key={msg._id}
-              className={`flex ${msg.from._id !== admin ? "justify-start" : "justify-end"} mb-2`}
+              className={`flex ${
+                msg.from._id !== admin ? "justify-start" : "justify-end"
+              } mb-2`}
             >
               <MuiBox className="flex items-start space-x-2">
                 {msg.from.username !== admin && msg.from.profileImage && (
-                  <Avatar src={msg.from.profileImage || "/default-profile.png"} />
+                  <Avatar
+                    src={msg.from.profileImage || "/default-profile.png"}
+                  />
                 )}
                 <Paper
                   className={`p-3 rounded-lg shadow-md ${
-                    msg.from._id === admin ? "bg-blue-500 text-white" : "bg-gray-300 text-black"
+                    msg.from._id === admin
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-300 text-black"
                   }`}
                 >
                   <Typography variant="body1">{msg.message}</Typography>
@@ -172,40 +189,39 @@ function ChatBox({ selectedConversation, onlineUsers }: ChatBoxProps) {
         <div ref={messageContainerRef} />
       </MuiBox>
 
-      <MuiBox className="flex items-center p-4 bg-gray-100 border-t border-gray-300">
-  <TextField
-    fullWidth
-    label="Type your message"
-    variant="outlined"
-    value={message}
-    onChange={(e) => setMessage(e.target.value)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        handleAdminMessageSend();
-      }
-    }}
-    multiline
-    rows={1}
-    className="bg-white rounded-xl shadow-md"
-    InputProps={{
-      style: {
-        padding: "12px 18px",
-        borderRadius: "16px",
-        backgroundColor: "#f5f5f5",
-      },
-    }}
-  />
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={handleAdminMessageSend}
-    startIcon={<SendIcon />}
-    className="ml-2 rounded-xl shadow-md"
-  >
-    Send
-  </Button>
-</MuiBox>
-
+      <MuiBox className="p-4 border-t border-gray-300 bg-white rounded-b-lg shadow-lg flex items-center space-x-4">
+        <TextField
+          fullWidth
+          label="Type your message"
+          variant="outlined"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAdminMessageSend();
+            }
+          }}
+          multiline
+          rows={1}
+          className="bg-white rounded-xl shadow-md"
+          InputProps={{
+            style: {
+              padding: "12px 18px",
+              borderRadius: "16px",
+              backgroundColor: "#f5f5f5",
+            },
+          }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleAdminMessageSend}
+          startIcon={<SendIcon />}
+          className="ml-2 rounded-xl shadow-md"
+        >
+          Send
+        </Button>
+      </MuiBox>
     </Paper>
   );
 }

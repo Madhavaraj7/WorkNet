@@ -11,19 +11,21 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { AdminLoginAPI } from "../../Services/allAPI"; 
+import { AdminLoginAPI } from "../../Services/allAPI";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { tokenAuthenticationContext } from "../../ContextAPI/AdminAuth"; 
+import { tokenAuthenticationContext } from "../../ContextAPI/AdminAuth";
 
 const AdminAuth: React.FC = () => {
-  const { setIsAuthorized,setAdmin,admin }: any = useContext(tokenAuthenticationContext); // Consume setAdmin from context
+  const { setIsAuthorized, setAdmin, admin }: any = useContext(
+    tokenAuthenticationContext
+  );
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  
+
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -54,12 +56,12 @@ const AdminAuth: React.FC = () => {
       const result = await AdminLoginAPI({ email, password });
       setLoading(false);
       console.log(result);
-      
+
       if (result && result.user && result.token) {
         localStorage.setItem("adtoken", result.token);
         localStorage.setItem("admin", JSON.stringify(result.user));
         setIsAuthorized(true);
-        setAdmin(result.user); 
+        setAdmin(result.user);
         toast.success("Login Successful!");
         navigate("/adhome");
       } else {
@@ -79,11 +81,11 @@ const AdminAuth: React.FC = () => {
     event.preventDefault();
   };
 
-  useEffect(()=>{
-    if(admin?.email){
+  useEffect(() => {
+    if (admin?.email) {
       navigate("/adusers");
     }
-  },[admin])
+  }, [admin]);
 
   return (
     <>
@@ -227,7 +229,7 @@ const AdminAuth: React.FC = () => {
                     <Button
                       onClick={handleClickShowPassword}
                       onMouseDown={handleMouseDownPassword}
-                      sx={{ color: '#cbd5e0' }}
+                      sx={{ color: "#cbd5e0" }}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </Button>

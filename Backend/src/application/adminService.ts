@@ -9,13 +9,17 @@ import {
   unblockUserById,
 } from "../infrastructure/userRepository";
 import { User } from "../domain/user";
-import { errorHandler } from "../utils/errorHandler"; 
-import { createCategory, deleteWorkerById, getAllBookingsWithDetails, getAllWorkersFromDB} from "../infrastructure/adminRepository";
-import { Worker } from "../domain/worker"; 
+import { errorHandler } from "../utils/errorHandler";
+import {
+  createCategory,
+  deleteWorkerById,
+  getAllBookingsWithDetails,
+  getAllWorkersFromDB,
+} from "../infrastructure/adminRepository";
+import { Worker } from "../domain/worker";
 import { Category, ICategory } from "../domain/category";
-import { UserModel } from '../infrastructure/userRepository'; // Adjust the import to point to your User model
-import * as adminRepository from '../infrastructure/adminRepository';
-
+import { UserModel } from "../infrastructure/userRepository";
+import * as adminRepository from "../infrastructure/adminRepository";
 
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendEamilForApprove";
@@ -24,7 +28,11 @@ import { deleteReviewById as deleteReviewInRepo } from "../infrastructure/adminR
 import { Booking } from "../domain/booking";
 
 
+
+
+
 // Function to log in an admin user
+// Verifies credentials, checks if user is verified, and generates JWT token
 export const loginUser = async (
   email: string,
   password: string
@@ -59,15 +67,13 @@ export const loginUser = async (
 };
 
 // Function to update a user's profile
+// Updates profile information for an admin user
 export const updateUserProfile = async (
   userId: string,
   update: Partial<User>
 ) => {
   try {
-    console.log("userId:", userId);
-    // console.log('update:', update);
     const updatedUser = await updateAdminProfile(userId, update);
-    // console.log(updateUser);
 
     if (!updatedUser) {
       throw new Error("User not found");
@@ -80,11 +86,14 @@ export const updateUserProfile = async (
 };
 
 // Fetch all users
+// Retrieves all users from the database
 export const getAllUsers = async (): Promise<User[]> => {
   return findAllUsers();
 };
 
+
 // Function to block a user
+// Marks a user as blocked in the database
 export const blockUser = async (userId: string): Promise<User | null> => {
   const user = await findUserById(userId);
   if (!user) {
@@ -99,6 +108,7 @@ export const blockUser = async (userId: string): Promise<User | null> => {
 };
 
 // Function to unblock a user
+// Marks a user as unblocked in the database
 export const unblockUser = async (userId: string): Promise<User | null> => {
   const user = await findUserById(userId);
   if (!user) {
@@ -113,55 +123,55 @@ export const unblockUser = async (userId: string): Promise<User | null> => {
 };
 
 // Function to Get all workers
+// Retrieves all workers from the database
 export const getAllWorkers = async () => {
   return await getAllWorkersFromDB();
 };
 
-// Function to Update all workers status
+// Function to update worker status
+// Approves or rejects a worker's application and sends a notification email
 export const updateWorkerStatus = async (
   _id: string,
   status: "approved" | "rejected"
 ) => {
   try {
-    // Find the worker by _id
     const worker = await Worker.findOne({ _id });
     console.log("worker", worker);
 
-    // If worker is not found, throw an error
     if (!worker) {
       throw new Error("Worker not found");
     }
 
-    // Update the worker's status
     const updatedWorker = await Worker.findOneAndUpdate(
       { _id },
       { status },
       { new: true }
     );
 
-    // Fetch the associated user by worker.userId
     const user = await UserModel.findOne({ _id: worker.userId });
 
     if (!user) {
       throw new Error("User not found");
     }
 
-    // If the status is approved, update the user's role to "worker"
     if (status === "approved") {
       await UserModel.findOneAndUpdate(
-        { _id: worker.userId }, 
+        { _id: worker.userId },
         { role: "worker" },
         { new: true }
       );
     }
 
-    // Send email notification based on the status
-    const emailSubject = status === "approved" ? "Worker Status Approved" : "Worker Status Rejected";
-    const emailBody = status === "approved"
-      ? "Congratulations! Your worker status has been approved please login again."
-      : "We regret to inform you that your worker status has been rejected.";
+    const emailSubject =
+      status === "approved"
+        ? "Worker Status Approved"
+        : "Worker Status Rejected";
+    const emailBody =
+      status === "approved"
+        ? "Congratulations! Your worker status has been approved please login again."
+        : "We regret to inform you that your worker status has been rejected.";
 
-    await sendEmail ({
+    await sendEmail({
       to: user.email,
       subject: emailSubject,
       body: emailBody,
@@ -174,22 +184,21 @@ export const updateWorkerStatus = async (
   }
 };
 
-
 // Function to delete a worker
-
+// Blocks a worker and marks their user account as blocked in the database
 export const deleteWorker = async (workerId: string) => {
   const worker = await Worker.findById(workerId);
   if (!worker) {
-    throw errorHandler(404, 'Worker not found');
+    throw errorHandler(404, "Worker not found");
   }
 
   worker.isBlocked = true;
   await worker.save();
 
-  const userId = worker.userId; 
+  const userId = worker.userId;
   const user = await UserModel.findById(userId);
   if (!user) {
-    throw errorHandler(404, 'User not found');
+    throw errorHandler(404, "User not found");
   }
 
   user.isBlocked = true;
@@ -198,96 +207,115 @@ export const deleteWorker = async (workerId: string) => {
   return await deleteWorkerById(workerId);
 };
 
-
 // Function to add a new category
+// Creates a new category in the system
 export const addCategory = async (name: string, description?: string) => {
   const newCategory = await createCategory({ name, description });
   return newCategory;
 };
 
-
 // Function to update a category
-
+// Updates details of an existing category by its ID
 export const updateCategory = async (
   _id: string,
   updateData: Partial<ICategory>
 ) => {
-  // Validate the _id
   if (!mongoose.Types.ObjectId.isValid(_id)) {
-    throw new Error('Invalid category ID');
+    throw new Error("Invalid category ID");
   }
 
   try {
-    // Find and update the category
     const updatedCategory = await Category.findByIdAndUpdate(_id, updateData, {
       new: true,
-      runValidators: true, // Ensure validators are run during the update
+      runValidators: true,
     });
 
-    console.log(updateCategory);
-    
-
     if (!updatedCategory) {
-      throw new Error('Category not found');
+      throw new Error("Category not found");
     }
 
     return updatedCategory;
   } catch (error) {
-    console.error('Error updating category:', error);
-    throw new Error('Failed to update category');
+    console.error("Error updating category:", error);
+    throw new Error("Failed to update category");
   }
 };
 
+// Function to find a category by name
+// Searches for a category by its name
 export const findCategoryByName = async (name: string) => {
   return Category.findOne({ name });
 };
 
 
+// Function to fetch all reviews with details
+// Retrieves all reviews along with additional details
 export const fetchAllReviewsWithDetails = async () => {
   return await getAllReviewsWithDetails();
 };
 
 
-
-export const getAllCounts = async (): Promise<{ usersCount: number; workersCount: number; bookingsCount: number; reviewCount : number }> => {
+// Function to get counts of users, workers, bookings, and reviews
+// Fetches the count of various entities in the system
+export const getAllCounts = async (): Promise<{
+  usersCount: number;
+  workersCount: number;
+  bookingsCount: number;
+  reviewCount: number;
+}> => {
   const usersCount = await adminRepository.getUsersCount();
   const workersCount = await adminRepository.getWorkersCount();
   const bookingsCount = await adminRepository.getBookingsCount();
   const reviewCount = await adminRepository.getReviewCount();
-  return { usersCount, workersCount, bookingsCount,reviewCount };
+  return { usersCount, workersCount, bookingsCount, reviewCount };
 };
 
 
-
-export const getBookingTrends = async (startDate: Date, endDate: Date): Promise<{ date: string, count: number }[]> => {
+// Function to get booking trends
+// Fetches the count of bookings between two dates, grouped by day
+export const getBookingTrends = async (
+  startDate: Date,
+  endDate: Date
+): Promise<{ date: string; count: number }[]> => {
   const bookings = await Booking.aggregate([
     { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-    { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        count: { $sum: 1 },
+      },
+    },
     { $sort: { _id: 1 } },
   ]);
 
-  return bookings.map(booking => ({
+  return bookings.map((booking) => ({
     date: booking._id,
     count: booking.count,
   }));
 };
 
 
-export async function fetchDailyRevenue(year: number, month: number, day: number): Promise<number> {
-  const startDate = new Date(year, month - 1, day, 0, 0, 0); // Start of the day
-  const endDate = new Date(year, month - 1, day + 1, 0, 0, 0); // Start of the next day
+// Function to fetch daily revenue
+// Retrieves total revenue for a specific day
+export async function fetchDailyRevenue(
+  year: number,
+  month: number,
+  day: number
+): Promise<number> {
+  const startDate = new Date(year, month - 1, day, 0, 0, 0); 
+  const endDate = new Date(year, month - 1, day + 1, 0, 0, 0); 
 
   const result = await Booking.aggregate([
     {
       $match: {
-        status: 'Confirmed',
+        status: "Confirmed",
         createdAt: { $gte: startDate, $lt: endDate },
       },
     },
     {
       $group: {
         _id: null,
-        totalRevenue: { $sum: '$amount' },
+        totalRevenue: { $sum: "$amount" },
       },
     },
   ]);
@@ -295,18 +323,20 @@ export async function fetchDailyRevenue(year: number, month: number, day: number
   return result.length > 0 ? result[0].totalRevenue : 0;
 }
 
-
-
-
-
-
-
-
+// Function to fetch daily revenue
+// Retrieves total revenue for a specific day
 export const fetchAllBookings = async () => {
   try {
     const bookings = await getAllBookingsWithDetails();
     return bookings;
-  } catch (error:any) {
+  } catch (error: any) {
     throw new Error(`Error fetching bookings: ${error.message}`);
   }
+};
+
+
+// Function to delete a review
+// Deletes a review from the database by its ID
+export const deleteReviewById = async (reviewId: string): Promise<void> => {
+  await deleteReviewInRepo(reviewId);
 };

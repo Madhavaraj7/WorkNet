@@ -13,18 +13,20 @@ exports.updateBookingStatus = exports.updateWallet = exports.getWalletByUserId =
 const booking_1 = require("../domain/booking");
 const slot_1 = require("../domain/slot");
 const wallet_1 = require("../domain/wallet");
+// Create a new booking and save it to the database.
 const createBooking = (userId, slotId, workerId, amount) => __awaiter(void 0, void 0, void 0, function* () {
     const booking = new booking_1.Booking({ userId, slotId, workerId, amount });
     return booking.save();
 });
 exports.createBooking = createBooking;
+// Cancel a booking by its ID and mark the associated slot as available.
 const cancelBooking = (bookingId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const booking = yield booking_1.Booking.findById(bookingId);
         if (!booking) {
-            throw new Error('Booking not found');
+            throw new Error("Booking not found");
         }
-        booking.status = 'Cancelled';
+        booking.status = "Cancelled";
         yield booking.save();
         const slot = yield slot_1.Slot.findById(booking.slotId);
         if (slot) {
@@ -32,24 +34,27 @@ const cancelBooking = (bookingId) => __awaiter(void 0, void 0, void 0, function*
             yield slot.save();
         }
         else {
-            throw new Error('Slot not found');
+            throw new Error("Slot not found");
         }
         return booking;
     }
     catch (error) {
-        console.error('Error cancelling the booking:', error);
+        console.error("Error cancelling the booking:", error);
         throw error;
     }
 });
 exports.cancelBooking = cancelBooking;
+// Retrieve a booking by its ID from the database.
 const getBookingById = (bookingId) => __awaiter(void 0, void 0, void 0, function* () {
     return booking_1.Booking.findById(bookingId).exec();
 });
 exports.getBookingById = getBookingById;
+// Fetch the wallet information for a user by their user ID.
 const getWalletByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return wallet_1.WalletModel.findOne({ userId }).exec();
 });
 exports.getWalletByUserId = getWalletByUserId;
+// Update the wallet balance for a user and record the transaction.
 const updateWallet = (userId, amount) => __awaiter(void 0, void 0, void 0, function* () {
     return wallet_1.WalletModel.findOneAndUpdate({ userId }, {
         $inc: { walletBalance: amount },
@@ -57,12 +62,13 @@ const updateWallet = (userId, amount) => __awaiter(void 0, void 0, void 0, funct
             walletTransaction: {
                 transactionDate: new Date(),
                 transactionAmount: amount,
-                transactionType: 'credit'
-            }
-        }
+                transactionType: "credit",
+            },
+        },
     }, { new: true }).exec();
 });
 exports.updateWallet = updateWallet;
+// Update the status of a booking by its ID.
 const updateBookingStatus = (bookingId, status) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield booking_1.Booking.findByIdAndUpdate(bookingId, { status }, { new: true, runValidators: true });

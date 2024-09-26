@@ -7,7 +7,7 @@ exports.io = void 0;
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
-const allRoutes_1 = __importDefault(require("./presentation/routes/allRoutes")); // Make sure this import is correct
+const allRoutes_1 = __importDefault(require("./presentation/routes/allRoutes"));
 const config_1 = require("./config");
 const morgan_1 = __importDefault(require("morgan"));
 const http_1 = require("http");
@@ -21,12 +21,12 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 // Middleware setup
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL || '*', // Adjust as needed
+    origin: process.env.CLIENT_URL || '*',
 }));
 app.use((0, morgan_1.default)('dev'));
 app.use(body_parser_1.default.json());
 // Routes setup
-app.use('/api/users', allRoutes_1.default); // Ensure this is a valid middleware function
+app.use('/api/users', allRoutes_1.default);
 // Connect to the database
 (0, config_1.connectToDatabase)();
 // Create an HTTP server
@@ -34,8 +34,8 @@ const httpServer = (0, http_1.createServer)(app);
 // Initialize Socket.IO
 exports.io = new socket_io_1.Server(httpServer, {
     cors: {
-        origin: process.env.CLIENT_URL || '*', // Adjust as needed
-        methods: ['GET', 'POST'], // Allowed methods
+        origin: process.env.CLIENT_URL || '*',
+        methods: ['GET', 'POST'],
     },
 });
 // Use Socket.IO handler

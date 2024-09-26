@@ -21,7 +21,6 @@ const processZaopayPayment = (amount, zaopayToken) => __awaiter(void 0, void 0, 
             amount,
             zaopayToken
         });
-        // Adjust based on actual Zaopay response format
         if (response.data && response.data.success) {
             return response.data;
         }

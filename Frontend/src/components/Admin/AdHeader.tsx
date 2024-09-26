@@ -21,14 +21,13 @@ import MessageIcon from "@mui/icons-material/Message";
 import Person4Icon from "@mui/icons-material/Person4";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { tokenAuthenticationContext } from '../../ContextAPI/AdminAuth';
+import { tokenAuthenticationContext } from "../../ContextAPI/AdminAuth";
 import { io } from "socket.io-client";
 import { getUnreadMessagesCount } from "../../Services/allAPI";
 
 // Initialize socket connection
-// const socket = io("https://worknet.onrender.com");
-const socket = io("https://worknet.solutions"); // for localhost
-
+// const socket = io("http://localhost:3000"); // Your server URL
+const socket = io("https://worknet.solutions"); // for production
 
 const drawerWidth = 240;
 
@@ -63,6 +62,13 @@ const AdHeader: React.FC = () => {
   const handleIconClick = (iconName: string) => {
     setActiveIcon(iconName);
     navigate("/ad" + iconName);
+
+    if (iconName === "messages") {
+      socket.on("unreadCount", (data) => {
+        console.log("Unread count received:", data);
+        setUnreadCount(data.unreadCount);
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -78,12 +84,15 @@ const AdHeader: React.FC = () => {
     }
   };
 
-  const token = localStorage.getItem("adtoken") || '';
+  const token = localStorage.getItem("adtoken") || "";
 
   const fetchUnreadCount = async () => {
     try {
       if (authContext?.admin?._id) {
-        const response = await getUnreadMessagesCount(authContext.admin._id, token);
+        const response = await getUnreadMessagesCount(
+          authContext.admin._id,
+          token
+        );
         setUnreadCount(response.unreadCount);
       }
     } catch (error) {
@@ -95,14 +104,14 @@ const AdHeader: React.FC = () => {
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
     });
-  
+
     fetchUnreadCount();
-  
+
     socket.on("unreadCount", (data) => {
       console.log("Unread count received:", data);
       setUnreadCount(data.unreadCount);
     });
-  
+
     return () => {
       socket.off("unreadCount");
     };
@@ -110,7 +119,7 @@ const AdHeader: React.FC = () => {
 
   useEffect(() => {
     if (authContext?.admin?._id) {
-      socket.emit('userOnline', authContext.admin._id); 
+      socket.emit("userOnline", authContext.admin._id);
     }
   }, [authContext?.admin?._id]);
 
@@ -121,7 +130,12 @@ const AdHeader: React.FC = () => {
         <Toolbar className="flex justify-between items-center">
           <div className="flex items-center">
             <EngineeringIcon fontSize="large" className="text-teal-400" />
-            <Link to="/adHome" className="text-2xl font-bold hover:text-teal-400">WORKNET</Link>
+            <Link
+              to="/adHome"
+              className="text-2xl font-bold hover:text-teal-400"
+            >
+              WORKNET
+            </Link>
           </div>
           <div className="flex space-x-4">
             <Badge badgeContent={0} color="error">
@@ -166,8 +180,15 @@ const AdHeader: React.FC = () => {
         </Box>
         <Divider />
         <List>
-          {[ 
-            "home", "users", "workers", "Category", "reviews", "revenue", "messages", "profile"
+          {[
+            "home",
+            "users",
+            "workers",
+            "Category",
+            "reviews",
+            "revenue",
+            "messages",
+            "profile",
           ].map((icon) => (
             <React.Fragment key={icon}>
               <div
@@ -177,18 +198,32 @@ const AdHeader: React.FC = () => {
                   color: activeIcon === icon ? "#3B82F6" : "#FFFFFF",
                 }}
               >
-                {icon === "home" && <HomeIcon className="me-3" fontSize="large" />}
-                {icon === "users" && <PeopleAltIcon className="me-3" fontSize="large" />}
-                {icon === "workers" && <PeopleAltIcon className="me-3" fontSize="large" />}
-                {icon === "Category" && <BarChartIcon className="me-3" fontSize="large" />}
-                {icon === "reviews" && <ReviewsIcon className="me-3" fontSize="large" />}
-                {icon === "revenue" && <ReportIcon className="me-3" fontSize="large" />}
+                {icon === "home" && (
+                  <HomeIcon className="me-3" fontSize="large" />
+                )}
+                {icon === "users" && (
+                  <PeopleAltIcon className="me-3" fontSize="large" />
+                )}
+                {icon === "workers" && (
+                  <PeopleAltIcon className="me-3" fontSize="large" />
+                )}
+                {icon === "Category" && (
+                  <BarChartIcon className="me-3" fontSize="large" />
+                )}
+                {icon === "reviews" && (
+                  <ReviewsIcon className="me-3" fontSize="large" />
+                )}
+                {icon === "revenue" && (
+                  <ReportIcon className="me-3" fontSize="large" />
+                )}
                 {icon === "messages" && (
                   <Badge badgeContent={unreadCount} color="error">
                     <MessageIcon className="me-3" fontSize="large" />
                   </Badge>
                 )}
-                {icon === "profile" && <Person4Icon className="me-3" fontSize="large" />}
+                {icon === "profile" && (
+                  <Person4Icon className="me-3" fontSize="large" />
+                )}
                 <Typography className="font-semibold">{icon}</Typography>
               </div>
             </React.Fragment>

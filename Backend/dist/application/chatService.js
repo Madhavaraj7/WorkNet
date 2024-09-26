@@ -16,25 +16,30 @@ exports.findAllRooms = exports.updateRoom = exports.createRoom = exports.findRoo
 const messagesModel_1 = __importDefault(require("../domain/messagesModel"));
 const roomsModel_1 = __importDefault(require("../domain/roomsModel"));
 const userRepository_1 = require("../infrastructure/userRepository");
+// Create a new message and save it to the database
 const createMessage = (messageData) => __awaiter(void 0, void 0, void 0, function* () {
     const newMessage = new messagesModel_1.default(messageData);
     return yield newMessage.save();
 });
 exports.createMessage = createMessage;
+// Retrieve messages associated with a specific room ID
 const findMessagesByRoomId = (roomId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield messagesModel_1.default.find({ roomId }).populate('from to', 'username');
 });
 exports.findMessagesByRoomId = findMessagesByRoomId;
+// Find messages sent or received by a specific user ID
 const findMessagesByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield messagesModel_1.default.find({
         $or: [{ from: userId }, { to: userId }],
     }).populate('from to', 'username');
 });
 exports.findMessagesByUserId = findMessagesByUserId;
+// Find a room by its unique room ID
 const findRoomByRoomId = (roomId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield roomsModel_1.default.findOne({ roomId });
 });
 exports.findRoomByRoomId = findRoomByRoomId;
+// Create a new room between a sender and a receiver
 const createRoom = (roomData) => __awaiter(void 0, void 0, void 0, function* () {
     const sender = yield userRepository_1.UserModel.findById(roomData.sender);
     const receiver = yield userRepository_1.UserModel.findById(roomData.receiver);
@@ -52,10 +57,12 @@ const createRoom = (roomData) => __awaiter(void 0, void 0, void 0, function* () 
     return yield newRoom.save();
 });
 exports.createRoom = createRoom;
+// Update the details of an existing room
 const updateRoom = (roomId, updateData) => __awaiter(void 0, void 0, void 0, function* () {
     return yield roomsModel_1.default.findByIdAndUpdate(roomId, updateData, { new: true });
 });
 exports.updateRoom = updateRoom;
+// Retrieve all rooms sorted by creation date in descending order
 const findAllRooms = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield roomsModel_1.default.find().sort({ createdDate: -1 });
 });

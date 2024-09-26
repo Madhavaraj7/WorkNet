@@ -26,9 +26,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import { getAdminAllworkersAPI, deleteWorkerAPI } from "../../Services/allAPI";
 import { toast } from "react-toastify";
-import CloseIcon from '@mui/icons-material/Close';
-
-
+import CloseIcon from "@mui/icons-material/Close";
 
 interface Worker {
   _id: string;
@@ -118,7 +116,7 @@ const AdWorkers: React.FC = () => {
 
   const handleOpenKycModal = (worker: Worker) => {
     setSelectedWorker(worker);
-    setCurrentKycImages(0); 
+    setCurrentKycImages(0);
     setShowKycModal(true);
   };
 
@@ -260,13 +258,13 @@ const AdWorkers: React.FC = () => {
                   </Button>
                 </TableCell>
                 <TableCell className="text-center">
-                    <button
-                      className="px-6 py-3 bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 font-semibold"
-                      onClick={() => handleOpenKycModal(worker)}
-                    >
-                      View KYC
-                    </button>
-                  </TableCell>
+                  <button
+                    className="px-6 py-3 bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 font-semibold"
+                    onClick={() => handleOpenKycModal(worker)}
+                  >
+                    View KYC
+                  </button>
+                </TableCell>
                 <TableCell
                   className="text-center"
                   sx={{ fontSize: "16px", padding: "12px" }}
@@ -319,8 +317,8 @@ const AdWorkers: React.FC = () => {
         <Box
           sx={{
             position: "relative",
-            width: "600px", 
-            height: "400px", 
+            width: "600px",
+            height: "400px",
             backgroundColor: "white",
             borderRadius: "8px",
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
@@ -335,9 +333,9 @@ const AdWorkers: React.FC = () => {
             src={currentImages[currentImageIndex]}
             alt="Worker Work"
             style={{
-              width: "100%", 
+              width: "100%",
               height: "100%",
-              objectFit: "contain", 
+              objectFit: "contain",
             }}
           />
           <IconButton
@@ -409,82 +407,86 @@ const AdWorkers: React.FC = () => {
       </Modal>
 
       <Modal
-      open={showKycModal}
-      onClose={() => setShowKycModal(false)}
-      aria-labelledby="kyc-modal-title"
-      aria-describedby="kyc-modal-description"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backdropFilter: 'blur(4px)',
-        transition: 'opacity 0.3s ease-in-out',
-      }}
-    >
-      <Box
+        open={showKycModal}
+        onClose={() => setShowKycModal(false)}
+        aria-labelledby="kyc-modal-title"
+        aria-describedby="kyc-modal-description"
         sx={{
-          position: 'relative',
-          width: '600px',
-          height: '400px',
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(4px)",
+          transition: "opacity 0.3s ease-in-out",
         }}
       >
-        {/* Close Button */}
-        <IconButton
-          onClick={() => setShowKycModal(false)}
+        <Box
           sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 1,
+            position: "relative",
+            width: "600px",
+            height: "400px",
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
           }}
         >
-          <CloseIcon />
-        </IconButton>
-        
+          {/* Close Button */}
+          <IconButton
+            onClick={() => setShowKycModal(false)}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 1,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
 
-        {selectedWorker && selectedWorker.kycDetails.length > 0 ? (
-          <>
-            <img
-              src={selectedWorker.kycDetails[currentKycImages]?.documentImage}
-              alt="KYC"
-              style={{ width: "100%", borderRadius: "8px", objectFit: "cover" }}
-            />
-            <div className="flex justify-between mt-2">
-              <IconButton
-                onClick={() =>
-                  setCurrentKycImages((prevIndex) =>
-                    prevIndex === 0 ? selectedWorker.kycDetails.length - 1 : prevIndex - 1
-                  )
-                }
-              >
-                {/* Add left arrow icon */}
-              </IconButton>
-              <IconButton
-                onClick={() =>
-                  setCurrentKycImages((prevIndex) =>
-                    prevIndex === selectedWorker.kycDetails.length - 1 ? 0 : prevIndex + 1
-                  )
-                }
-              >
-                {/* Add right arrow icon */}
-              </IconButton>
-            </div>
-          </>
-        ) : (
-          <p>No KYC details available</p>
-        )}
-      </Box>
-    </Modal>
+          {selectedWorker && selectedWorker.kycDetails.length > 0 ? (
+            <>
+              <img
+                src={selectedWorker.kycDetails[currentKycImages]?.documentImage}
+                alt="KYC"
+                style={{
+                  width: "100%",
+                  borderRadius: "8px",
+                  objectFit: "cover",
+                }}
+              />
+              <div className="flex justify-between mt-2">
+                <IconButton
+                  onClick={() =>
+                    setCurrentKycImages((prevIndex) =>
+                      prevIndex === 0
+                        ? selectedWorker.kycDetails.length - 1
+                        : prevIndex - 1
+                    )
+                  }
+                >
+                </IconButton>
+                <IconButton
+                  onClick={() =>
+                    setCurrentKycImages((prevIndex) =>
+                      prevIndex === selectedWorker.kycDetails.length - 1
+                        ? 0
+                        : prevIndex + 1
+                    )
+                  }
+                >
+                </IconButton>
+              </div>
+            </>
+          ) : (
+            <p>No KYC details available</p>
+          )}
+        </Box>
+      </Modal>
 
-      {/* Dialog for deleting a worker */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Delete Worker</DialogTitle>
         <DialogContent>

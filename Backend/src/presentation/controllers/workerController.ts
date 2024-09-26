@@ -18,6 +18,8 @@ interface CustomRequest extends Request {
   userId?: string;
 }
 
+
+// Controller to register a new worker
 export const registerWorkerController = async (
   req: CustomRequest,
   res: any
@@ -43,6 +45,7 @@ export const registerWorkerController = async (
   }
 };
 
+// Controller to fetch all registered workers
 export const getWorkersController = async (
   req: Request,
   res: Response
@@ -55,6 +58,7 @@ export const getWorkersController = async (
   }
 };
 
+// Controller to block a specific worker by ID
 export const blockWorkerController = async (
   req: Request,
   res: Response
@@ -63,12 +67,10 @@ export const blockWorkerController = async (
     const { id } = req.params;
     const blockedWorker = await blockWorkerService(id);
     if (blockedWorker) {
-      res
-        .status(200)
-        .json({
-          message: "Worker blocked successfully",
-          worker: blockedWorker,
-        });
+      res.status(200).json({
+        message: "Worker blocked successfully",
+        worker: blockedWorker,
+      });
     } else {
       res.status(404).json({ message: "Worker not found" });
     }
@@ -77,6 +79,7 @@ export const blockWorkerController = async (
   }
 };
 
+// Controller to unblock a specific worker by ID
 export const unblockWorkerController = async (
   req: Request,
   res: Response
@@ -85,12 +88,10 @@ export const unblockWorkerController = async (
     const { id } = req.params;
     const unblockedWorker = await unblockWorkerService(id);
     if (unblockedWorker) {
-      res
-        .status(200)
-        .json({
-          message: "Worker unblocked successfully",
-          worker: unblockedWorker,
-        });
+      res.status(200).json({
+        message: "Worker unblocked successfully",
+        worker: unblockedWorker,
+      });
     } else {
       res.status(404).json({ message: "Worker not found" });
     }
@@ -99,6 +100,7 @@ export const unblockWorkerController = async (
   }
 };
 
+// Controller to get works associated with the logged-in user
 export const getLoginedUserWorksController = async (
   req: CustomRequest,
   res: Response
@@ -122,6 +124,7 @@ export const getLoginedUserWorksController = async (
   }
 };
 
+// Controller to update an existing worker's details
 export const updateWorkerController = async (
   req: CustomRequest,
   res: any
@@ -130,12 +133,10 @@ export const updateWorkerController = async (
     const userId = req.userId;
     let { categories, ...workerData } = req.body;
 
-    console.log({categories,...workerData});
-    
-    
+    console.log({ categories, ...workerData });
+
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     console.log(files);
-    
 
     if (!userId) {
       return res.status(401).json({ message: "User ID is required" });
@@ -213,6 +214,7 @@ export const updateWorkerController = async (
   }
 };
 
+// Function to delete an image from Cloudinary using its URL
 const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
   const publicId = imageUrl.split("/").pop()?.split(".")[0];
   if (publicId) {
@@ -220,6 +222,7 @@ const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
   }
 };
 
+// Controller to get a specific worker by ID
 export const getWorkerController = async (
   req: Request,
   res: Response
@@ -241,6 +244,7 @@ export const getWorkerController = async (
   }
 };
 
+// Controller to fetch appointments associated with a specific worker
 export const getWorkerAppointmentsController = async (
   req: any,
   res: Response
@@ -248,7 +252,7 @@ export const getWorkerAppointmentsController = async (
   const workerId = req.workerId;
 
   console.log(workerId);
-  
+
   try {
     const users = await getWorkerAppointmentsService(workerId as string);
     if (users.length > 0) {
