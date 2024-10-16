@@ -21,7 +21,7 @@ import { getUnreadMessagesFromAdmin } from "../Services/allAPI";
 import { io } from "socket.io-client";
 
 // const socket = io("http://localhost:3000"); // Your server URL
-const socket = io("https://worknet.solutions"); // for production
+const socket = io("https://worknet.onrender.com"); // for production
 
 const Header: React.FC = () => {
   const authContext = useContext(tokenAuthenticationContext);

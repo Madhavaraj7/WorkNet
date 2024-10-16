@@ -27,7 +27,7 @@ import { getUnreadMessagesCount } from "../../Services/allAPI";
 
 // Initialize socket connection
 // const socket = io("http://localhost:3000"); // Your server URL
-const socket = io("https://worknet.solutions"); // for production
+const socket = io("https://worknet.onrender.com"); // for production
 
 const drawerWidth = 240;
 

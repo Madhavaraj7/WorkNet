@@ -41,7 +41,7 @@ const Help: React.FC = () => {
   //   });
 
   useEffect(() => {
-    const socketConnection = io("https://worknet.solutions", {            // for prodcution
+    const socketConnection = io("https://worknet.onrender.com", {            // for prodcution
       transports: ["websocket"],
       autoConnect: false,
     });

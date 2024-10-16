@@ -16,7 +16,7 @@ import io from "socket.io-client";
 import { SERVER_URL } from "../../Services/serverURL";
 
 // const socket = io("http://localhost:3000"); // Your server URL
-const socket = io("https://worknet.solutions"); // for prodcution
+const socket = io("https://worknet.onrender.com"); // for prodcution
 
 interface Room {
   _id: string;
