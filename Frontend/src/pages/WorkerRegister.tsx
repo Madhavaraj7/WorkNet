@@ -1,4 +1,4 @@
-import  { useEffect, useState, ChangeEvent,  } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -47,9 +47,9 @@ interface RegisterData {
   state: string;
   city: string;
   workImages: File[];
-  amount: string; // New field for amount
-  kycDocumentType: string; // For dropdown selection
-  kycDocumentImage: File | null; // For storing the uploaded image
+  amount: string;
+  kycDocumentType: string;
+  kycDocumentImage: File | null;
 }
 
 function WorkerRegister() {
@@ -57,9 +57,7 @@ function WorkerRegister() {
 
   const [open] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]); // State to hold categories
-
-
+  const [categories, setCategories] = useState<string[]>([]);
 
   const [registerData, setRegisterData] = useState<RegisterData>({
     registerImage: null,
@@ -75,7 +73,7 @@ function WorkerRegister() {
     state: "",
     city: "",
     workImages: [],
-    amount: "", // Initialize amount field
+    amount: "",
     kycDocumentType: "",
     kycDocumentImage: null,
   });
@@ -96,7 +94,6 @@ function WorkerRegister() {
       setRegImagePreview(URL.createObjectURL(registerData.registerImage));
     }
   }, [registerData.workImages, registerData.registerImage]);
-
 
   // const categories = [
   //   "Plumbing",
@@ -145,7 +142,6 @@ function WorkerRegister() {
   ];
 
   const paymentModes = ["Cash", "Online"];
-
 
   const handleChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
@@ -206,7 +202,7 @@ function WorkerRegister() {
       !city ||
       !amount ||
       !kycDocumentType ||
-      !kycDocumentImage || // Ensure KYC fields are filled
+      !kycDocumentImage ||
       workImages.length === 0
     ) {
       toast.warning("Please fill the form completely!");
@@ -214,7 +210,7 @@ function WorkerRegister() {
     }
 
     if (workImages.length >= 3) {
-      setLoading(true); // Set loading to true
+      setLoading(true);
 
       const reqBody = new FormData();
       reqBody.append("registerImage", registerImage);
@@ -266,7 +262,9 @@ function WorkerRegister() {
               kycDocumentType: "",
               kycDocumentImage: null,
             });
-            toast.success("Your Registration Successfully please wait for admin approvel!");
+            toast.success(
+              "Your Registration Successfully please wait for admin approvel!"
+            );
             navigate("/");
           } else {
             toast.info(result.response || "Registration failed");
@@ -311,7 +309,18 @@ function WorkerRegister() {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
+      const validExtensions = ["image/jpeg", "image/png"]; 
       const newFiles = Array.from(e.target.files);
+
+      const invalidFiles = newFiles.filter(
+        (file) => !validExtensions.includes(file.type)
+      );
+
+      if (invalidFiles.length > 0) {
+        toast.error("Please select a valid image file (.jpg or .png)");
+        return;
+      }
+
       setRegisterData((prevData) => ({
         ...prevData,
         workImages: [...prevData.workImages, ...newFiles],
@@ -340,18 +349,27 @@ function WorkerRegister() {
                 <Box textAlign="center" mb={2}>
                   <label className="cursor-pointer">
                     <input
-                      onChange={(e) =>
-                        setRegisterData({
-                          ...registerData,
-                          registerImage: e.target.files
-                            ? e.target.files[0]
-                            : null,
-                        })
-                      }
+                      onChange={(e) => {
+                        const file = e.target.files ? e.target.files[0] : null;
+                        const validExtensions = ["image/jpeg", "image/png"]; // Define accepted MIME types
+
+                        if (file && !validExtensions.includes(file.type)) {
+                          toast.error("Please select a valid image file (.jpg or .png)!");
+                          return;
+                        }
+
+                        setRegisterData((prevData) => ({
+                          ...prevData,
+                          registerImage: file,
+                        }));
+                      }}
                       className="hidden"
                       type="file"
+                      accept=".jpg, .png"
+
                       name="registerImage"
                     />
+
                     <Box
                       sx={{
                         display: "flex",
@@ -684,6 +702,8 @@ function WorkerRegister() {
                     Upload Images
                     <input
                       type="file"
+                      accept=".jpg, .png"
+
                       multiple
                       hidden
                       onChange={handleFileChange}
@@ -730,7 +750,6 @@ function WorkerRegister() {
                     <br />
                     <br />
 
-
                     <label htmlFor="upload-kyc-document">
                       <input
                         type="file"
@@ -759,8 +778,6 @@ function WorkerRegister() {
                     </label>
                     <br />
                     <br />
-
-
 
                     {registerData.kycDocumentImage && (
                       <div className="flex justify-center mt-4">
